@@ -4,5 +4,6 @@ module.exports = {
   theme: {
     extend: {},
   },
-  plugins: {},
+  // Tailwind expects an array here; an object will crash with `plugins.forEach is not a function`.
+  plugins: [],
 };
