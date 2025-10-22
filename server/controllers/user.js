@@ -40,3 +40,26 @@ export const register = async (req, res) => {
         accessToken: token
     });
 };
+
+export const login = async (req, res) => {
+    const { email, password } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) {
+        return res.status(400).json({ message: 'User does not exist' });
+    };
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+        return res.status(400).json({ message: 'Invalid credentials' });
+    };
+
+    user.password = undefined;
+
+    const token = jwt.sign({ email }, secretKey);
+    res.send({
+        message: 'Login successful',
+        user,
+        accessToken: token
+    });
+};

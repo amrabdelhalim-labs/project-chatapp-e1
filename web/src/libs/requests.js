@@ -19,3 +19,12 @@ export const register = async ({
 
   return response.data;
 };
+
+export const login = async ({ email, password }) => {
+  const response = await axios.post(`/api/user/login`, {
+    email,
+    password,
+  });
+
+  return response.data;
+};
