@@ -9,3 +9,14 @@ export const connectDB = async () => {
         console.error('MongoDB connection error:', error);
     };
 };
+
+// Connect Server at default port 3000.
+export const connectServer = (app) => {
+  const PORT = process.env.PORT || 3000;
+
+  try {
+    app.listen(PORT, () => console.log(`Server running on PORT ${PORT}.`));
+  } catch (error) {
+    throw new Error("Error in server connection: " + err);
+  };
+};

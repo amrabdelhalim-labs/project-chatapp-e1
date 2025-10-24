@@ -13,7 +13,7 @@ export const register = async (req, res) => {
 
     const existingUser = await User.findOne({ email });
     const hashedPassword = await bcrypt.hash(password, 10);
-    const token = jwt.sign({ email }, secretKey);
+    const token = jwt.sign({ userId: User._id }, secretKey);
     const defaultPicture = `${hostname}:${port}/uploads/default-picture.jpg`;
 
     if (existingUser) {
@@ -56,7 +56,7 @@ export const login = async (req, res) => {
 
     user.password = undefined;
 
-    const token = jwt.sign({ email }, secretKey);
+    const token = jwt.sign({ userId: user._id }, secretKey);
     res.send({
         message: 'Login successful',
         user,

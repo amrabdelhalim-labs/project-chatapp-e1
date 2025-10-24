@@ -1,19 +1,22 @@
+import { useEffect } from "react";
 import { useStore } from "../libs/globalState";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import logo from "../assets/icon.png";
 import { login } from "../libs/requests";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 
 export default function Login() {
     const navigate = useNavigate();
-    const { setUser, setToken } = useStore();
+    const { setUser, setAccessToken } = useStore();
 
     const formik = useFormik({
         initialValues: {
             email: "",
             password: "",
         },
+        validateOnBlur: false,
+        validateOnChange: false,
         validationSchema: Yup.object({
             email: Yup.string()
                 .email("Invalid email format")
@@ -30,11 +33,18 @@ export default function Login() {
                 alert(response.error);
             } else {
                 setUser(response.user);
-                setToken(response.accessToken);
+                setAccessToken(response.accessToken);
                 navigate("/");
             };
         },
     });
+
+    useEffect(() => {
+        const errors = Object.values(formik.errors);
+        if (errors.length > 0) {
+            alert(errors.join("\n"));
+        }
+    }, [formik.errors]);
 
     return <div className="h-screen bg-[#111821]">
         <div className="flex flex-col space-y-8 justify-center h-full max-w-lg mx-auto px-8">
@@ -66,8 +76,14 @@ export default function Login() {
                     type="submit"
                     className="w-full bg-blue-500 hover:bg-blue-600 p-3 rounded-md text-white font-semibold"
                 >
-                    Login
+                    {formik.isSubmitting ? "Loading..." : "Login"}
                 </button>
+                <div className="mt-2 space-x-2">
+                    <span className="text-white">Don't have an account?</span>
+                    <Link to="/register" className="text-blue-500">
+                        Register
+                    </Link>
+                </div>
             </form>
         </div>
     </div>
