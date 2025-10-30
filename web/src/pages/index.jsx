@@ -57,16 +57,17 @@ export default function Home() {
         setUser(updatedUser);
       } else {
         updateFriend(updatedUser);
+
         if (currentReceiver?._id === updatedUser._id) {
           setCurrentReceiver(updatedUser);
-        }
-      }
+        };
+      };
     });
 
     socket.on("user_created", (userCreated) => {
       if (userCreated._id !== user._id) {
         addFriend(userCreated);
-      }
+      };
     });
 
     setSocket(socket);
@@ -83,25 +84,13 @@ export default function Home() {
         // The axios interceptor will handle redirection to login
       }
     };
+    
     fetchData();
 
     return () => {
       socket.disconnect();
     };
-  }, [
-        accessToken,
-        addFriend,
-        addMessage,
-        setCurrentReceiver,
-        setFriends,
-        setMessages,
-        setSocket,
-        setTyping,
-        setUser,
-        updateFriend,
-        user._id,
-        currentReceiver?._id
-    ]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     console.log(messages);

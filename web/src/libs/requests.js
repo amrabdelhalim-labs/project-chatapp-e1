@@ -9,15 +9,24 @@ export const register = async ({
   password,
   confirmPassword,
 }) => {
-  const response = await axios.post("/api/user/register", {
-    firstName,
-    lastName,
-    email,
-    password,
-    confirmPassword,
-  });
+  try {
+    const response = await axios.post("/api/user/register", {
+      firstName,
+      lastName,
+      email,
+      password,
+      confirmPassword,
+    });
 
-  return response.data;
+    return response.data;
+  } catch (error) {
+    // Normalize backend validation errors (400) to a simple shape the UI already checks: { error }
+    const message =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Registration failed";
+    return { error: message };
+  }
 };
 
 export const login = async ({email, password}) => {

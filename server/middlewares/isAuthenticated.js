@@ -2,20 +2,21 @@ import "dotenv/config";
 import jwt from "jsonwebtoken";
 
 export default function isAuthenticated(req, res, next) {
-  const token = req.headers.authorization;
+  // Support standard 'Authorization: Bearer <token>' header
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : authHeader;
 
   if (!token) {
-    return res.send({ message: "Authentication invalid" });
-  };
+    return res.status(401).json({ message: "Authentication invalid" });
+  }
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-
     req.userId = payload.userId;
     next();
   } catch (error) {
-    return res.send({ message: "Authentication invalid" });
-  };
+    return res.status(401).json({ message: "Authentication invalid" });
+  }
 };
 
 export const isSocketAuthenticated = (socket, next) => {

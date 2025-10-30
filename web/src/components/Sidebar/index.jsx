@@ -30,7 +30,7 @@ export default function Sidebar() {
   // وظيفة لتصفية جهات الاتصال بناءً على الرسائل غير المقروءة
   const unseenMessagesContacts = (contact) => {
     if (!showUnSeenMessages) return true; // إذا لم يتم تفعيل خيار عرض الرسائل غير المقروءة، إرجاع جميع جهات الاتصال
-    const contactMessages = getReceiverMessages(messages, contact._id); // الحصول على رسائل جهة الاتصال المحددة
+    const contactMessages = getReceiverMessages(messages, contact._id, user._id); // الحصول على رسائل جهة الاتصال المحددة
     // التحقق مما إذا كانت جهة الاتصال تحتوي على رسائل غير مقروءة
     const containUnseenMessages = contactMessages.some(
       (message) => !message.seen
@@ -43,7 +43,7 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="flex-[1] bg-[#131B20] border-r border-[#a7a8a82f] h-full overflow-y-scroll">
+    <div className="flex-[1] bg-[#131B20] border-r border-[#a7a8a82f] h-full overflow-y-auto">
       <div className="flex items-center justify-between bg-[#222C32] p-3 h-16">
         <div className="flex items-center justify-center">
           <img

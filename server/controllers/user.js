@@ -1,7 +1,9 @@
 import 'dotenv/config';
+import { StatusCodes } from 'http-status-codes';
 import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { io } from '../index.js';
 
 const secretKey = process.env.JWT_SECRET;
 const hostname = process.env.hostname || 'localhost';
@@ -13,7 +15,8 @@ export const register = async (req, res) => {
 
     const existingUser = await User.findOne({ email });
     const hashedPassword = await bcrypt.hash(password, 10);
-    const token = jwt.sign({ userId: User._id }, secretKey);
+    // token must be generated from the created user's _id, not the model
+    // we'll generate it after creating the user to ensure we have the id
     const defaultPicture = `${hostname}:${port}/uploads/default-picture.jpg`;
 
     if (existingUser) {
@@ -29,12 +32,16 @@ export const register = async (req, res) => {
         lastName,
         email,
         password: hashedPassword,
-        picture: defaultPicture
+        profilePicture: defaultPicture
     });
 
     newUser.password = undefined;
+    io.emit('user_created', newUser);
 
-    res.send({
+    // Now that we have the newUser, sign token with its _id
+    const token = jwt.sign({ userId: newUser._id }, secretKey);
+
+    res.status(StatusCodes.CREATED).json({
         message: 'User registered successfully',
         user: newUser,
         accessToken: token
@@ -57,9 +64,27 @@ export const login = async (req, res) => {
     user.password = undefined;
 
     const token = jwt.sign({ userId: user._id }, secretKey);
-    res.send({
+    res.status(StatusCodes.OK).json({
         message: 'Login successful',
         user,
         accessToken: token
     });
+};
+
+
+export const getProfile = async (req, res) => {
+  const userId = req.userId;
+  const user = await User.findById(userId);
+
+  user.password = undefined;
+
+  res.status(StatusCodes.OK).json(user);
+};
+
+export const getUsers = async (req, res) => {
+  const users = await User.find({ _id: { $ne: req.userId } }).select(
+    "-password"
+  );
+
+  res.status(StatusCodes.OK).json(users);
 };

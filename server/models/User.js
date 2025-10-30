@@ -23,7 +23,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         maxLength: 100,
     },
-    picture: {
+    profilePicture: {
         type: String,
         default: '',
     },

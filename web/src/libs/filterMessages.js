@@ -1,6 +1,7 @@
-export function getReceiverMessages(messages, receiverId) {
+export function getReceiverMessages(messages, receiverId, currentUserId) {
   return messages.filter(
     (message) =>
-      message.senderId === receiverId || message.receiverId === receiverId
+      (message.sender === currentUserId && message.recipient === receiverId) ||
+      (message.sender === receiverId && message.recipient === currentUserId)
   );
 };

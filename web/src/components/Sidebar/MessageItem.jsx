@@ -17,7 +17,7 @@ const MessageItem = ({
     const lastMessage = contactMessages[contactMessages.length - 1];
 
     const unreadMessages = contactMessages.filter(
-        (message) => !message.seen && message.receiverId !== id
+        (message) => !message.seen && message.recipient !== id
     ).length;
 
     const onClick = () => {

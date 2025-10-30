@@ -43,7 +43,25 @@ export const useStore = create((set) => ({
   setMessages: (messages) => set({ messages }),
   addMessage: (message) => {
     return set(({ messages }) => {
-      return { messages: [...messages, message] };
+      // Deduplicate/merge logic:
+      // 1) If server echo arrives with same _id -> replace existing
+      // 2) If clientId is present, replace optimistic one with same clientId
+      const copy = [...messages];
+      const byIdIndex = message._id ? copy.findIndex(m => m._id === message._id) : -1;
+      if (byIdIndex !== -1) {
+        copy[byIdIndex] = { ...copy[byIdIndex], ...message };
+        return { messages: copy };
+      }
+
+      if (message.clientId) {
+        const byClientIndex = copy.findIndex(m => m.clientId && m.clientId === message.clientId);
+        if (byClientIndex !== -1) {
+          copy[byClientIndex] = { ...copy[byClientIndex], ...message };
+          return { messages: copy };
+        }
+      }
+
+      return { messages: [...copy, message] };
     });
   },
   currentReceiver,

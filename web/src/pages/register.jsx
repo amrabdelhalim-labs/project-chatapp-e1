@@ -1,13 +1,14 @@
-import { useStore } from "../libs/globalState";
-import { useFormik } from "formik";
-import * as Yup from "yup";
+import { useEffect } from "react";
 import logo from "../assets/icon.png";
 import { register } from "../libs/requests";
-import { useNavigate } from "react-router-dom";
+import { useStore } from "../libs/globalState";
+import { Link, useNavigate } from "react-router-dom";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 export default function Register() {
     const navigate = useNavigate();
-    const { setUser, setToken } = useStore();
+    const { setUser, setAccessToken } = useStore();
 
     const formik = useFormik({
         initialValues: {
@@ -17,20 +18,20 @@ export default function Register() {
             password: "",
             confirmPassword: "",
         },
+
+        validateOnBlur: false,
+        validateOnChange: false,
+
         validationSchema: Yup.object({
-            firstName: Yup.string()
-                .required("First name is required"),
-            lastName: Yup.string()
-                .required("Last name is required"),
-            email: Yup.string()
-                .email("Invalid email format")
-                .required("Email is required"),
+            firstName: Yup.string().required("First Name is required"),
+            lastName: Yup.string().required("Last Name is required"),
+            email: Yup.string().email("Invalid email").required("Email is required"),
             password: Yup.string()
-                .min(6, "Password must be at least 6 characters")
-                .required("Password is required"),
+                .required("Password is required")
+                .min(6, "Password must be at least 6 characters"),
             confirmPassword: Yup.string()
-                .oneOf([Yup.ref("password"), null], "Passwords must match")
-                .required("Confirm Password is required"),
+                .required("Confirm Password is required")
+                .oneOf([Yup.ref("password"), null], "Passwords must match"),
         }),
 
         async onSubmit(values) {
@@ -40,78 +41,83 @@ export default function Register() {
                 alert(response.error);
             } else {
                 setUser(response.user);
-                setToken(response.accessToken);
+                setAccessToken(response.accessToken);
                 navigate("/");
-            };
+            }
         },
     });
 
-    return <div className="h-screen bg-[#111821]">
-        <div className="flex flex-col space-y-8 justify-center h-full max-w-lg mx-auto px-8">
-            <img src={logo} alt="Logo" className="w-64 mx-auto" />
-            <form onSubmit={formik.handleSubmit}>
-                <input
-                    type="text"
-                    id="firstName"
-                    name="firstName"
-                    placeholder="First Name"
-                    className="w-full p-3 rounded-md bg-[#192734] text-white mb-4"
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values.firstName}
-                />
+    useEffect(() => {
+        const errors = Object.values(formik.errors);
 
-                <input
-                    type="text"
-                    id="lastName"
-                    name="lastName"
-                    placeholder="Last Name"
-                    className="w-full p-3 rounded-md bg-[#192734] text-white mb-4"
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values.lastName}
-                />
+        if (errors.length > 0) {
+            alert(errors.join("\n"));
+        };
+    }, [formik.errors]);
 
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    placeholder="Email"
-                    className="w-full p-3 rounded-md bg-[#192734] text-white mb-4"
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values.email}
-                />
+    return (
+        <div className="h-screen bg-[#111B21]">
+            <div className="flex flex-col space-y-8 justify-center h-full max-w-lg mx-auto px-8">
+                <img src={logo} alt="logo" className="w-64 mx-auto" />
+                <form onSubmit={formik.handleSubmit}>
+                    <input
+                        type="text"
+                        id="firstName"
+                        placeholder="First Name"
+                        className="w-full p-3 rounded-md bg-[#192734] mb-4 text-white"
+                        value={formik.values.firstName}
+                        onChange={formik.handleChange}
+                    />
 
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    placeholder="Password"
-                    className="w-full p-3 rounded-md bg-[#192734] text-white mb-4"
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values.password}
-                />
+                    <input
+                        type="text"
+                        id="lastName"
+                        placeholder="Last Name"
+                        className="w-full p-3 rounded-md bg-[#192734] mb-4 text-white"
+                        value={formik.values.lastName}
+                        onChange={formik.handleChange}
+                    />
 
-                <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    placeholder="Confirm Password"
-                    className="w-full p-3 rounded-md bg-[#192734] text-white mb-4"
-                    onChange={formik.handleChange}
-                    onBlur={formik.handleBlur}
-                    value={formik.values.confirmPassword}
-                />
+                    <input
+                        type="text"
+                        id="email"
+                        placeholder="Email"
+                        className="w-full p-3 rounded-md bg-[#192734] mb-4 text-white"
+                        value={formik.values.email}
+                        onChange={formik.handleChange}
+                    />
 
-                <button
-                    type="submit"
-                    className="w-full bg-blue-500 hover:bg-blue-600 p-3 rounded-md text-white font-semibold"
-                >
-                    Register
-                </button>
-            </form>
+                    <input
+                        type="password"
+                        id="password"
+                        placeholder="Password"
+                        className="w-full p-3 rounded-md bg-[#192734] mb-4 text-white"
+                        value={formik.values.password}
+                        onChange={formik.handleChange}
+                    />
+
+                    <input
+                        type="password"
+                        id="confirmPassword"
+                        placeholder="Confirm Password"
+                        className="w-full p-3 rounded-md bg-[#192734] mb-4 text-white"
+                        value={formik.values.confirmPassword}
+                        onChange={formik.handleChange}
+                    />
+                    <button
+                        type="submit"
+                        className="w-full bg-blue-500 hover:bg-blue-600 p-3 rounded-md text-white font-semibold"
+                    >
+                        Register
+                    </button>
+                    <div className="mt-2 space-x-2">
+                        <span className="text-white">Already have an account? </span>
+                        <Link to="/login" className="text-blue-500">
+                            Login
+                        </Link>
+                    </div>
+                </form>
+            </div>
         </div>
-    </div>
+    );
 };
