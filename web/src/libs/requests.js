@@ -59,7 +59,7 @@ export const getUsers = async (accessToken) => {
 };
 
 export const updateUser = async (accessToken, body) => {
-  const response = await axios.put("/api/user", body, {
+  const response = await axios.put("/api/user/profile", body, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
@@ -69,7 +69,7 @@ export const updateUser = async (accessToken, body) => {
 };
 
 export const updateProfilePicture = async (accessToken, formData) => {
-  const response = await axios.put("/api/user/profile-picture", formData, {
+  const response = await axios.put("/api/user/profile/picture", formData, {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },

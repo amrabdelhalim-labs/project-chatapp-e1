@@ -10,17 +10,20 @@ export default function Profile({ onClose }) {
   const [firstName, setFirstName] = useState(user.firstName);
   const [lastName, setLastName] = useState(user.lastName);
   const [status, setStatus] = useState(user.status);
-  const [image, setImage] = useState(user.profilePicture);
+  const [image, setImage] = useState(
+    user.profilePicture || `${process.env.REACT_APP_API_URL}/uploads/default-picture.jpg`
+  );
   
   const handleProfilePictureChange = async (e) => {
     if (e.target.files && e.target.files[0]) {
       setImage(URL.createObjectURL(e.target.files[0])); // عرض معاينة فورية للصورة المختارة
 
-      const formData = new FormData(); // إنشاء كائن FormData لإرسال الملف
-      formData.append("profilePicture", e.target.files[0]); // إضافة الملف إلى النموذج
+  const formData = new FormData(); // إنشاء كائن FormData لإرسال الملف
+  // يجب أن يتطابق اسم الحقل مع ما يتوقعه multer في السيرفر: upload.single("file")
+  formData.append("file", e.target.files[0]); // إضافة الملف إلى النموذج بالحقل الصحيح
 
       await updateProfilePicture(accessToken, formData); // إرسال الطلب إلى الخادم
-    }
+    };
   };
 
   return (

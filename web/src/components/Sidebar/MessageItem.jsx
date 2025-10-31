@@ -12,12 +12,17 @@ const MessageItem = ({
     id,
 }) => {
     const navigate = useNavigate();
-    const { socket, messages, setMessages } = useStore();
-    const contactMessages = getReceiverMessages(messages, id);
-    const lastMessage = contactMessages[contactMessages.length - 1];
+    const { socket, messages, setMessages, user } = useStore();
+    
+    // جميع الرسائل بين المستخدم الحالي وهذا الصديق
+    const contactMessages = getReceiverMessages(messages, id, user._id);
 
+    // آخر رسالة بين الطرفين
+    const lastMessage = contactMessages.length > 0 ? contactMessages[contactMessages.length - 1] : null;
+
+    // عدد الرسائل غير المقروءة من هذا الصديق للمستخدم الحالي
     const unreadMessages = contactMessages.filter(
-        (message) => !message.seen && message.recipient !== id
+        (msg) => msg.sender === id && msg.recipient === user._id && !msg.seen
     ).length;
 
     const onClick = () => {
@@ -29,8 +34,14 @@ const MessageItem = ({
         navigate(`/${id}`);
         // إرسال حدث "seen" إلى الخادم
         socket?.emit("seen", id);
-        // تحديث حالة الرسائل محلياً لتعريفها بأنها "مرئية"
-        setMessages(messages.map((message) => ({ ...message, seen: true })));
+        // تحديث حالة الرسائل محلياً لتعريفها بأنها "مرئية" فقط للرسائل الواردة من هذا المستخدم
+        setMessages(
+            messages.map((message) =>
+                message.sender === id && message.recipient === user._id
+                    ? { ...message, seen: true }
+                    : message
+            )
+        );
     };
 
     return (
@@ -40,7 +51,7 @@ const MessageItem = ({
                 }`}
         >
             <img
-                src={profilePicture}
+                src={profilePicture || `${process.env.REACT_APP_API_URL}/uploads/default-picture.jpg`}
                 alt="profilePicture"
                 className="w-10 h-10 rounded-full mr-4"
             />
@@ -48,8 +59,12 @@ const MessageItem = ({
             <div>
                 <p className="text-white font-semibold">{sender}</p>
                 <p className="text-white text-sm">
-                    {sender._id === id ? "You: " : ""}{" "}
-                    {lastMessage?.content || "Start conversation here..."}
+                    {lastMessage ? (
+                        <>
+                            {lastMessage.sender === user._id ? "You: " : ""}
+                            {lastMessage.content}
+                        </>
+                    ) : "Start conversation here..."}
                 </p>
             </div>
             

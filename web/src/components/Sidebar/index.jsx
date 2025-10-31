@@ -43,12 +43,12 @@ export default function Sidebar() {
   }
 
   return (
-    <div className="flex-[1] bg-[#131B20] border-r border-[#a7a8a82f] h-full overflow-y-auto">
+    <div className="flex-[1] bg-[#131B20] border-r border-[#a7a8a82f] h-full">
       <div className="flex items-center justify-between bg-[#222C32] p-3 h-16">
         <div className="flex items-center justify-center">
           <img
             className="w-10 h-10 rounded-full cursor-pointer"
-            src={user.profilePicture}
+            src={user.profilePicture || `${process.env.REACT_APP_API_URL}/uploads/default-picture.jpg`}
             alt="Avatar"
             onClick={() => setShowProfile(true)}
           />
@@ -83,7 +83,7 @@ export default function Sidebar() {
           <IoFilter size={16} color="#B0BAC0" />
         </button>
       </div>
-      <div>
+      <div className="overflow-y-auto h-[calc(97vh-112px)]">
         {friends ? (
           friends.length > 0 ? (
             friends
@@ -95,7 +95,7 @@ export default function Sidebar() {
                   id={friend._id}
                   sender={`${friend.firstName} ${friend.lastName}`}
                   selected={friend._id === activeMessage}
-                  profilePicture={friend.profilePicture}
+                  profilePicture={friend.profilePicture || `${process.env.REACT_APP_API_URL}/uploads/default-picture.jpg`}
                   setActiveMessage={() => setActiveMessage(friend._id)}
                   setCurrentReceiver={() => {
                     setCurrentReceiver(friend);

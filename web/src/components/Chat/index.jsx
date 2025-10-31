@@ -23,7 +23,12 @@ export default function Chat() {
                 });
             });
         };
-    }, []);
+
+        // عند فتح المحادثة، أرسل حدث seen للسيرفر
+        if (receiverId && user && user._id && window?.socket) {
+            window.socket.emit("seen", receiverId);
+        }
+    }, [receiverId, user]);
 
     return (
         <div className="flex-[3] flex flex-col">

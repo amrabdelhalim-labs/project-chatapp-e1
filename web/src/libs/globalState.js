@@ -41,6 +41,13 @@ export const useStore = create((set) => ({
   setInput: (input) => set({ input }),
   messages: [],
   setMessages: (messages) => set({ messages }),
+  // تعليم جميع رسائل مرسِل محدد كمقروءة للمستخدم الحالي
+  markMessagesSeenFromSender: (senderId, currentUserId) =>
+    set(({ messages }) => ({
+      messages: messages.map((m) =>
+        m.sender === senderId && m.recipient === currentUserId ? { ...m, seen: true } : m
+      ),
+    })),
   addMessage: (message) => {
     return set(({ messages }) => {
       // Deduplicate/merge logic:
@@ -51,15 +58,15 @@ export const useStore = create((set) => ({
       if (byIdIndex !== -1) {
         copy[byIdIndex] = { ...copy[byIdIndex], ...message };
         return { messages: copy };
-      }
+      };
 
       if (message.clientId) {
         const byClientIndex = copy.findIndex(m => m.clientId && m.clientId === message.clientId);
         if (byClientIndex !== -1) {
           copy[byClientIndex] = { ...copy[byClientIndex], ...message };
           return { messages: copy };
-        }
-      }
+        };
+      };
 
       return { messages: [...copy, message] };
     });

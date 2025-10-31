@@ -17,6 +17,7 @@ export default function EditableInput({
   const handleEdit = () => {
     setIsEditable(true);
   };
+  
   const handleNotEdit = async () => {
     setIsEditable(false);
 

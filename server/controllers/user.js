@@ -4,6 +4,8 @@ import User from '../models/User.js';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
 import { io } from '../index.js';
+import fs from 'fs';
+import path from 'path';
 
 const secretKey = process.env.JWT_SECRET;
 const hostname = process.env.hostname || 'localhost';
@@ -17,7 +19,7 @@ export const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
     // token must be generated from the created user's _id, not the model
     // we'll generate it after creating the user to ensure we have the id
-    const defaultPicture = `${hostname}:${port}/uploads/default-picture.jpg`;
+    const defaultPicture = `http://${hostname}:${port}/uploads/default-picture.jpg`;
 
     if (existingUser) {
         return res.status(400).json({ message: 'User already exists' });
@@ -73,18 +75,75 @@ export const login = async (req, res) => {
 
 
 export const getProfile = async (req, res) => {
-  const userId = req.userId;
-  const user = await User.findById(userId);
+    const userId = req.userId;
+    const user = await User.findById(userId);
 
-  user.password = undefined;
+    user.password = undefined;
 
-  res.status(StatusCodes.OK).json(user);
+    res.status(StatusCodes.OK).json(user);
 };
 
 export const getUsers = async (req, res) => {
-  const users = await User.find({ _id: { $ne: req.userId } }).select(
-    "-password"
-  );
+    const users = await User.find({ _id: { $ne: req.userId } }).select(
+        "-password"
+    );
 
-  res.status(StatusCodes.OK).json(users);
+    res.status(StatusCodes.OK).json(users);
+};
+
+export const updateUser = async (req, res) => {
+    const userId = req.userId;
+    const { firstName, lastName, status } = req.body;
+
+    const user = await User.findByIdAndUpdate(
+        userId,
+        { firstName, lastName, status },
+        { new: true }
+    );
+
+    user.password = undefined;
+    io.emit("user_updated", user);
+
+    res.status(StatusCodes.OK).json(user);
+};
+
+export const updateProfilePicture = async (req, res) => {
+    const userId = req.userId;
+    const newFileUrl = `http://${hostname}:${port}/uploads/${req.file?.filename}`;
+
+    // احصل على رابط الصورة القديمة قبل التحديث لمحاولة حذفها لاحقاً
+    const previous = await User.findById(userId).select('profilePicture');
+
+    const user = await User.findByIdAndUpdate(
+        userId,
+        { profilePicture: newFileUrl },
+        { new: true }
+    );
+
+    user.password = undefined;
+    io.emit("user_updated", user);
+
+    // حذف الصورة القديمة من النظام إن لم تكن هي الصورة الافتراضية
+    try {
+        const oldUrl = previous?.profilePicture;
+        
+        if (oldUrl) {
+            const urlObj = new URL(oldUrl);
+            const oldFileName = path.basename(urlObj.pathname); // e.g. default-picture.jpg أو اسم فريد
+
+            if (oldFileName && oldFileName !== 'default-picture.jpg') {
+                const oldFilePath = path.join(process.cwd(), 'public', 'uploads', oldFileName);
+                
+                await fs.promises.unlink(oldFilePath).catch((err) => {
+                    if (err?.code !== 'ENOENT') {
+                        console.error('Failed to delete old profile picture:', err.message);
+                    };
+                });
+            };
+        };
+    } catch (err) {
+        console.error('Error while cleaning old profile picture:', err?.message || err);
+    };
+
+    res.status(StatusCodes.OK).json(user);
 };

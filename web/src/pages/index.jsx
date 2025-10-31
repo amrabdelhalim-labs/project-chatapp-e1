@@ -20,6 +20,7 @@ export default function Home() {
     accessToken,
     currentReceiver,
     messages,
+    markMessagesSeenFromSender,
   } = useStore();
 
   useEffect(() => {
@@ -49,7 +50,10 @@ export default function Home() {
     });
 
     socket.on("seen", (senderId) => {
-      console.log("Seen", senderId);
+      // حدّث الحالة محلياً ليظهر تأثير القراءة فوراً
+      if (senderId && user?._id) {
+        markMessagesSeenFromSender(senderId, user._id);
+      }
     });
 
     socket.on("user_updated", (updatedUser) => {
