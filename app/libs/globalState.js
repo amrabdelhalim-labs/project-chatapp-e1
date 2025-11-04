@@ -1,13 +1,10 @@
 import { create } from "zustand";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const userItem = localStorage.getItem("user");
-const user = userItem && userItem !== "null" && userItem !== "undefined" ? JSON.parse(userItem) : null;
-
-const accessTokenItem = localStorage.getItem("accessToken");
-const accessToken = accessTokenItem && accessTokenItem !== "null" && accessTokenItem !== "undefined" ? accessTokenItem : null;
-
-const currentReceiverItem = localStorage.getItem("currentReceiver");
-const currentReceiver = currentReceiverItem && currentReceiverItem !== "null" && currentReceiverItem !== "undefined" ? JSON.parse(currentReceiverItem) : null;
+// Initialize with null - will be hydrated after app loads
+const user = null;
+const accessToken = null;
+const currentReceiver = null;
 
 export const useStore = create((set) => ({
   socket: null,
@@ -29,12 +26,12 @@ export const useStore = create((set) => ({
       return { friends: [...friends] };
     }),
 
-  setUser: (user) => {
-    localStorage.setItem("user", JSON.stringify(user));
+  setUser: async (user) => {
+    await AsyncStorage.setItem("user", JSON.stringify(user));
     return set({ user });
   },
-  setAccessToken: (accessToken) => {
-    localStorage.setItem("accessToken", accessToken);
+  setAccessToken: async (accessToken) => {
+    await AsyncStorage.setItem("accessToken", accessToken);
     return set({ accessToken });
   },
   input: "",
@@ -73,13 +70,33 @@ export const useStore = create((set) => ({
   },
   currentReceiver,
   setCurrentReceiver: (currentReceiver) => {
-    localStorage.setItem("currentReceiver", JSON.stringify(currentReceiver));
+    AsyncStorage.setItem("currentReceiver", JSON.stringify(currentReceiver));
     return set({ currentReceiver });
   },
-  logout: () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("currentReceiver");
+  logout: async () => {
+    await AsyncStorage.removeItem("user");
+    await AsyncStorage.removeItem("accessToken");
+    await AsyncStorage.removeItem("currentReceiver");
     return set({ user: null, accessToken: null, currentReceiver: null, friends: null, messages: [] });
   },
 }));
+
+// Hydrate store from AsyncStorage on app start
+export const hydrateStore = async () => {
+  try {
+    const [userItem, accessTokenItem, currentReceiverItem] = await Promise.all([
+      AsyncStorage.getItem("user"),
+      AsyncStorage.getItem("accessToken"),
+      AsyncStorage.getItem("currentReceiver"),
+    ]);
+
+    const user = userItem && userItem !== "null" && userItem !== "undefined" ? JSON.parse(userItem) : null;
+    const accessToken = accessTokenItem && accessTokenItem !== "null" && accessTokenItem !== "undefined" ? accessTokenItem : null;
+    const currentReceiver = currentReceiverItem && currentReceiverItem !== "null" && currentReceiverItem !== "undefined" ? JSON.parse(currentReceiverItem) : null;
+
+    useStore.setState({ user, accessToken, currentReceiver });
+    console.log("✅ Store hydrated from AsyncStorage");
+  } catch (error) {
+    console.error("❌ Failed to hydrate store:", error);
+  }
+};
