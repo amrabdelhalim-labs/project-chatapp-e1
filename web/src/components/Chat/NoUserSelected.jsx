@@ -6,13 +6,10 @@ import { useStore } from "../../libs/globalState";
 
 export default function NoUserSelected() {
   const navigate = useNavigate();
-  const { setAccessToken, setUser } = useStore();
+  const { logout } = useStore();
 
   const handleLogout = () => {
-    setAccessToken(null);
-    setUser(null);
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
+    logout();
     navigate("/");
   };
 

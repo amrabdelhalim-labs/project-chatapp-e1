@@ -10,11 +10,12 @@ import { hydrateStore } from "./libs/globalState";
 if (!BackHandler.removeEventListener) {
   BackHandler.removeEventListener = (eventName, handler) => {
     const subscription = BackHandler.addEventListener(eventName, handler);
+
     if (subscription && subscription.remove) {
       subscription.remove();
-    }
+    };
   };
-}
+};
 
 export default function App() {
   useEffect(() => {

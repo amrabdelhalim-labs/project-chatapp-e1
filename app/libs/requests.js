@@ -4,6 +4,18 @@ import { API_URL } from "@env";
 
 axios.defaults.baseURL = API_URL;
 
+// Add axios interceptor to handle 401 errors
+axios.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid - will be handled by the calling component
+      console.log("⚠️ Unauthorized access - token may be invalid or expired");
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const register = async ({
     firstName,
     lastName,

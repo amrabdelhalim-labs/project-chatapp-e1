@@ -4,13 +4,10 @@ import { useNavigate } from "react-router-dom";
 
 const ChatHeader = () => {
     const navigate = useNavigate();
-    const { currentReceiver, setAccessToken, setUser, typing } = useStore();
+    const { currentReceiver, logout, typing } = useStore();
 
     const handleLogout = () => {
-        setAccessToken(null);
-        setUser(null);
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("user");
+        logout();
         navigate("/");
     };
 

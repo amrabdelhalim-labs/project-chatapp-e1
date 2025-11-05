@@ -95,7 +95,6 @@ export const hydrateStore = async () => {
     const currentReceiver = currentReceiverItem && currentReceiverItem !== "null" && currentReceiverItem !== "undefined" ? JSON.parse(currentReceiverItem) : null;
 
     useStore.setState({ user, accessToken, currentReceiver });
-    console.log("✅ Store hydrated from AsyncStorage");
   } catch (error) {
     console.error("❌ Failed to hydrate store:", error);
   }

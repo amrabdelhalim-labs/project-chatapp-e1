@@ -1,4 +1,4 @@
-import { StyleSheet, Image, KeyboardAvoidingView, Platform, ScrollView, TouchableWithoutFeedback, Keyboard } from "react-native";
+import { StyleSheet, Image, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import { Box, Text, Heading, VStack, FormControl, Input, Link, Button, HStack, Toast } from "native-base";
 import { useNavigation } from "@react-navigation/native";
 import { useFormik } from "formik";
@@ -12,14 +12,14 @@ export default function Register() {
   const { setAccessToken, setUser, user, accessToken } = useStore();
 
   useEffect(() => {
-    if (user && accessToken !== "") {
+    if (user && accessToken && accessToken !== "") {
       navigation.navigate("Home");
     }
-  }, []);
+  }, [user, accessToken, navigation]);
 
   const formik = useFormik({
     initialValues: {
-      firstNanme: "",
+      firstName: "",
       lastName: "",
       email: "",
       password: "",
@@ -88,7 +88,6 @@ export default function Register() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
           <Box safeArea w="90%" maxW="290">
         <Image
           source={require("../assets/icon.png")}
@@ -167,7 +166,6 @@ export default function Register() {
           </HStack>
         </VStack>
           </Box>
-        </TouchableWithoutFeedback>
       </ScrollView>
     </KeyboardAvoidingView>
   );
