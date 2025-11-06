@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { MaterialCommunityIcons } from "react-native-vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -15,6 +15,7 @@ const Tab = createMaterialTopTabNavigator();
 
 export default function Home() {
     const navigation = useNavigation();
+    const socketRef = useRef(null); // 🔥 نحفظ الـ socket نفسه بدل flag
     const {
     addMessage,
     setFriends,
@@ -32,19 +33,21 @@ export default function Home() {
   } = useStore();
 
   useEffect(() => {
-    // Don't connect socket or fetch data if user is not logged in
-    if (!user || !accessToken) {
-      console.log("⚠️ User not logged in, redirecting to Login");
-      navigation.replace("Login");
+    // 🔥 لو Socket موجود فعلاً ومتصل، متعملش واحد جديد
+    if (socketRef.current?.connected) {
       return;
-    }
+    };
 
     const socket = io(API_URL, {
       query: "token=" + accessToken,
     });
 
+    // 🔥 احفظ الـ socket في الـ ref
+    socketRef.current = socket;
+
     socket.on("connect", () => {
       console.log(`Connected to the server with the id: ${socket.id}`);
+      setSocket(socket);
     });
 
     socket.on("disconnect", () => {
@@ -56,12 +59,12 @@ export default function Home() {
       addMessage(message);
     });
 
-    socket.on("typing", () => {
-      setTyping(true);
+    socket.on("typing", (senderId) => {
+      setTyping(senderId || true);
     });
 
     socket.on("stop_typing", () => {
-      setTyping(false);
+      setTyping(null);
     });
 
     socket.on("seen", (senderId) => {
@@ -99,24 +102,20 @@ export default function Home() {
         setFriends(users);
         setMessages(messages);
       } catch (error) {
-        console.error("Error fetching data:", error);
-        
-        // If 401, clear invalid token and redirect to login
-        if (error.response?.status === 401) {
-          console.log("🔒 Token invalid - logging out");
-          // Token is invalid, need to re-login
-          // Note: We don't call logout() here to avoid navigation issues
-          // The user will be redirected by the Login screen's useEffect
-        }
+        // Error handling done by axios interceptor
       }
     };
     
     fetchData();
 
     return () => {
-      socket.disconnect();
+      // 🔥 فقط افصل Socket لو موجود فعلاً
+      if (socketRef.current?.connected) {
+        socketRef.current.disconnect();
+        socketRef.current = null;
+      }
     };
-  }, [user, accessToken]); // Add dependencies
+  }, []); // 🔥 بدون dependencies - ينفذ مرة واحدة فقط!
 
   return (
     <>

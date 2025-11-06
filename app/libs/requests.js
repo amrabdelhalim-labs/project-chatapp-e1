@@ -1,16 +1,18 @@
 import axios from "axios";
 import * as FileSystem from "expo-file-system";
 import { API_URL } from "@env";
+import { useStore } from "./globalState";
 
 axios.defaults.baseURL = API_URL;
 
 // Add axios interceptor to handle 401 errors
 axios.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     if (error.response?.status === 401) {
-      // Token expired or invalid - will be handled by the calling component
-      console.log("⚠️ Unauthorized access - token may be invalid or expired");
+      // Auto logout on unauthorized access
+      const { logout } = useStore.getState();
+      await logout();
     }
     return Promise.reject(error);
   }

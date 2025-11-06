@@ -5,17 +5,12 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { login } from "../libs/requests";
 import { useStore } from "../libs/globalState";
-import { useEffect } from "react";
 
 export default function Login() {
   const navigation = useNavigation();
-  const { setAccessToken, setUser, user, accessToken } = useStore();
+  const { setAccessToken, setUser } = useStore();
 
-  useEffect(() => {
-    if (user && accessToken && accessToken !== "") {
-      navigation.navigate("Home");
-    }
-  }, [user, accessToken, navigation]);
+  // 🔥 حذف useEffect - Navigation هيتحكم تلقائياً
 
   const formik = useFormik({
     initialValues: {
@@ -63,8 +58,8 @@ export default function Login() {
         placement: "top",
       });
 
-      setUser(response.user);
-      setAccessToken(response.accessToken);
+      await setUser(response.user);
+      await setAccessToken(response.accessToken);
       navigation.navigate("Home");
     };
   };
@@ -72,11 +67,13 @@ export default function Login() {
     <KeyboardAvoidingView 
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={{ flex: 1 }}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
     >
       <ScrollView 
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        bounces={false}
       >
           <Box safeArea w="90%" maxW="290">
         <Image
@@ -140,7 +137,8 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     alignItems: "center",
-    paddingVertical: 72,
+    paddingVertical: 40,
+    paddingBottom: 20,
   },
   logo: {
     transform: [{ scale: 0.5 }],

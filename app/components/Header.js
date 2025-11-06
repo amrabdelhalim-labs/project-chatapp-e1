@@ -1,4 +1,5 @@
 import { View, Text, StyleSheet } from "react-native";
+import { Toast } from "native-base";
 import { useStore } from "../libs/globalState.js";
 import { MaterialIcons } from "react-native-vector-icons";
 import { useNavigation } from "@react-navigation/native";
@@ -7,12 +8,21 @@ export default function Header() {
   const { user, logout } = useStore();
   const navigation = useNavigation();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
+    
+    Toast.show({
+      title: "Logged out successfully",
+      status: "success",
+      backgroundColor: "#0e806a",
+      placement: "top",
+      duration: 2000,
+    });
+    
     navigation.navigate("Login");
   };
 
-  if (!user) return navigation.navigate("Login");
+  if (!user) return null;
 
   return (
     <View style={styles.container}>
