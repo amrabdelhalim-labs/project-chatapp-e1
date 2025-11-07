@@ -1,5 +1,4 @@
 import axios from "axios";
-import * as FileSystem from "expo-file-system";
 import { API_URL } from "@env";
 import { useStore } from "./globalState";
 
@@ -25,18 +24,27 @@ export const register = async ({
     password,
     confirmPassword,
 }) => {
-    const response = await axios.post("/api/user/register", {
-        firstName,
-        lastName,
-        email,
-        password,
-        confirmPassword,
-    });
+    try {
+        const response = await axios.post("/api/user/register", {
+            firstName,
+            lastName,
+            email,
+            password,
+            confirmPassword,
+        });
 
-    return response.data;
+        return response.data;
+    } catch (error) {
+        // Normalize backend validation errors (400) to a simple shape the UI already checks: { error }
+        const message =
+            error?.response?.data?.message ||
+            error?.message ||
+            "Registration failed";
+        return { error: message };
+    }
 };
 
-export const login = async (email, password) => {
+export const login = async ({ email, password }) => {
     const response = await axios.post("/api/user/login", {
         email,
         password,
@@ -66,7 +74,7 @@ export const getUsers = async (accessToken) => {
 };
 
 export const updateUser = async (accessToken, body) => {
-    const response = await axios.put("/api/user", body, {
+    const response = await axios.put("/api/user/profile", body, {
         headers: {
             Authorization: `Bearer ${accessToken}`,
         },
@@ -75,21 +83,28 @@ export const updateUser = async (accessToken, body) => {
     return response.data;
 };
 
-export const uploadImage = async (accessToken, imageUri) => {
-    const response = await FileSystem.uploadAsync(
-        `${API_URL}/api/user/profile-picture`,
-        imageUri,
-        {
-            httpMethod: "PUT",
-            headers: {
-                Authorization: `Bearer ${accessToken}`,
-            },
-            uploadType: FileSystem.FileSystemUploadType.MULTIPART,
-            fieldName: "profilePicture",
-            mimeType: "image/jpeg",
-        }
-    );
-    return response;
+export const updateProfilePicture = async (accessToken, imageUri) => {
+    // Use axios + FormData for React Native multipart upload
+    const form = new FormData();
+    // Derive a filename and mime based on uri (basic heuristic)
+    const fileName = imageUri.split("/").pop() || `photo.jpg`;
+    const ext = (fileName.split(".").pop() || "jpg").toLowerCase();
+    const mime = ext === "png" ? "image/png" : ext === "jpg" || ext === "jpeg" ? "image/jpeg" : "application/octet-stream";
+
+    form.append("file", {
+        uri: imageUri,
+        name: fileName,
+        type: mime,
+    });
+
+    const response = await axios.put("/api/user/profile/picture", form, {
+        headers: {
+            Authorization: `Bearer ${accessToken}`,
+            // Let axios set proper multipart boundary automatically; no explicit Content-Type
+        },
+    });
+
+    return response.data;
 };
 
 export const createMessage = async (accessToken, { receiverId, content }) => {
@@ -108,6 +123,7 @@ export const createMessage = async (accessToken, { receiverId, content }) => {
 
     return response.data;
 };
+
 export const getMessages = async (accessToken) => {
     const response = await axios.get("/api/message/", {
         headers: {
@@ -117,3 +133,4 @@ export const getMessages = async (accessToken) => {
 
     return response.data;
 };
+

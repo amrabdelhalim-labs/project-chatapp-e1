@@ -26,14 +26,3 @@ export const getMessages = async (req, res) => {
     res.status(StatusCodes.OK).json(messages);
 };
 
-export const seen = async (req, res) => {
-    const currentUserId = req.userId;
-    const { receiverId } = req.params;
-
-    await Message.updateMany(
-        { sender: receiverId, recipient: currentUserId, seen: false },
-        { seen: true }
-    );
-
-    res.status(StatusCodes.OK).json({ message: "Messages seen" });
-};

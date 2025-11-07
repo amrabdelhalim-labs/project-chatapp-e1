@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { MaterialCommunityIcons } from "react-native-vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import io from "socket.io-client";
 import { API_URL } from "@env";
@@ -8,7 +7,6 @@ import { useStore } from "../../libs/globalState";
 import { getMessages, getUsers } from "../../libs/requests";
 import Chat from "./chat";
 import Header from "../../components/Header";
-import Community from "./community";
 import Profile from "./profile";
 
 const Tab = createMaterialTopTabNavigator();
@@ -133,20 +131,6 @@ export default function Home() {
           },
         }}
       >
-        <Tab.Screen
-          name="Community"
-          component={Community}
-          options={{
-            tabBarLabelStyle: { display: "none" },
-            tabBarIcon: ({ color }) => (
-              <MaterialCommunityIcons
-                name="account-group"
-                size={24}
-                color={color}
-              />
-            ),
-          }}
-        />
         <Tab.Screen name="Chat" component={Chat} />
         <Tab.Screen name="Profile" component={Profile} />
       </Tab.Navigator>

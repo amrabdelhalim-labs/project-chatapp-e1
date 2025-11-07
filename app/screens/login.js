@@ -38,7 +38,10 @@ export default function Login() {
         placement: "top",
       });
     } else {
-      const response = await login(formik.values.email, formik.values.password);
+      const response = await login({ 
+        email: formik.values.email, 
+        password: formik.values.password 
+      });
 
       if (response.error) {
         Toast.show({
