@@ -16,10 +16,9 @@ export default function ChatMessage({ content, createdAt, isSender }) {
                         "bg-[#202C33]": !isSender,
                     })}
                 >
-                    <p
-                        className="text-white"
-                        dangerouslySetInnerHTML={{ __html: content.replace("\n", "<br>") }}
-                    />
+                    <p className="text-white whitespace-pre-wrap break-words">
+                        {content}
+                    </p>
                     <p className="text-[#B0BAC0] text-xs flex-1">
                         {moment(createdAt).format("hh:mm A")}
                     </p>
@@ -27,4 +26,4 @@ export default function ChatMessage({ content, createdAt, isSender }) {
             </div>
         </div>
     );
-};
+}

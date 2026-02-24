@@ -5,15 +5,14 @@ import MessageItem from "./MessageItem";
 import Profile from "../Profile";
 import { useStore } from "../../libs/globalState";
 import Loading from "../Loading";
-import { useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { getReceiverMessages } from "../../libs/filterMessages";
 import classNames from "classnames";
 
 export default function Sidebar() {
   const { user, setCurrentReceiver, friends, messages } = useStore();
 
-  const { pathname } = useLocation();
-  const receiverId = pathname.slice(1);
+  const { receiverId } = useParams();
 
   const [activeMessage, setActiveMessage] = useState(receiverId);
   const [showProfile, setShowProfile] = useState(false);

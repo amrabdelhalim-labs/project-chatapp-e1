@@ -57,6 +57,59 @@ server/
     └── api.test.js              # 63 E2E HTTP tests (real Express server)
 ```
 
+## Web Client Architecture
+
+```
+web/
+├── package.json                # React 19, CRA, Zustand, Socket.IO, Axios, Formik, Yup, Tailwind
+├── .env.example                # REACT_APP_API_URL=http://localhost:5000
+└── src/
+    ├── index.jsx               # ReactDOM.createRoot entry point
+    ├── App.jsx                 # Renders <Router />
+    ├── routes.jsx              # createBrowserRouter: / (ProtectedRoute → Home), /login, /register
+    ├── index.css               # Tailwind directives + base styles
+    ├── libs/
+    │   ├── globalState.js      # Zustand store (socket, user, friends, messages, typing)
+    │   ├── requests.js         # Axios instance with interceptors (auto-inject token, 401 redirect)
+    │   └── filterMessages.js   # getReceiverMessages(messages, receiverId, currentUserId)
+    ├── pages/
+    │   ├── index.jsx           # Home — Socket.IO connection, event listeners, data fetching
+    │   ├── login.jsx           # Formik + Yup login form
+    │   └── register.jsx        # Formik + Yup registration form
+    └── components/
+        ├── ProtectedRoute.jsx  # Redirects to /login if no token
+        ├── Loading.jsx         # Spinner component
+        ├── Chat/
+        │   ├── index.jsx       # Chat container — useParams(), auto-scroll, seen emit
+        │   ├── ChatHeader.jsx  # Receiver info + typing indicator + logout
+        │   ├── ChatFooter.jsx  # Message input + send (socket + optimistic update)
+        │   ├── ChatMessage.jsx # Single message bubble (safe text rendering, no XSS)
+        │   └── NoUserSelected.jsx  # Welcome screen when no chat selected
+        ├── Sidebar/
+        │   ├── index.jsx       # Friends list, search, unread filter
+        │   └── MessageItem.jsx # Friend row — last message, unread count, seen emit
+        └── Profile/
+            ├── index.jsx       # Profile picture upload + editable fields
+            └── EditableInput.jsx  # Inline edit with save-on-confirm
+    ├── setupTests.js           # TextEncoder polyfill + @testing-library/jest-dom
+    └── tests/
+        ├── filterMessages.test.js  # 7 tests — message filtering logic
+        ├── globalState.test.js     # 25 tests — Zustand store operations
+        ├── requests.test.js        # 24 tests — Axios interceptors + API functions
+        ├── integration.test.js     # 23 tests — Socket.IO event flow simulation
+        └── components.test.jsx     # 20 tests — component rendering + XSS prevention
+```
+
+### Web Key Patterns
+
+1. **Axios Interceptors:** `requests.js` creates an Axios instance with request interceptor (auto-inject `Bearer` token from `localStorage`) and response interceptor (redirect to `/login` on 401).
+2. **useParams() over pathname:** All components use `useParams()` for `receiverId` instead of `pathname.slice(1)`.
+3. **Safe Text Rendering:** `ChatMessage.jsx` uses `whitespace-pre-wrap` CSS class instead of `dangerouslySetInnerHTML` to prevent XSS.
+4. **Optimistic Updates:** `ChatFooter` adds messages locally with `clientId` before server confirmation; `addMessage()` deduplicates by `_id` or `clientId`.
+5. **Scoped Typing:** `typing` state stores the sender's userId (not a boolean) — only shows "typing..." when the current receiver is the one typing.
+6. **Bidirectional Read Receipts:** `seen` event carries `{ readerId, senderId }` — works for both the reader (mark incoming as read) and sender (mark outgoing as read).
+7. **Safe localStorage:** `safeParse()` / `safeGet()` wrappers handle corrupt/null/undefined values with try-catch.
+
 ## Data Flow
 
 ### Authentication
@@ -108,12 +161,45 @@ messageSchema.index({ createdAt: -1 });
 | JWT_SECRET | Yes | — | JWT signing secret |
 | STORAGE_TYPE | No | local | Storage backend (local/cloudinary/s3) |
 
-## Test Scripts
+## Testing Architecture
+
+### Server Tests (232 tests — custom runner)
+
+| File | Tests | Level | What It Tests |
+|------|-------|-------|---------------|
+| `comprehensive.test.js` | 80 | Integration | All layers in a single workflow (validators → JWT → repos → storage) |
+| `repositories.test.js` | 44 | Unit | CRUD operations per repository in isolation |
+| `integration.test.js` | 45 | Integration | Full-stack with temp workspace (storage + JWT + validators) |
+| `api.test.js` | 63 | E2E | Real HTTP requests against Express server on port 5001 |
 
 ```bash
+cd server
+npm run test:all         # all 232 tests (4 files sequentially)
 npm test                 # comprehensive.test.js (80 tests)
 npm run test:repos       # repositories.test.js (44 tests)
 npm run test:integration # integration.test.js (45 tests)
-npm run test:e2e         # api.test.js (63 tests — starts server on port 5001)
-npm run test:all         # all four sequentially (232 tests)
+npm run test:e2e         # api.test.js (63 tests — port 5001)
 ```
+
+### Web Tests (99 tests — Jest + @testing-library/react)
+
+| File | Tests | Level | What It Tests |
+|------|-------|-------|---------------|
+| `filterMessages.test.js` | 7 | Unit | `getReceiverMessages()` bidirectional filtering |
+| `globalState.test.js` | 25 | Unit | Zustand store (user, friends, messages, typing, localStorage sync) |
+| `requests.test.js` | 24 | Unit | Axios interceptors (token injection, 401 redirect), all API functions |
+| `integration.test.js` | 23 | Integration | Socket.IO event flows (messages, seen, typing, broadcasts) |
+| `components.test.jsx` | 20 | Component | ChatMessage XSS, ProtectedRoute, ChatHeader, ChatFooter, Router |
+
+```bash
+cd web
+npm test                 # watch mode (development)
+npm run test:ci          # single run, no watch (CI/servers)
+```
+
+### Web Test Infrastructure Notes
+
+- **TextEncoder polyfill:** `setupTests.js` polyfills `TextEncoder`/`TextDecoder` for jsdom (required by react-router v7)
+- **react-router v7 moduleNameMapper:** `package.json` jest config maps `react-router-dom`, `react-router`, and `react-router/dom` to dist files because CRA's Jest can't resolve `exports` field
+- **transformIgnorePatterns:** react-router packages are transformed (not ignored) since they use ESM internally
+- **No real server needed:** All web tests mock Axios and Socket.IO — they run without a backend

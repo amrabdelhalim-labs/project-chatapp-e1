@@ -6,7 +6,7 @@ import { useStore } from "../../libs/globalState";
 import { updateProfilePicture } from "../../libs/requests";
 
 export default function Profile({ onClose }) {
-  const { user, accessToken } = useStore();
+  const { user } = useStore();
   const [firstName, setFirstName] = useState(user.firstName);
   const [lastName, setLastName] = useState(user.lastName);
   const [status, setStatus] = useState(user.status);
@@ -16,14 +16,18 @@ export default function Profile({ onClose }) {
   
   const handleProfilePictureChange = async (e) => {
     if (e.target.files && e.target.files[0]) {
+      // تحرير Object URL السابق لتجنب تسريب الذاكرة
+      if (image && image.startsWith("blob:")) {
+        URL.revokeObjectURL(image);
+      }
       setImage(URL.createObjectURL(e.target.files[0])); // عرض معاينة فورية للصورة المختارة
 
-  const formData = new FormData(); // إنشاء كائن FormData لإرسال الملف
-  // يجب أن يتطابق اسم الحقل مع ما يتوقعه multer في السيرفر: upload.single("file")
-  formData.append("file", e.target.files[0]); // إضافة الملف إلى النموذج بالحقل الصحيح
+      const formData = new FormData(); // إنشاء كائن FormData لإرسال الملف
+      // يجب أن يتطابق اسم الحقل مع ما يتوقعه multer في السيرفر: upload.single("file")
+      formData.append("file", e.target.files[0]); // إضافة الملف إلى النموذج بالحقل الصحيح
 
-      await updateProfilePicture(accessToken, formData); // إرسال الطلب إلى الخادم
-    };
+      await updateProfilePicture(formData); // إرسال الطلب إلى الخادم
+    }
   };
 
   return (

@@ -6,8 +6,8 @@ This directory contains machine-facing documentation for AI assistants working o
 
 | File | Purpose |
 |------|---------|
-| [architecture.md](architecture.md) | System architecture, tech stack, data flow |
-| [feature-guide.md](feature-guide.md) | Feature implementation patterns, Socket.IO events, storage |
+| [architecture.md](architecture.md) | System architecture (server + web), tech stack, data flow |
+| [feature-guide.md](feature-guide.md) | Feature implementation patterns, Socket.IO events, storage, state management |
 
 ## Quick Context
 
@@ -17,8 +17,51 @@ This directory contains machine-facing documentation for AI assistants working o
 - **Language:** JavaScript (ES Modules on server, JSX on clients)
 - **Database:** MongoDB with Mongoose ODM
 - **Auth:** JWT with 7-day expiry
-- **Real-time:** Socket.IO for messaging, typing indicators, read receipts
+- **Real-time:** Socket.IO for messaging, typing indicators (scoped), bidirectional read receipts
 - **Storage:** Strategy Pattern (local/Cloudinary/S3) via `STORAGE_TYPE` env var
-- **Testing:** Custom runner, 232 server tests (4 test suites)
+- **Web Client:** React 19 + Zustand + Axios interceptors + Formik/Yup + Tailwind CSS
+- **Server Testing:** Custom runner, 232 server tests (4 test suites)
+- **Web Testing:** Jest + Testing Library, 99 web tests (5 test suites)
 - **Deployment:** Heroku-ready with Procfile
-- **Tutorials:** 9 server tutorials (Arabic) in `docs/tutorials/server/`
+- **Tutorials:** 9 server tutorials + 5 client tutorials (Arabic) in `docs/tutorials/`
+
+## Test Commands
+
+### Server (custom test runner — requires MongoDB)
+```bash
+cd server
+npm run test:all         # all 232 tests (4 files sequentially)
+npm test                 # comprehensive.test.js (80 tests)
+npm run test:repos       # repositories.test.js (44 tests)
+npm run test:integration # integration.test.js (45 tests)
+npm run test:e2e         # api.test.js (63 tests — port 5001)
+```
+
+### Web (Jest + @testing-library/react)
+```bash
+cd web
+npm test                 # watch mode (development)
+npm run test:ci          # single run (CI/servers)
+# 99 tests across 5 suites — all pass
+```
+
+## Environment Variables
+
+| Variable | Package | Required | Default | Description |
+|----------|---------|----------|---------|-------------|
+| PORT | server | No | 5000 | Server port |
+| MONGODB_URL | server | Yes | — | MongoDB connection string |
+| JWT_SECRET | server | Yes | — | JWT signing secret |
+| STORAGE_TYPE | server | No | local | Storage backend (local/cloudinary/s3) |
+| REACT_APP_API_URL | web | No | — | Server URL for Axios |
+
+## Critical Rules
+
+- Controllers never import models directly — use `getRepositoryManager()`
+- Web components use `useParams()` for route params, never `pathname.slice()`
+- Chat content rendered via `whitespace-pre-wrap` text, never `dangerouslySetInnerHTML`
+- Typing state stores `senderId` (scoped), not a boolean
+- `seen` event is bidirectional: `{ readerId, senderId }`
+- Axios interceptor auto-injects Bearer token + redirects on 401
+- `safeParse()`/`safeGet()` wrappers guard localStorage from corrupt values
+- `addMessage()` deduplicates by `_id` then `clientId` (optimistic updates)

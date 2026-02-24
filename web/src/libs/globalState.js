@@ -1,13 +1,26 @@
 import { create } from "zustand";
 
-const userItem = localStorage.getItem("user");
-const user = userItem && userItem !== "null" && userItem !== "undefined" ? JSON.parse(userItem) : null;
+// ─── تحميل البيانات من localStorage بشكل آمن ──────────────────────
+const safeParse = (key) => {
+  try {
+    const item = localStorage.getItem(key);
+    if (!item || item === "null" || item === "undefined") return null;
+    return JSON.parse(item);
+  } catch {
+    localStorage.removeItem(key);
+    return null;
+  }
+};
 
-const accessTokenItem = localStorage.getItem("accessToken");
-const accessToken = accessTokenItem && accessTokenItem !== "null" && accessTokenItem !== "undefined" ? accessTokenItem : null;
+const safeGet = (key) => {
+  const item = localStorage.getItem(key);
+  if (!item || item === "null" || item === "undefined") return null;
+  return item;
+};
 
-const currentReceiverItem = localStorage.getItem("currentReceiver");
-const currentReceiver = currentReceiverItem && currentReceiverItem !== "null" && currentReceiverItem !== "undefined" ? JSON.parse(currentReceiverItem) : null;
+const user = safeParse("user");
+const accessToken = safeGet("accessToken");
+const currentReceiver = safeParse("currentReceiver");
 
 export const useStore = create((set) => ({
   socket: null,
@@ -17,6 +30,11 @@ export const useStore = create((set) => ({
   friends: null,
   typing: null,
   setTyping: (typing) => set({ typing }),
+  // إيقاف الكتابة فقط إذا كان نفس الشخص الذي يكتب حالياً
+  clearTyping: (senderId) =>
+    set(({ typing }) => ({
+      typing: typing === senderId ? null : typing,
+    })),
   setFriends: (friends) => set({ friends }),
   addFriend: (friend) =>
     set(({ friends }) => {
@@ -25,8 +43,10 @@ export const useStore = create((set) => ({
   updateFriend: (user) =>
     set(({ friends }) => {
       const index = friends.findIndex((f) => f._id === user._id);
-      friends[index] = user;
-      return { friends: [...friends] };
+      if (index === -1) return { friends };
+      const updated = [...friends];
+      updated[index] = user;
+      return { friends: updated };
     }),
 
   setUser: (user) => {
@@ -46,6 +66,13 @@ export const useStore = create((set) => ({
     set(({ messages }) => ({
       messages: messages.map((m) =>
         m.sender === senderId && m.recipient === currentUserId ? { ...m, seen: true } : m
+      ),
+    })),
+  // تعليم رسائلي المُرسلة لمستلم محدد كمقروءة (عندما يقرأها الطرف الآخر)
+  markMyMessagesSeen: (myUserId, recipientId) =>
+    set(({ messages }) => ({
+      messages: messages.map((m) =>
+        m.sender === myUserId && m.recipient === recipientId ? { ...m, seen: true } : m
       ),
     })),
   addMessage: (message) => {

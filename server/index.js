@@ -91,8 +91,11 @@ function setupWebSocket(httpServer) {
 
       await repos.message.markAsSeen(receiverId, currentUserId);
 
-      // Notify both parties to update UI
-      getIO().to([currentUserId, receiverId]).emit('seen', receiverId);
+      // Notify both parties to update UI with both IDs
+      getIO().to([currentUserId, receiverId]).emit('seen', {
+        readerId: currentUserId,
+        senderId: receiverId,
+      });
     });
 
     socket.on('send_message', async ({ receiverId, content, clientId }) => {

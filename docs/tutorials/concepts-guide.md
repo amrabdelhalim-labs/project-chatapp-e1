@@ -238,11 +238,24 @@ socket.emit('send_message', { receiverId, content });
 
 ### 4. **React Router (Web)**
 - التوجيه بين الصفحات
+- **v7** يستخدم `createBrowserRouter` (Data Router)
 
 ```javascript
-<Route path="/login" element={<Login />} />
-<Route path="/chat" element={<Chat />} />
-<Route path="/" element={<Navigate to="/chat" />} />
+// الطريقة الحديثة (React Router v7):
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <ProtectedRoute><Home /></ProtectedRoute>,
+    children: [
+      { path: "", element: <NoUserSelected /> },
+      { path: ":receiverId", element: <Chat /> },
+    ],
+  },
+  { path: "/login", element: <Login /> },
+]);
+
+// useParams لاستخراج المعاملات الديناميكية
+const { receiverId } = useParams();
 ```
 
 ---
@@ -256,6 +269,53 @@ socket.emit('send_message', { receiverId, content });
   <Stack.Screen name="Home" component={HomeScreen} />
   <Stack.Screen name="Chat" component={ChatScreen} />
 </Stack.Navigator>
+```
+
+---
+
+### 6. **Axios Interceptors**
+- اعتراض طلبات HTTP قبل إرسالها أو بعد استقبالها
+- **Request Interceptor**: إضافة التوكن تلقائياً لكل طلب
+- **Response Interceptor**: معالجة أخطاء 401 مركزياً
+
+```javascript
+const api = axios.create({ baseURL: 'http://localhost:5000' });
+
+// Request: إضافة التوكن تلقائياً
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("accessToken");
+  if (token && token !== "null") {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Response: إعادة توجيه عند 401
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401) {
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+```
+
+---
+
+### 7. **Optimistic Updates (التحديث المتفائل)**
+- عرض النتيجة فوراً **قبل** تأكيد الخادم
+- يعطي تجربة مستخدم فورية
+
+```javascript
+// ❌ بدون (بطيء): إرسال → انتظار → عرض
+// ✅ مع (فوري):   إرسال → عرض فوراً → تأكيد لاحقاً
+
+const clientId = crypto.randomUUID(); // معرف مؤقت
+socket.emit("send_message", { content, clientId });
+addMessage({ clientId, content, sender: user._id }); // عرض فوري!
+// عندما يرد الخادم → addMessage يدمج بـ clientId (لا تكرار)
 ```
 
 ---
@@ -434,9 +494,12 @@ export const login = async (req, res) => {
 - **Socket.IO**: https://socket.io/docs/v4/
 - **Mongoose**: https://mongoosejs.com/
 - **React**: https://react.dev/
+- **React Router**: https://reactrouter.com/
 - **React Native**: https://reactnative.dev/
 - **Zustand**: https://zustand-demo.pmnd.rs/
+- **Axios**: https://axios-http.com/
 - **JWT**: https://jwt.io/
+- **React Testing Library**: https://testing-library.com/
 
 ---
 

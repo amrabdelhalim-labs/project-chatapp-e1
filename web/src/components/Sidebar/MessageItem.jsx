@@ -12,7 +12,7 @@ const MessageItem = ({
     id,
 }) => {
     const navigate = useNavigate();
-    const { socket, messages, setMessages, user } = useStore();
+    const { socket, messages, markMessagesSeenFromSender, user } = useStore();
     
     // جميع الرسائل بين المستخدم الحالي وهذا الصديق
     const contactMessages = getReceiverMessages(messages, id, user._id);
@@ -35,13 +35,7 @@ const MessageItem = ({
         // إرسال حدث "seen" إلى الخادم
         socket?.emit("seen", id);
         // تحديث حالة الرسائل محلياً لتعريفها بأنها "مرئية" فقط للرسائل الواردة من هذا المستخدم
-        setMessages(
-            messages.map((message) =>
-                message.sender === id && message.recipient === user._id
-                    ? { ...message, seen: true }
-                    : message
-            )
-        );
+        markMessagesSeenFromSender(id, user._id);
     };
 
     return (

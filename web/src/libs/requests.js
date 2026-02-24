@@ -1,6 +1,34 @@
 import axios from "axios";
 
-axios.defaults.baseURL = process.env.REACT_APP_API_URL;
+// ─── إنشاء Axios Instance مع Interceptors ───────────────────────
+const api = axios.create({
+  baseURL: process.env.REACT_APP_API_URL,
+});
+
+// Request Interceptor: إضافة التوكن تلقائياً لكل طلب
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("accessToken");
+  if (token && token !== "null" && token !== "undefined") {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
+
+// Response Interceptor: التعامل مع أخطاء 401 (انتهاء الجلسة)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error?.response?.status === 401) {
+      localStorage.removeItem("user");
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("currentReceiver");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
+// ─── دوال المصادقة (لا تحتاج توكن) ─────────────────────────────
 
 export const register = async ({
   firstName,
@@ -10,7 +38,7 @@ export const register = async ({
   confirmPassword,
 }) => {
   try {
-    const response = await axios.post("/api/user/register", {
+    const response = await api.post("/api/user/register", {
       firstName,
       lastName,
       email,
@@ -30,76 +58,53 @@ export const register = async ({
 };
 
 export const login = async ({email, password}) => {
-  const response = await axios.post("/api/user/login", {
-    email,
-    password,
-  });
+  try {
+    const response = await api.post("/api/user/login", {
+      email,
+      password,
+    });
 
+    return response.data;
+  } catch (error) {
+    const message =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Login failed";
+    return { error: message };
+  }
+};
+
+// ─── دوال تحتاج مصادقة (التوكن يُضاف تلقائياً عبر Interceptor) ─
+
+export const getProfile = async () => {
+  const response = await api.get("/api/user/profile");
   return response.data;
 };
 
-export const getProfile = async (accessToken) => {
-  const response = await axios.get("/api/user/profile", {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-
+export const getUsers = async () => {
+  const response = await api.get("/api/user/friends");
   return response.data;
 };
 
-export const getUsers = async (accessToken) => {
-  const response = await axios.get("/api/user/friends", {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-
+export const updateUser = async (body) => {
+  const response = await api.put("/api/user/profile", body);
   return response.data;
 };
 
-export const updateUser = async (accessToken, body) => {
-  const response = await axios.put("/api/user/profile", body, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-
+export const updateProfilePicture = async (formData) => {
+  const response = await api.put("/api/user/profile/picture", formData);
   return response.data;
 };
 
-export const updateProfilePicture = async (accessToken, formData) => {
-  const response = await axios.put("/api/user/profile/picture", formData, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+export const createMessage = async ({ receiverId, content }) => {
+  const response = await api.post("/api/message", {
+    receiverId,
+    content,
   });
-
   return response.data;
 };
 
-export const createMessage = async (accessToken, { receiverId, content }) => {
-  const response = await axios.post(
-    "/api/message",
-    {
-      receiverId,
-      content,
-    },
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
-
-  return response.data;
-};
-export const getMessages = async (accessToken) => {
-  const response = await axios.get("/api/message/", {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-
+export const getMessages = async () => {
+  const response = await api.get("/api/message/");
   return response.data;
 };

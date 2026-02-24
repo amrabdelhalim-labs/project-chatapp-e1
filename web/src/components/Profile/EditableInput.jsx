@@ -2,7 +2,6 @@ import { useState } from "react";
 import { FaEdit, FaCheck } from "react-icons/fa";
 import cn from "classnames";
 import { updateUser } from "../../libs/requests";
-import { useStore } from "../../libs/globalState";
 
 export default function EditableInput({
   value,
@@ -11,7 +10,6 @@ export default function EditableInput({
   id,
   placeholder,
 }) {
-  const { accessToken } = useStore();
   const [isEditable, setIsEditable] = useState(false);
 
   const handleEdit = () => {
@@ -21,14 +19,14 @@ export default function EditableInput({
   const handleNotEdit = async () => {
     setIsEditable(false);
 
-    await updateUser(accessToken, {
+    await updateUser({
       [id]: value,
     });
   };
 
   return (
     <div>
-      <label htmlFor={"fullName"} className="text-[#005C4B]">
+      <label htmlFor={id} className="text-[#005C4B]">
         {label}
       </label>
       <div className="relative">

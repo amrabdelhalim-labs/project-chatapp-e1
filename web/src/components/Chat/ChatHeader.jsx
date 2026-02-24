@@ -24,17 +24,18 @@ const ChatHeader = () => {
                 <div>
                     <p className="text-white text-md font-semibold">{`${currentReceiver.firstName} ${currentReceiver.lastName}`}</p>
                     <p className="text-[#B0BAC0] text-xs">
-                        {typing ? "typing..." : currentReceiver.status}
+                        {typing === currentReceiver._id ? "typing..." : currentReceiver.status}
                     </p>
                 </div>
             </div>
             <div className="flex space-x-4">
-                <button className="justify-center rounded-full p-1 cursor-pointer active:bg-[#005C4B] transition-all">
+                <button
+                    onClick={handleLogout}
+                    className="justify-center rounded-full p-1 cursor-pointer active:bg-[#005C4B] transition-all"
+                >
                     <IoLogOutOutline
-                        onClick={handleLogout}
                         size={20}
                         color="#B0BAC0"
-                        className="cursor-pointer"
                     />
                 </button>
             </div>

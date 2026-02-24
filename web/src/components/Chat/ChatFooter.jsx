@@ -1,11 +1,11 @@
 import { TbSend } from "react-icons/tb";
 import { useStore } from "../../libs/globalState";
-import { useLocation } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 
 export default function ChatFooter() {
     const { input, setInput, socket, addMessage, user } = useStore();
-    const { pathname: receiverId } = useLocation();
+    const { receiverId } = useParams();
 
     const sendMessage = () => {
         // Guard against missing socket or empty input
@@ -18,7 +18,7 @@ export default function ChatFooter() {
 
         // Emit to server including clientId so server can echo it back
         socket.emit("send_message", {
-            receiverId: receiverId.slice(1),
+            receiverId,
             content: input,
             clientId,
         });
@@ -27,7 +27,7 @@ export default function ChatFooter() {
         addMessage({
             clientId,
             sender: user._id,
-            recipient: receiverId.slice(1),
+            recipient: receiverId,
             content: input,
             seen: false,
             createdAt: new Date().toISOString(),
@@ -40,9 +40,9 @@ export default function ChatFooter() {
         if (!socket) return;
 
         if (input) {
-            socket.emit("typing", receiverId.slice(1));
+            socket.emit("typing", receiverId);
         } else {
-            socket.emit("stop_typing", receiverId.slice(1));
+            socket.emit("stop_typing", receiverId);
         }
     }, [input, socket, receiverId]);
 

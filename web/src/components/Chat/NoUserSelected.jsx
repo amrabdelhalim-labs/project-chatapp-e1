@@ -1,4 +1,3 @@
-import React from "react";
 import logo from "../../assets/icon.png";
 import { useNavigate } from "react-router-dom";
 import { IoLogOutOutline } from "react-icons/io5";
@@ -17,12 +16,13 @@ export default function NoUserSelected() {
     <div className="flex flex-col flex-[3]">
       <div className="flex items-center justify-end bg-[#222C32] h-16 p-3">
         <div className="flex space-x-4">
-          <button className="justify-center rounded-full p-1 cursor-pointer active:bg-[#005C4B] transition-all">
+          <button
+            onClick={handleLogout}
+            className="justify-center rounded-full p-1 cursor-pointer active:bg-[#005C4B] transition-all"
+          >
             <IoLogOutOutline
-              onClick={handleLogout}
               size={20}
               color="#B0BAC0"
-              className="cursor-pointer"
             />
           </button>
         </div>
@@ -38,4 +38,4 @@ export default function NoUserSelected() {
       </div>
     </div>
   );
-};
+}
