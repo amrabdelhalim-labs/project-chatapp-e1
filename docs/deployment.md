@@ -1,0 +1,311 @@
+# دليل النشر الإنتاجي
+
+## 📋 قائمة التحقق قبل النشر
+
+قبل النشر على الإنتاج، تأكد من:
+
+- [ ] جميع متغيرات البيئة مضبوطة بشكل صحيح
+- [ ] `JWT_SECRET` تم تغييره من القيمة الافتراضية
+- [ ] `MONGODB_URL` يشير لقاعدة بيانات إنتاجية (MongoDB Atlas)
+- [ ] أصول CORS مضبوطة بشكل صحيح
+- [ ] نوع التخزين مُكوَّن (Cloudinary أو S3 موصى به)
+- [ ] جميع التبعيات موجودة في `package.json`
+- [ ] `.gitignore` يستثني الملفات الحساسة
+- [ ] معالجة الأخطاء شاملة
+- [ ] `npm run test:all` يمر بنجاح (232 اختبار)
+
+---
+
+## 🔐 أفضل ممارسات الأمان
+
+### 1. متغيرات البيئة
+
+**لا تقم أبداً بنشر البيانات الحساسة إلى Git!**
+
+المتغيرات المطلوبة للإنتاج:
+
+```bash
+# أساسي
+PORT=5000
+MONGODB_URL=mongodb+srv://user:pass@cluster.mongodb.net/mychat
+JWT_SECRET=your_secure_random_secret_here
+
+# اختر نوع تخزين واحد
+STORAGE_TYPE=cloudinary  # أو 's3'
+CLOUDINARY_CLOUD_NAME=xxx
+CLOUDINARY_API_KEY=xxx
+CLOUDINARY_API_SECRET=xxx
+```
+
+### 2. توليد JWT Secret قوي
+
+```bash
+# Linux/Mac
+openssl rand -base64 32
+
+# Windows PowerShell
+[Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Minimum 0 -Maximum 256 }))
+
+# Node.js
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+### 3. إعدادات CORS
+
+الخادم يستخدم `cors()` بدون تحديد أصول (يقبل الكل في الوضع الحالي). للإنتاج، يُفضل تقييدها:
+
+```javascript
+// في index.js
+app.use(cors({
+  origin: process.env.CORS_ORIGINS?.split(',') || '*',
+  credentials: true,
+}));
+```
+
+```bash
+# متغير البيئة
+CORS_ORIGINS=https://yourdomain.com,https://app.yourdomain.com
+```
+
+### 4. تحديد معدل الطلبات (موصى به)
+
+```bash
+npm install express-rate-limit
+```
+
+```javascript
+import rateLimit from 'express-rate-limit';
+
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 دقيقة
+  max: 100,
+  message: { message: 'عدد كبير جداً من الطلبات، يرجى المحاولة لاحقاً' },
+});
+
+app.use('/api/user/login', limiter);
+app.use('/api/user/register', limiter);
+```
+
+---
+
+## 🚀 النشر على Heroku
+
+### الإعداد الأولي
+
+1. **تثبيت Heroku CLI:**
+
+   ```bash
+   # Windows
+   winget install Heroku.HerokuCLI
+
+   # Mac
+   brew install heroku/brew/heroku
+   ```
+
+2. **تسجيل الدخول:**
+
+   ```bash
+   heroku login
+   ```
+
+3. **إنشاء تطبيق:**
+
+   ```bash
+   cd server
+   heroku create mychat-server
+   ```
+
+### إعداد البيئة
+
+```bash
+# المتغيرات الأساسية
+heroku config:set MONGODB_URL="mongodb+srv://user:pass@cluster.mongodb.net/mychat"
+heroku config:set JWT_SECRET="$(openssl rand -base64 32)"
+heroku config:set NODE_ENV=production
+
+# التخزين (اختر واحد)
+heroku config:set STORAGE_TYPE=cloudinary
+heroku config:set CLOUDINARY_CLOUD_NAME=your_name
+heroku config:set CLOUDINARY_API_KEY=your_key
+heroku config:set CLOUDINARY_API_SECRET=your_secret
+```
+
+### Procfile
+
+ملف `Procfile` موجود في `server/`:
+
+```
+web: node index.js
+```
+
+### النشر
+
+```bash
+# نشر مجلد server فقط (subtree)
+git subtree push --prefix server heroku main
+
+# أو إذا كان المشروع كله في مستودع واحد:
+git push heroku main
+```
+
+### التحقق
+
+```bash
+# فتح التطبيق
+heroku open
+
+# فحص الحالة
+curl https://mychat-server.herokuapp.com/api/health
+
+# عرض السجلات
+heroku logs --tail
+```
+
+---
+
+## 🌐 النشر على Railway (بديل)
+
+1. اذهب إلى [railway.app](https://railway.app)
+2. اربط مستودع GitHub
+3. حدد مجلد `server/` كمصدر
+4. أضف متغيرات البيئة من لوحة التحكم
+5. Railway يكتشف `Procfile` تلقائياً
+
+---
+
+## 🗄️ إعداد MongoDB Atlas (قاعدة بيانات إنتاجية)
+
+### الخطوات:
+
+1. **إنشاء حساب** على [mongodb.com/atlas](https://www.mongodb.com/atlas)
+2. **إنشاء Cluster** (المجاني M0 يكفي للبداية)
+3. **إنشاء مستخدم قاعدة بيانات** (Database Access)
+4. **السماح باتصالات الشبكة** (Network Access): أضف `0.0.0.0/0` لـ Heroku
+5. **نسخ Connection String:**
+
+   ```
+   mongodb+srv://username:password@cluster.mongodb.net/mychat?retryWrites=true&w=majority
+   ```
+
+6. **تعيينه في Heroku:**
+
+   ```bash
+   heroku config:set MONGODB_URL="mongodb+srv://..."
+   ```
+
+### فهارس قاعدة البيانات
+
+النماذج تحتوي على فهارس تلقائية:
+
+```javascript
+// Message model
+messageSchema.index({ sender: 1, recipient: 1 });
+messageSchema.index({ recipient: 1, seen: 1 });
+messageSchema.index({ createdAt: -1 });
+```
+
+---
+
+## 📱 إعداد العملاء للإنتاج
+
+### تطبيق الويب (`web/`)
+
+```bash
+# ملف .env أو متغير بيئة
+REACT_APP_SERVER_URL=https://mychat-server.herokuapp.com
+```
+
+### تطبيق الموبايل (`app/`)
+
+```bash
+# ملف .env أو متغير بيئة
+EXPO_PUBLIC_SERVER_URL=https://mychat-server.herokuapp.com
+```
+
+---
+
+## 📊 المراقبة واستكشاف الأخطاء
+
+### سجلات Heroku
+
+```bash
+# عرض آخر 100 سطر
+heroku logs -n 100
+
+# متابعة مباشرة
+heroku logs --tail
+
+# تصفية حسب النوع
+heroku logs --tail --source app
+```
+
+### فحص الحالة
+
+```bash
+# فحص صحة الخادم
+curl -s https://your-app.herokuapp.com/api/health | jq
+
+# الاستجابة المتوقعة:
+{
+  "database": "connected",
+  "repositories": {
+    "user": true,
+    "message": true
+  }
+}
+```
+
+### مشاكل شائعة
+
+| المشكلة | الحل |
+|---------|------|
+| `H10 - App crashed` | تحقق من `heroku logs --tail`، غالباً متغير بيئة ناقص |
+| `H14 - No web processes` | تأكد من وجود `Procfile` في المجلد الصحيح |
+| `MongooseServerSelectionError` | تحقق من `MONGODB_URL` وقواعد Network Access في Atlas |
+| `CORS errors` | أضف أصل الواجهة الأمامية إلى إعدادات CORS |
+| `Socket.IO لا يعمل` | تأكد أن WebSocket مدعوم في خطة الاستضافة |
+
+---
+
+## ⚡ تحسين الأداء
+
+### الضغط (gzip)
+
+```bash
+npm install compression
+```
+
+```javascript
+import compression from 'compression';
+app.use(compression());
+```
+
+### حد حجم الطلبات
+
+```javascript
+app.use(express.json({ limit: '1mb' }));
+```
+
+### Socket.IO في الإنتاج
+
+```javascript
+const io = new Server(server, {
+  cors: {
+    origin: process.env.CORS_ORIGINS?.split(',') || '*',
+  },
+  // إعدادات إنتاجية
+  pingTimeout: 60000,
+  pingInterval: 25000,
+});
+```
+
+---
+
+## ✅ قائمة التحقق بعد النشر
+
+- [ ] `GET /api/health` يُرجع `{ database: "connected" }`
+- [ ] التسجيل والدخول يعملان
+- [ ] Socket.IO يتصل (اختبار من تطبيق الويب/الموبايل)
+- [ ] رفع صور الملف الشخصي يعمل مع مزود التخزين المختار
+- [ ] الرسائل تُرسل وتُستقبل في الوقت الحقيقي
+- [ ] السجلات لا تحتوي أخطاء متكررة

@@ -1,4 +1,5 @@
 import 'dotenv/config';
+import 'express-async-errors';
 import express from 'express';
 import userRouter from './routes/user.js';
 import messageRouter from './routes/message.js';
@@ -7,7 +8,9 @@ import isAuthenticated, { isSocketAuthenticated } from './middlewares/isAuthenti
 import cors from 'cors';
 import { Server } from 'socket.io';
 import http from 'http';
-import Message from './models/Message.js';
+import { StatusCodes } from 'http-status-codes';
+import { setIO, getIO } from './utils/socket.js';
+import { getRepositoryManager } from './repositories/index.js';
 
 // Set up Express app
 const app = express();
@@ -23,62 +26,105 @@ app.get('/', (req, res) => {
   res.send('Hello from the server!');
 });
 
+app.get('/api/health', async (req, res) => {
+  const repos = getRepositoryManager();
+  const health = await repos.healthCheck();
+  const status = health.database === 'connected' ? StatusCodes.OK : StatusCodes.SERVICE_UNAVAILABLE;
+  res.status(status).json(health);
+});
+
 app.use('/api/user', userRouter);
-app.use("/api/message", isAuthenticated, messageRouter);
+app.use('/api/message', isAuthenticated, messageRouter);
 
-// Connections
-connectDB();
-connectServer(server);
+// Global error handler
+app.use((err, req, res, _next) => {
+  console.error('Unhandled error:', err.message || err);
 
-// Websocket
-export const io = new Server(server, {
-  cors: {
-    origin: "*",
-  },
+  if (err.name === 'ValidationError') {
+    return res.status(StatusCodes.BAD_REQUEST).json({
+      message: 'خطأ في البيانات المدخلة',
+      errors: Object.values(err.errors).map((e) => e.message),
+    });
+  }
+
+  if (err.name === 'CastError') {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: 'معرف غير صالح' });
+  }
+
+  const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+  res.status(statusCode).json({ message: err.message || 'خطأ في الخادم' });
 });
 
-io.use(isSocketAuthenticated);
-
-io.on("connection", async (socket) => {
-  console.log(`user connected: ${socket.userId}`);
-
-  socket.join(socket.userId);
-
-  socket.on("disconnect", () => {
-    console.log(`user disconnected: ${socket.userId}`);
+// WebSocket setup
+function setupWebSocket(httpServer) {
+  const io = new Server(httpServer, {
+    cors: {
+      origin: '*',
+    },
   });
 
-  socket.on("typing", (receiverId) => {
-    socket.to(receiverId).emit("typing", socket.userId);
+  setIO(io);
+  io.use(isSocketAuthenticated);
+
+  io.on('connection', async (socket) => {
+    console.log(`user connected: ${socket.userId}`);
+    const repos = getRepositoryManager();
+
+    socket.join(socket.userId);
+
+    socket.on('disconnect', () => {
+      console.log(`user disconnected: ${socket.userId}`);
+    });
+
+    socket.on('typing', (receiverId) => {
+      socket.to(receiverId).emit('typing', socket.userId);
+    });
+
+    socket.on('stop_typing', (receiverId) => {
+      socket.to(receiverId).emit('stop_typing', socket.userId);
+    });
+
+    socket.on('seen', async (receiverId) => {
+      const currentUserId = socket.userId;
+
+      await repos.message.markAsSeen(receiverId, currentUserId);
+
+      // Notify both parties to update UI
+      getIO().to([currentUserId, receiverId]).emit('seen', receiverId);
+    });
+
+    socket.on('send_message', async ({ receiverId, content, clientId }) => {
+      if (!receiverId || !content?.trim()) return;
+
+      const senderId = socket.userId;
+      const message = await repos.message.create({
+        sender: senderId,
+        recipient: receiverId,
+        content: content.trim(),
+      });
+
+      // Include clientId so frontend can reconcile optimistic message
+      const messageWithClientId = clientId ? { ...message.toObject(), clientId } : message;
+
+      // Broadcast to both sender and recipient rooms
+      getIO().to([receiverId, senderId]).emit('receive_message', messageWithClientId);
+    });
   });
 
-  socket.on("stop_typing", (receiverId) => {
-    socket.to(receiverId).emit("stop_typing", socket.userId);
-  });
+  return io;
+}
 
-  socket.on("seen", async (receiverId) => {
-    // المستخدم الحالي هو المستقبل للرسائل، و"receiverId" هو المُرسل الذي نفتح محادثته الآن
-    const currentUserId = socket.userId;
+// Start server only when running directly (not imported by tests)
+const isMainModule =
+  process.argv[1] &&
+  (process.argv[1].endsWith('index.js') || process.argv[1].includes('nodemon'));
 
-    console.log(`Marking messages from ${receiverId} to ${currentUserId} as seen`);
+if (isMainModule) {
+  connectDB();
+  setupWebSocket(server);
+  connectServer(server);
+}
 
-    await Message.updateMany(
-      { sender: receiverId, recipient: currentUserId, seen: false },
-      { seen: true }
-    ).exec();
-
-    // أخطر الطرفين لتحديث الواجهة فوراً
-    io.to([currentUserId, receiverId]).emit("seen", receiverId);
-  });
-
-  socket.on("send_message", async ({ receiverId, content, clientId }) => {
-    const senderId = socket.userId;
-    const message = await Message.create({ sender: senderId, recipient: receiverId, content });
-
-    // Include clientId in the response so frontend can reconcile optimistic message
-    const messageWithClientId = clientId ? { ...message.toObject(), clientId } : message;
-
-    // Broadcast to both sender and recipient rooms
-    io.to([receiverId, senderId]).emit("receive_message", messageWithClientId);
-  });
-});
+export { app, server, setupWebSocket };

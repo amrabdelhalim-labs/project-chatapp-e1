@@ -1,0 +1,491 @@
+# شرح نظام الاختبارات
+
+## 📋 نظرة عامة
+
+نظام الاختبارات في المشروع **مخصص وبسيط** — لا يستخدم مكتبات مثل Jest أو Mocha. بدلاً من ذلك، يعتمد على إطار صغير في `test.helpers.js` يوفر الأساسيات: تأكيدات، ألوان، وملخص النتائج.
+
+### هيكل الملفات:
+```
+tests/
+├── test.helpers.js          ← إطار الاختبار المشترك
+├── comprehensive.test.js    ← 80 اختبار — سير عمل كامل
+├── repositories.test.js     ← 44 اختبار — عمليات CRUD المستودعات
+├── integration.test.js      ← 45 اختبار — تكامل كامل مع التخزين
+└── api.test.js              ← 63 اختبار — طلبات HTTP حقيقية (E2E)
+```
+
+**الإجمالي: 232 اختبار**
+
+---
+
+## 🔧 إطار الاختبار (test.helpers.js)
+
+### المكونات:
+
+```javascript
+// ألوان الطرفية
+export const colors = {
+  reset:   '\x1b[0m',
+  green:   '\x1b[32m',   // نجاح ✓
+  red:     '\x1b[31m',   // فشل ✗
+  yellow:  '\x1b[33m',   // خطوات [1] [2]
+  blue:    '\x1b[34m',   // عناوين
+  cyan:    '\x1b[36m',   // فواصل ━━━
+  magenta: '\x1b[35m',   // عناوين رئيسية
+};
+```
+
+### حالة الاختبارات:
+
+```javascript
+export const state = {
+  total: 0,    // إجمالي الاختبارات
+  passed: 0,   // عدد الناجحة
+  failed: 0,   // عدد الفاشلة
+  reset() {
+    this.total = 0;
+    this.passed = 0;
+    this.failed = 0;
+  },
+};
+```
+
+### دالة التأكيد — `assert()`:
+
+```javascript
+export function assert(condition, message) {
+  state.total++;
+  if (condition) {
+    state.passed++;
+    console.log(`✓ PASS ${message}`);   // أخضر
+  } else {
+    state.failed++;
+    console.log(`✗ FAIL ${message}`);   // أحمر
+  }
+}
+```
+
+**لماذا لم نستخدم `throw`؟**
+- نريد تنفيذ **كل** الاختبارات حتى لو فشل بعضها
+- `throw` يوقف التنفيذ، أما `assert` يسجّل ويكمل
+
+### أدوات التنظيم:
+
+```javascript
+// عنوان قسم كبير
+export function logSection(title) {
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+  console.log(title);
+  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+}
+
+// خطوة مرقمة داخل قسم
+export function logStep(stepNumber, description) {
+  console.log(`[${stepNumber}] ${description}`);
+}
+
+// ملخص النتائج النهائي
+export function printSummary() {
+  console.log(`Total:  ${state.total}`);
+  console.log(`Passed: ${state.passed}`);
+  console.log(`Failed: ${state.failed}`);
+  console.log(`Rate:   ${rate}%`);
+
+  if (state.failed === 0) {
+    console.log('✓ All tests passed!');
+  }
+}
+```
+
+---
+
+## 📋 ملف 1: comprehensive.test.js — 80 اختبار
+
+**الغرض:** اختبار سير عمل كامل من البداية للنهاية.
+
+### المراحل الثمانية:
+
+```
+المرحلة 1: Validators          ← التحقق من المدخلات
+المرحلة 2: JWT Utilities       ← إنشاء والتحقق من التوكنات
+المرحلة 3: Socket Utility      ← setIO / getIO
+المرحلة 4: User Repository     ← إنشاء وتحديث المستخدمين
+المرحلة 5: Message Repository  ← إرسال وقراءة الرسائل
+المرحلة 6: Base Repository     ← exists, count, findPaginated
+المرحلة 7: Storage Service     ← رفع وحذف ملفات
+المرحلة 8: Cleanup             ← حذف بيانات الاختبار
+```
+
+### مثال من المرحلة 1 — اختبار Validator:
+
+```javascript
+// اختبار التسجيل بمدخلات صحيحة
+const validResult = validateRegisterInput({
+  firstName: 'أحمد',
+  lastName: 'محمد',
+  email: 'test@example.com',
+  password: 'Test123!',
+});
+assert(validResult.isValid, 'Valid registration passes validation');
+assert(validResult.errors.length === 0, 'No errors for valid input');
+
+// اختبار بإيميل خاطئ
+const invalidEmail = validateRegisterInput({
+  firstName: 'أحمد',
+  lastName: 'محمد',
+  email: 'not-an-email',
+  password: 'Test123!',
+});
+assert(!invalidEmail.isValid, 'Invalid email fails validation');
+```
+
+### كيف يعمل الـ Cleanup:
+
+```javascript
+// المرحلة 8: حذف كل بيانات الاختبار
+logSection('PHASE 8: CLEANUP');
+
+for (const user of testData.users) {
+  await repos.user.delete(user._id);
+}
+assert(true, 'All test users deleted');
+
+for (const msg of testData.messages) {
+  await repos.message.delete(msg._id);
+}
+assert(true, 'All test messages deleted');
+```
+
+---
+
+## 📋 ملف 2: repositories.test.js — 44 اختبار
+
+**الغرض:** اختبار مركّز على عمليات CRUD للمستودعات.
+
+### ما يغطيه:
+
+```
+User Repository:
+├── create (createUser)
+├── findByEmail
+├── emailExists
+├── findByIdSafe (بدون password)
+├── findAllExcept
+├── updateProfile
+├── updateProfilePicture (يرجع القديمة)
+└── delete
+
+Message Repository:
+├── create
+├── findAllForUser
+├── findConversation
+├── markAsSeen (يرجع عدد)
+├── countUnseen
+├── countAllUnseen
+├── deleteConversation
+└── delete
+```
+
+### مثال — اختبار `updateProfilePicture`:
+
+```javascript
+const { previousPicture, user } = await repos.user.updateProfilePicture(
+  testUserId1,
+  'http://localhost:5000/uploads/new-picture.jpg'
+);
+
+assert(previousPicture !== null, 'Returns previous picture URL');
+assert(user.profilePicture === 'http://localhost:5000/uploads/new-picture.jpg',
+  'Profile picture updated successfully');
+assert(user.password === undefined, 'Password excluded from response');
+```
+
+---
+
+## 📋 ملف 3: integration.test.js — 45 اختبار
+
+**الغرض:** اختبار تكامل كامل يشمل التخزين المحلي مع نظام ملفات حقيقي.
+
+### ما يميّزه:
+- ينشئ **مجلد مؤقت** لاختبارات التخزين
+- يختبر رفع ملفات حقيقية (صور PNG 1×1 بكسل)
+- يختبر حذف الملفات مع حماية `default-picture.jpg`
+- ينظّف المجلد المؤقت في النهاية
+
+### إنشاء المجلد المؤقت:
+
+```javascript
+const tempDir = path.join(
+  process.env.TEMP || '/tmp',
+  `mychat-test-${Date.now()}`
+);
+```
+
+### إنشاء صورة اختبار:
+
+```javascript
+async function createTestImage(filename) {
+  const testImagePath = path.join(tempDir, 'test-images', filename);
+  // ينشئ صورة PNG حقيقية (1×1 بكسل)
+  // أصغر صورة ممكنة — كافية للاختبار
+  const pngBuffer = Buffer.from([
+    0x89, 0x50, 0x4E, 0x47, /* ... PNG header ... */
+  ]);
+  fs.writeFileSync(testImagePath, pngBuffer);
+  return testImagePath;
+}
+```
+
+### أقسام الاختبار:
+
+```
+1. Validators (مدخلات)
+2. JWT (توكنات)
+3. Socket utility
+4. Storage Service:
+    ├── إنشاء LocalStorageStrategy
+    ├── healthCheck
+    ├── رفع ملف (من buffer)
+    ├── رفع ملف (من مسار)
+    ├── التحقق من وجود الملف
+    ├── حذف ملف عادي ← true
+    ├── حذف default-picture.jpg ← محمي
+    └── getFileUrl
+5. User Repository (CRUD كامل)
+6. Message Repository (CRUD كامل)
+7. Cleanup (حذف بيانات + مجلد مؤقت)
+```
+
+---
+
+## 📋 ملف 4: api.test.js — 63 اختبار
+
+**الغرض:** اختبارات E2E (End-to-End) — طلبات HTTP حقيقية ضد خادم Express شغّال.
+
+### ما يميّزه:
+- يشغّل خادم Express حقيقي على المنفذ `5001`
+- يرسل طلبات HTTP باستخدام `node:http` (بدون مكتبات)
+- يختبر كل الـ endpoints مع headers حقيقية
+- يستخدم **Mock Socket.IO** لتجنب WebSocket أثناء الاختبار
+
+### Mock Socket.IO:
+
+```javascript
+// قبل استيراد التطبيق، نضع IO وهمي
+const mockIO = {
+  to: () => ({ emit: () => {} }),
+  emit: () => {},
+};
+setIO(mockIO);
+
+// الآن نستورد التطبيق بأمان
+const { default: app } = await import('../index.js');
+```
+
+**لماذا؟** — `index.js` يستخدم `getIO()` في بعض الأماكن. بدون Mock، سيفشل.
+
+### دالة الطلبات:
+
+```javascript
+function makeRequest(method, path, body = null, token = null) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: 'localhost',
+      port: PORT,
+      path,
+      method,
+      headers: { 'Content-Type': 'application/json' },
+    };
+
+    if (token) {
+      options.headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const req = http.request(options, (res) => {
+      let data = '';
+      res.on('data', (chunk) => (data += chunk));
+      res.on('end', () => {
+        resolve({ status: res.statusCode, body: JSON.parse(data) });
+      });
+    });
+
+    if (body) req.write(JSON.stringify(body));
+    req.end();
+  });
+}
+```
+
+### أقسام الاختبار:
+
+```
+1. Registration:
+    ├── تسجيل مستخدم 1 ← 201
+    ├── تسجيل مستخدم 2 ← 201
+    ├── تسجيل بنفس الإيميل ← 409
+    ├── بدون بيانات ← 400
+    ├── إيميل غير صحيح ← 400
+    └── التحقق من هيكل الرد (user + token)
+
+2. Login:
+    ├── تسجيل الدخول ← 200
+    ├── كلمة مرور خاطئة ← 401
+    └── إيميل غير موجود ← 401
+
+3. Auth Protection:
+    ├── بدون توكن ← 401
+    └── توكن منتهي ← 401
+
+4. Profile:
+    ├── GET /users/me ← 200
+    ├── PUT /users/me ← 200
+    └── التحقق من عدم وجود password في الرد
+
+5. Users:
+    ├── GET /users ← 200 (قائمة بدون المستخدم الحالي)
+    └── التحقق من العدد
+
+6. Messages:
+    ├── POST /messages ← 201
+    ├── GET /messages ← 200
+    ├── GET /messages/conversation/:userId ← 200
+    ├── PUT /messages/seen/:senderId ← 200
+    └── بيانات ناقصة ← 400
+
+7. Health:
+    └── GET /health ← 200 (database: connected)
+
+8. Cleanup:
+    └── حذف بيانات الاختبار من قاعدة البيانات
+```
+
+---
+
+## 🏃 تشغيل الاختبارات
+
+### الأوامر المتاحة:
+
+```bash
+# اختبار شامل واحد (الافتراضي)
+npm test
+
+# اختبارات المستودعات فقط
+npm run test:repos
+
+# اختبارات التكامل (مع تخزين محلي)
+npm run test:integration
+
+# اختبارات E2E (طلبات HTTP حقيقية)
+npm run test:e2e
+
+# تشغيل الكل (232 اختبار)
+npm run test:all
+```
+
+### المتطلبات:
+
+```
+1. MongoDB شغّال (محلي أو Atlas)
+2. ملف .env يحتوي MONGODB_URL و JWT_SECRET
+3. المنفذ 5001 متاح (لاختبارات api.test.js)
+```
+
+### المخرجات المتوقعة:
+
+```
+┌──────────────────────────────────────────────────┐
+│  🧪 COMPREHENSIVE INTEGRATION TEST              │
+│  Full Workflow: Create → Update → Delete         │
+└──────────────────────────────────────────────────┘
+
+⚙️ Initializing...
+✓ Database connected
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+PHASE 1: VALIDATORS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ PASS Valid registration passes validation
+✓ PASS No errors for valid input
+✓ PASS Empty input fails validation
+...
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Total:  80
+Passed: 80
+Failed: 0
+Rate:   100.0%
+
+✓ All tests passed!
+```
+
+---
+
+## 🧩 نمط الاختبار المشترك
+
+كل ملف اختبار يتبع نفس الهيكل:
+
+```javascript
+import 'dotenv/config.js';         // 1. تحميل المتغيرات
+import mongoose from 'mongoose';    // 2. الاعتماديات
+import { assert, logSection, printSummary } from './test.helpers.js';
+
+async function runTests() {
+  try {
+    // 3. الاتصال بقاعدة البيانات
+    await mongoose.connect(process.env.MONGODB_URL);
+
+    // 4. تنفيذ الاختبارات
+    logSection('القسم الأول');
+    assert(condition, 'وصف الاختبار');
+
+    // 5. تنظيف البيانات
+    logSection('CLEANUP');
+    // حذف كل بيانات الاختبار
+
+  } catch (error) {
+    console.error('Test error:', error);
+    process.exit(1);
+  } finally {
+    // 6. طباعة الملخص
+    printSummary();
+    await mongoose.disconnect();
+    process.exit(state.failed > 0 ? 1 : 0);
+  }
+}
+
+runTests();
+```
+
+**النقاط المهمة في هذا النمط:**
+- `dotenv/config.js` — يحمّل `.env` تلقائياً
+- `try/catch/finally` — يضمن التنظيف حتى لو حدث خطأ
+- `process.exit(1)` عند الفشل — يُنبه CI/CD بفشل الاختبارات
+- كل ملف ينظّف بياناته — لا يترك بيانات وهمية في قاعدة البيانات
+
+---
+
+## 📊 مقارنة أنواع الاختبارات
+
+| النوع | الملف | العدد | ما يختبره | السرعة |
+|-------|-------|-------|-----------|--------|
+| **شامل** | comprehensive | 80 | كل شيء معاً | ⚡ سريع |
+| **مستودعات** | repositories | 44 | CRUD فقط | ⚡ سريع |
+| **تكامل** | integration | 45 | + تخزين + ملفات | 🕐 متوسط |
+| **E2E** | api | 63 | HTTP حقيقي | 🕐 متوسط |
+
+### متى تستخدم أي نوع؟
+
+- **أضفت method جديد في Repository?** → `npm run test:repos`
+- **عدّلت Storage Strategy?** → `npm run test:integration`
+- **عدّلت Route أو Controller?** → `npm run test:e2e`
+- **قبل الـ commit?** → `npm run test:all`
+
+---
+
+## 🎯 النقاط المهمة
+
+✅ **إطار مخصص** — بسيط وبدون اعتماديات خارجية
+✅ **`assert()` لا يوقف التنفيذ** — يسجّل النتيجة ويكمل
+✅ **كل ملف مستقل** — يمكن تشغيله وحده
+✅ **التنظيف التلقائي** — كل ملف يحذف بياناته
+✅ **Process exit codes** — `0` = نجاح، `1` = فشل (مهم لـ CI/CD)
+✅ **232 اختبار** بنسبة نجاح **100%**

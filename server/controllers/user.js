@@ -1,149 +1,132 @@
-import 'dotenv/config';
 import { StatusCodes } from 'http-status-codes';
-import User from '../models/User.js';
-import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { io } from '../index.js';
-import fs from 'fs';
-import path from 'path';
+import { createToken } from '../utils/jwt.js';
+import { getIO } from '../utils/socket.js';
+import { getRepositoryManager } from '../repositories/index.js';
+import { getStorageService } from '../services/storage/storage.service.js';
+import {
+  validateRegisterInput,
+  validateLoginInput,
+  validateUpdateUserInput,
+} from '../validators/user.validator.js';
 
-const secretKey = process.env.JWT_SECRET;
-const hostname = process.env.hostname || 'localhost';
-const port = process.env.PORT || 5000;
-
+const repos = getRepositoryManager();
 
 export const register = async (req, res) => {
-    const { firstName, lastName, email, password, confirmPassword } = req.body;
+  const { firstName, lastName, email, password, confirmPassword } = req.body;
 
-    const existingUser = await User.findOne({ email });
-    const hashedPassword = await bcrypt.hash(password, 10);
-    // token must be generated from the created user's _id, not the model
-    // we'll generate it after creating the user to ensure we have the id
-    const defaultPicture = `http://${hostname}:${port}/uploads/default-picture.jpg`;
+  // Validate input before any DB or crypto operations
+  validateRegisterInput({ firstName, lastName, email, password, confirmPassword });
 
-    if (existingUser) {
-        return res.status(400).json({ message: 'User already exists' });
-    };
+  // Check email uniqueness before hashing
+  const emailTaken = await repos.user.emailExists(email);
+  if (emailTaken) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: 'هذا البريد الإلكتروني مسجل بالفعل' });
+  }
 
-    if (password !== confirmPassword) {
-        return res.status(400).json({ message: 'Passwords do not match' });
-    };
+  const hashedPassword = await bcrypt.hash(password, 10);
+  const storage = getStorageService();
+  const defaultPicture = storage.getFileUrl('default-picture.jpg');
 
-    const newUser = await User.create({
-        firstName,
-        lastName,
-        email,
-        password: hashedPassword,
-        profilePicture: defaultPicture
-    });
+  const newUser = await repos.user.createUser({
+    firstName,
+    lastName,
+    email,
+    password: hashedPassword,
+    profilePicture: defaultPicture,
+  });
 
-    newUser.password = undefined;
-    io.emit('user_created', newUser);
+  getIO().emit('user_created', newUser);
 
-    // Now that we have the newUser, sign token with its _id
-    const token = jwt.sign({ userId: newUser._id }, secretKey);
+  const token = createToken(newUser._id);
 
-    res.status(StatusCodes.CREATED).json({
-        message: 'User registered successfully',
-        user: newUser,
-        accessToken: token
-    });
+  res.status(StatusCodes.CREATED).json({
+    message: 'User registered successfully',
+    user: newUser,
+    accessToken: token,
+  });
 };
 
 export const login = async (req, res) => {
-    const { email, password } = req.body;
+  const { email, password } = req.body;
 
-    const user = await User.findOne({ email });
-    if (!user) {
-        return res.status(400).json({ message: 'User does not exist' });
-    };
+  validateLoginInput({ email, password });
 
-    const isPasswordCorrect = await bcrypt.compare(password, user.password);
-    if (!isPasswordCorrect) {
-        return res.status(400).json({ message: 'Invalid credentials' });
-    };
+  const user = await repos.user.findByEmail(email);
+  if (!user) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'المستخدم غير موجود' });
+  }
 
-    user.password = undefined;
+  const isPasswordCorrect = await bcrypt.compare(password, user.password);
+  if (!isPasswordCorrect) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'بيانات الدخول غير صحيحة' });
+  }
 
-    const token = jwt.sign({ userId: user._id }, secretKey);
-    res.status(StatusCodes.OK).json({
-        message: 'Login successful',
-        user,
-        accessToken: token
-    });
+  user.password = undefined;
+  const token = createToken(user._id);
+
+  res.status(StatusCodes.OK).json({
+    message: 'Login successful',
+    user,
+    accessToken: token,
+  });
 };
 
-
 export const getProfile = async (req, res) => {
-    const userId = req.userId;
-    const user = await User.findById(userId);
-
-    user.password = undefined;
-
-    res.status(StatusCodes.OK).json(user);
+  const user = await repos.user.findByIdSafe(req.userId);
+  if (!user) {
+    return res.status(StatusCodes.NOT_FOUND).json({ message: 'المستخدم غير موجود' });
+  }
+  res.status(StatusCodes.OK).json(user);
 };
 
 export const getUsers = async (req, res) => {
-    const users = await User.find({ _id: { $ne: req.userId } }).select(
-        "-password"
-    );
-
-    res.status(StatusCodes.OK).json(users);
+  const users = await repos.user.findAllExcept(req.userId);
+  res.status(StatusCodes.OK).json(users);
 };
 
 export const updateUser = async (req, res) => {
-    const userId = req.userId;
-    const { firstName, lastName, status } = req.body;
+  const { firstName, lastName, status } = req.body;
 
-    const user = await User.findByIdAndUpdate(
-        userId,
-        { firstName, lastName, status },
-        { new: true }
-    );
+  validateUpdateUserInput({ firstName, lastName, status });
 
-    user.password = undefined;
-    io.emit("user_updated", user);
+  const user = await repos.user.updateProfile(req.userId, { firstName, lastName, status });
+  if (!user) {
+    return res.status(StatusCodes.NOT_FOUND).json({ message: 'المستخدم غير موجود' });
+  }
 
-    res.status(StatusCodes.OK).json(user);
+  getIO().emit('user_updated', user);
+  res.status(StatusCodes.OK).json(user);
 };
 
 export const updateProfilePicture = async (req, res) => {
-    const userId = req.userId;
-    const newFileUrl = `http://${hostname}:${port}/uploads/${req.file?.filename}`;
+  if (!req.file) {
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'يجب رفع صورة' });
+  }
 
-    // احصل على رابط الصورة القديمة قبل التحديث لمحاولة حذفها لاحقاً
-    const previous = await User.findById(userId).select('profilePicture');
+  const storage = getStorageService();
 
-    const user = await User.findByIdAndUpdate(
-        userId,
-        { profilePicture: newFileUrl },
-        { new: true }
-    );
+  // Upload new picture via storage service
+  const uploadResult = await storage.uploadFile(req.file);
+  const newFileUrl = uploadResult.url;
 
-    user.password = undefined;
-    io.emit("user_updated", user);
+  const { previousPicture, user } = await repos.user.updateProfilePicture(
+    req.userId,
+    newFileUrl
+  );
 
-    // حذف الصورة القديمة من النظام إن لم تكن هي الصورة الافتراضية
-    try {
-        const oldUrl = previous?.profilePicture;
-        
-        if (oldUrl) {
-            const urlObj = new URL(oldUrl);
-            const oldFileName = path.basename(urlObj.pathname); // e.g. default-picture.jpg أو اسم فريد
+  if (!user) {
+    return res.status(StatusCodes.NOT_FOUND).json({ message: 'المستخدم غير موجود' });
+  }
 
-            if (oldFileName && oldFileName !== 'default-picture.jpg') {
-                const oldFilePath = path.join(process.cwd(), 'public', 'uploads', oldFileName);
-                
-                await fs.promises.unlink(oldFilePath).catch((err) => {
-                    if (err?.code !== 'ENOENT') {
-                        console.error('Failed to delete old profile picture:', err.message);
-                    };
-                });
-            };
-        };
-    } catch (err) {
-        console.error('Error while cleaning old profile picture:', err?.message || err);
-    };
+  getIO().emit('user_updated', user);
 
-    res.status(StatusCodes.OK).json(user);
+  // Delete old profile picture via storage service (skip default)
+  if (previousPicture) {
+    await storage.deleteFile(previousPicture);
+  }
+
+  res.status(StatusCodes.OK).json(user);
 };

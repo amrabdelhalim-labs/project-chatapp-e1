@@ -1,35 +1,40 @@
-import "dotenv/config";
-import jwt from "jsonwebtoken";
+import { StatusCodes } from 'http-status-codes';
+import { verifyToken } from '../utils/jwt.js';
 
 export default function isAuthenticated(req, res, next) {
-  // Support standard 'Authorization: Bearer <token>' header
   const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : authHeader;
+  const token =
+    authHeader && authHeader.startsWith('Bearer ')
+      ? authHeader.split(' ')[1]
+      : authHeader;
 
   if (!token) {
-    return res.status(401).json({ message: "Authentication invalid" });
+    return res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json({ message: 'التوثيق غير صالح' });
   }
 
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = verifyToken(token);
     req.userId = payload.userId;
     next();
   } catch (error) {
-    return res.status(401).json({ message: "Authentication invalid" });
+    return res
+      .status(StatusCodes.UNAUTHORIZED)
+      .json({ message: 'التوثيق غير صالح' });
   }
-};
+}
 
 export const isSocketAuthenticated = (socket, next) => {
   if (!socket.handshake.query || !socket.handshake.query.token) {
-    return next(new Error("Authentication invalid"));
-  };
+    return next(new Error('التوثيق غير صالح'));
+  }
 
   try {
-    const data = jwt.verify(socket.handshake.query.token, process.env.JWT_SECRET);
-
+    const data = verifyToken(socket.handshake.query.token);
     socket.userId = data.userId;
     next();
   } catch (error) {
     next(error);
-  };
+  }
 };
