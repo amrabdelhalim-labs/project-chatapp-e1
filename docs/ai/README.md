@@ -22,8 +22,10 @@ This directory contains machine-facing documentation for AI assistants working o
 - **Web Client:** React 19 + Zustand + Axios interceptors + Formik/Yup + Tailwind CSS
 - **Server Testing:** Custom runner, 232 server tests (4 test suites)
 - **Web Testing:** Jest + Testing Library, 99 web tests (5 test suites)
+- **Mobile Testing:** Jest 29 + jest-expo 54, 83 mobile tests (4 test suites)
+- **Total Tests:** 414 (232 server + 99 web + 83 mobile)
 - **Deployment:** Heroku-ready with Procfile
-- **Tutorials:** 9 server tutorials + 5 client tutorials (Arabic) in `docs/tutorials/`
+- **Tutorials:** 9 server tutorials + 5 web tutorials + 5 mobile tutorials (Arabic) in `docs/tutorials/`
 
 ## Test Commands
 
@@ -45,6 +47,15 @@ npm run test:ci          # single run (CI/servers)
 # 99 tests across 5 suites — all pass
 ```
 
+### Mobile (Jest 29 + jest-expo 54)
+```bash
+cd app
+npm test                 # watch mode (development)
+npm run test:ci          # single run (CI/servers)
+npx jest --watchAll=false --verbose  # verbose output
+# 83 tests across 4 suites — all pass
+```
+
 ## Environment Variables
 
 | Variable | Package | Required | Default | Description |
@@ -54,6 +65,7 @@ npm run test:ci          # single run (CI/servers)
 | JWT_SECRET | server | Yes | — | JWT signing secret |
 | STORAGE_TYPE | server | No | local | Storage backend (local/cloudinary/s3) |
 | REACT_APP_API_URL | web | No | — | Server URL for Axios |
+| API_URL | app | Yes | — | Server URL via `@env` (react-native-dotenv) |
 
 ## Critical Rules
 
@@ -62,6 +74,10 @@ npm run test:ci          # single run (CI/servers)
 - Chat content rendered via `whitespace-pre-wrap` text, never `dangerouslySetInnerHTML`
 - Typing state stores `senderId` (scoped), not a boolean
 - `seen` event is bidirectional: `{ readerId, senderId }`
-- Axios interceptor auto-injects Bearer token + redirects on 401
-- `safeParse()`/`safeGet()` wrappers guard localStorage from corrupt values
+- Axios interceptor auto-injects Bearer token + redirects on 401 (both web and mobile)
+- `safeParse()`/`safeGet()` wrappers guard localStorage from corrupt values (web)
 - `addMessage()` deduplicates by `_id` then `clientId` (optimistic updates)
+- Mobile uses `axios.create()` instance (not `axios.defaults.baseURL`)
+- Mobile `logout()` clears both AsyncStorage and Zustand store
+- Mobile babel plugins (dotenv + reanimated) excluded in test env
+- Mobile must use Jest 29 (not 30) — jest-expo 54 incompatibility

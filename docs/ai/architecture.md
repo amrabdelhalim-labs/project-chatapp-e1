@@ -110,6 +110,54 @@ web/
 6. **Bidirectional Read Receipts:** `seen` event carries `{ readerId, senderId }` — works for both the reader (mark incoming as read) and sender (mark outgoing as read).
 7. **Safe localStorage:** `safeParse()` / `safeGet()` wrappers handle corrupt/null/undefined values with try-catch.
 
+## Mobile App Architecture
+
+```
+app/
+├── package.json                # Expo ~54, React Native 0.81.5, React 19, Zustand, Axios, Socket.IO
+├── App.js                      # Entry: hydrateStore → NativeBaseProvider + BackHandler
+├── navigation.js               # Stack Navigator (Login, Register, Home → Tab Navigator)
+├── babel.config.js             # babel-preset-expo + dotenv/reanimated (excluded in test env)
+├── .env                        # API_URL=http://localhost:5000
+├── libs/
+│   ├── globalState.js          # Zustand store + AsyncStorage persistence (not localStorage)
+│   ├── requests.js             # axios.create() + interceptors (token from Zustand, 401→logout)
+│   └── filterMessages.js       # getReceiverMessages() — same logic as web
+├── screens/
+│   ├── login.js                # Formik + Yup login form
+│   ├── register.js             # Formik + Yup registration form
+│   └── home/
+│       ├── index.js            # Socket.IO connection, event listeners, Tab Navigator
+│       ├── chat.js             # Friends list (FlatList) → navigate to messages
+│       ├── messages.js         # Chat screen — send/receive/seen/typing
+│       └── profile.js          # Profile picture (expo-image-picker), EditUserModal
+├── components/
+│   ├── Header.js               # Green header bar + logout button
+│   ├── EditUserModal.js        # NativeBase Modal + Formik form
+│   └── Chat/                   # (Additional chat sub-components)
+└── tests/
+    ├── __mocks__/
+    │   ├── @env.js                              # { API_URL: "http://localhost:5000" }
+    │   └── @react-native-async-storage/
+    │       └── async-storage.js                 # In-memory Map mock
+    ├── globalState.test.js                      # 25 tests — store + AsyncStorage
+    ├── filterMessages.test.js                   # 7 tests — pure function
+    ├── requests.test.js                         # 27 tests — Axios + interceptors + API
+    └── integration.test.js                      # 28 tests — Socket.IO event flow
+```
+
+### Mobile Key Patterns
+
+1. **axios.create() Instance:** `requests.js` uses `axios.create({ baseURL })` (not `axios.defaults.baseURL`) — avoids global side effects.
+2. **Token from Zustand:** Request interceptor reads `useStore.getState().accessToken` — no manual token passing needed in API calls.
+3. **AsyncStorage Persistence:** `setUser()` and `setAccessToken()` are async — they `await AsyncStorage.setItem()`. The `hydrateStore()` in `App.js` reads from AsyncStorage on app launch.
+4. **401 → Logout:** Response interceptor calls `logout()` which clears both AsyncStorage (3 keys) and Zustand store.
+5. **Scoped Typing:** Same as web — `typing` stores `senderId`, `clearTyping(id)` only clears if the same sender.
+6. **Bidirectional Seen:** Same as web — `seen` event carries `{ readerId, senderId }`.
+7. **FormData for React Native:** `updateProfilePicture(uri)` builds FormData with `{ uri, name, type }` (not a File blob like web).
+8. **No XSS Risk:** React Native renders text via `<Text>` component — no HTML injection possible.
+9. **Immutable Updates:** `addFriend()` and `updateFriend()` create new array copies; `updateFriend()` has bounds check (`if (index === -1) return`).
+
 ## Data Flow
 
 ### Authentication
@@ -203,3 +251,27 @@ npm run test:ci          # single run, no watch (CI/servers)
 - **react-router v7 moduleNameMapper:** `package.json` jest config maps `react-router-dom`, `react-router`, and `react-router/dom` to dist files because CRA's Jest can't resolve `exports` field
 - **transformIgnorePatterns:** react-router packages are transformed (not ignored) since they use ESM internally
 - **No real server needed:** All web tests mock Axios and Socket.IO — they run without a backend
+
+### Mobile Tests (83 tests — Jest 29 + jest-expo 54)
+
+| File | Tests | Level | What It Tests |
+|------|-------|-------|---------------|
+| `globalState.test.js` | 25 | Unit | Zustand store + AsyncStorage sync (auth, friends, messages, typing) |
+| `filterMessages.test.js` | 7 | Unit | `getReceiverMessages()` bidirectional filtering |
+| `requests.test.js` | 27 | Unit+Integration | Axios instance + interceptors + all API functions + integration scenarios |
+| `integration.test.js` | 28 | Integration | Socket.IO event flows (messages, seen, typing, broadcasts, isolation, multi-event) |
+
+```bash
+cd app
+npm test                 # watch mode (development)
+npm run test:ci          # single run, no watch (CI/servers)
+npx jest --watchAll=false --verbose  # verbose output
+```
+
+### Mobile Test Infrastructure Notes
+
+- **Jest 29 required:** jest-expo 54 is incompatible with Jest 30 (`__ExpoImportMetaRegistry` error)
+- **Babel plugin exclusion:** Both `react-native-dotenv` and `react-native-reanimated/plugin` are excluded when `NODE_ENV === "test"` — dotenv would inline real .env values (bypassing moduleNameMapper mock), reanimated requires worklets plugin
+- **moduleNameMapper:** Maps `^@env$` to `tests/__mocks__/@env.js` (exports `API_URL = "http://localhost:5000"`)
+- **AsyncStorage mock:** In-memory Map-based mock in `tests/__mocks__/@react-native-async-storage/async-storage.js`
+- **No real server needed:** All mobile tests mock Axios and AsyncStorage — they run without a backend

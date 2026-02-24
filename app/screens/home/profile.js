@@ -8,7 +8,7 @@ import { updateProfilePicture } from "../../libs/requests";
 import { API_URL } from "@env";
 
 export default function Profile() {
-  const { user, accessToken, setUser } = useStore();
+  const { user, setUser } = useStore();
   const firstName = user?.firstName;
   const lastName = user?.lastName;
   const email = user?.email;
@@ -68,7 +68,7 @@ export default function Profile() {
         const localUri = result.assets[0].uri;
         setFile(localUri);
         try {
-          const updatedUser = await updateProfilePicture(accessToken, localUri);
+          const updatedUser = await updateProfilePicture(localUri);
           if (updatedUser?.profilePicture) {
             setUser(updatedUser);
             setFile(updatedUser.profilePicture);

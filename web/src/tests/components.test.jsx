@@ -3,6 +3,7 @@
 // يختبر: عرض المكونات + تفاعلها مع المخزن والتوجيه
 // ─────────────────────────────────────────────────────────────────
 
+/* eslint-disable testing-library/no-node-access, testing-library/no-container, testing-library/no-wait-for-multiple-assertions */
 import { render, screen, waitFor } from "@testing-library/react";
 import { createMemoryRouter, RouterProvider } from "react-router-dom";
 import { useStore } from "../libs/globalState";

@@ -5,8 +5,8 @@ import { updateUser } from "../libs/requests"; // استيراد دالة update
 import { useStore } from "../libs/globalState"; // استيراد useStore للوصول إلى الحالة العالمية وتحديثها
 
 export default function EditUserModal({ modalVisible, closeModal }) {
-  // الحصول على رمز الوصول وبيانات المستخدم من الحالة العالمية
-  const { accessToken, user, setUser } = useStore();
+  // الحصول على بيانات المستخدم من الحالة العالمية
+  const { user, setUser } = useStore();
 
   // إعداد useFormik لإدارة حالة النموذج والتحقق من صحة البيانات
   const formik = useFormik({
@@ -23,7 +23,7 @@ export default function EditUserModal({ modalVisible, closeModal }) {
     }),
     async onSubmit(values) {
       // دالة لإرسال بيانات النموذج المحدثة إلى الخادم وتحديث الحالة العالمية
-      const user = await updateUser(accessToken, values);
+      const user = await updateUser(values);
       setUser(user); // تحديث بيانات المستخدم في الحالة العالمية
       closeModal(); // إغلاق النافذة بعد التحديث
     },

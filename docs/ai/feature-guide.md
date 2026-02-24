@@ -135,6 +135,27 @@ Both web and mobile use Zustand with persistence:
 // All API functions use this instance — no manual Authorization headers needed
 ```
 
+### Axios Interceptors (mobile)
+
+```javascript
+// requests.js creates axios instance with axios.create({ baseURL: API_URL }):
+// 1. Request interceptor: auto-inject Bearer token from useStore.getState().accessToken
+// 2. Response interceptor: 401 → logout() (clears AsyncStorage + Zustand store)
+// Token comes from Zustand (not storage) — no manual Authorization headers needed
+// login()/register() wrapped in try/catch with error normalization: { error: "message" }
+```
+
+### Key Differences: Web vs Mobile State
+
+| Aspect | Web | Mobile |
+|--------|-----|--------|
+| **Storage** | localStorage (synchronous) | AsyncStorage (async) |
+| **Token Source** | localStorage via safeParse/safeGet | Zustand store (populated from AsyncStorage on hydration) |
+| **401 Response** | Redirect to /login | logout() → clear AsyncStorage + store |
+| **Startup** | Read localStorage inline | `hydrateStore()` in App.js (async) |
+| **Safe Guards** | `safeParse()`/`safeGet()` | Not needed (AsyncStorage API is typed) |
+| **FormData** | `new File(blob, name)` | `{ uri, name, type }` object |
+
 ## Error Handling
 
 - Validators throw errors with `statusCode: 400` and Arabic messages
@@ -183,6 +204,31 @@ npm run test:ci      # single run (CI/servers)
 - Use `createMemoryRouter` + `RouterProvider` for routing tests
 - `setupTests.js` polyfills `TextEncoder` for react-router v7 + jsdom
 
+### Mobile Tests (83 tests — Jest 29 + jest-expo 54, no backend needed)
+
+```bash
+cd app
+npm test             # watch mode (development)
+npm run test:ci      # single run (CI/servers)
+npx jest --watchAll=false --verbose  # verbose output
+```
+
+| File | Tests | What It Tests |
+|------|-------|---------------|
+| `globalState.test.js` | 25 | Zustand store + AsyncStorage sync (auth, friends, messages, typing) |
+| `filterMessages.test.js` | 7 | Message filtering (same logic as web) |
+| `requests.test.js` | 27 | Axios instance + interceptors + API functions + integration scenarios |
+| `integration.test.js` | 28 | Socket.IO event flows + conversation isolation + multi-event + guards |
+
+**Mobile test patterns:**
+- Must use Jest 29 (not 30) — jest-expo 54 incompatible with Jest 30
+- Babel plugins (dotenv + reanimated) excluded in test env via `NODE_ENV` check
+- `moduleNameMapper` maps `@env` to `tests/__mocks__/@env.js`
+- AsyncStorage mocked with in-memory Map in `tests/__mocks__/@react-native-async-storage/async-storage.js`
+- Mock Axios with `jest.mock('axios')` factory (same pattern as web)
+- Use `renderHook()` + `act()` for async store testing with AsyncStorage
+- Socket.IO events simulated by calling Zustand actions directly
+
 ### Adding Tests for a New Feature
 
 **Server:** Add assertions to `comprehensive.test.js` in the appropriate phase, or create targeted tests in `repositories.test.js`.
@@ -192,3 +238,9 @@ npm run test:ci      # single run (CI/servers)
 - API calls → `requests.test.js`
 - Socket events → `integration.test.js`
 - UI rendering → `components.test.jsx`
+
+**Mobile:** Same file organization as web:
+- Store logic + AsyncStorage → `globalState.test.js`
+- Axios/API calls → `requests.test.js`
+- Socket events → `integration.test.js`
+- Message filtering → `filterMessages.test.js`

@@ -2,11 +2,12 @@
 
 ## نظرة عامة
 
-يستخدم المشروع نظامين للاختبار:
+يستخدم المشروع ثلاثة أنظمة للاختبار:
 - **الخادم:** نظام اختبارات مخصص بدون مكتبات خارجية — 4 ملفات اختبار (232 اختبار)
 - **الويب:** Jest + @testing-library/react — 5 ملفات اختبار (99 اختبار)
+- **الموبايل:** Jest + jest-expo + @testing-library/react-native — 4 ملفات اختبار (83 اختبار)
 
-**إجمالي الاختبارات:** 331 اختبار (232 خادم + 99 ويب)
+**إجمالي الاختبارات:** 414 اختبار (232 خادم + 99 ويب + 83 موبايل)
 
 ---
 
@@ -42,6 +43,23 @@ npm run test:ci
 ```
 
 **المتطلبات:** لا يحتاج خادم — جميع الاختبارات تستخدم mocks
+
+### الموبايل
+
+```bash
+cd app
+
+# وضع المراقبة (للتطوير)
+npm test
+
+# تشغيل واحد بدون مراقبة (للخوادم و CI)
+npm run test:ci
+
+# تشغيل مع تفاصيل
+npx jest --watchAll=false --verbose
+```
+
+**المتطلبات:** لا يحتاج خادم — جميع الاختبارات تستخدم mocks (Jest 29 + jest-expo 54)
 
 ---
 
@@ -378,3 +396,164 @@ import "@testing-library/jest-dom";
 | `Cannot find module react-router-dom` | تحقق من `moduleNameMapper` في `package.json` |
 | `Cannot find module react-router/dom` | أضف مسار subpath في `moduleNameMapper` |
 | الاختبارات لا تنتهي (watch mode) | استخدم `npm run test:ci` بدلاً من `npm test` |
+
+---
+
+---
+
+# اختبارات الموبايل
+
+## نظرة عامة
+
+يستخدم تطبيق الموبايل **Jest 29** مع **jest-expo 54** و **@testing-library/react-native** — 4 ملفات اختبار تغطي المنطق والتكامل.
+
+**إجمالي الاختبارات:** 83 اختبار (25 + 7 + 27 + 28)
+
+⚠️ **ملاحظة**: Jest 30 غير متوافق مع jest-expo 54 — يجب استخدام Jest 29.
+
+---
+
+## هيكل الاختبارات
+
+```
+app/tests/
+├── __mocks__/
+│   ├── @env.js                                    # محاكاة متغيرات البيئة
+│   └── @react-native-async-storage/
+│       └── async-storage.js                       # محاكاة AsyncStorage
+├── globalState.test.js                            # متجر Zustand + AsyncStorage (25 اختبار)
+├── filterMessages.test.js                         # تصفية الرسائل (7 اختبارات)
+├── requests.test.js                               # Axios + Interceptors + API (27 اختبار)
+└── integration.test.js                            # تدفق أحداث Socket.IO (28 اختبار)
+```
+
+---
+
+## ملف 1: اختبارات المتجر (`globalState.test.js`)
+
+**25 اختبار** — يختبر جميع عمليات متجر Zustand مع مزامنة AsyncStorage.
+
+| القسم | الوصف | العدد |
+|-------|-------|------|
+| القيم الأولية | التأكد من القيم الافتراضية | 1 |
+| المصادقة | `setUser` + `setAccessToken` + `logout` + AsyncStorage | 5 |
+| الأصدقاء | `setFriends` + `addFriend` + `updateFriend` (immutable) | 3 |
+| الرسائل | `addMessage` (عادي + `clientId` + `_id` dedup) + ترتيب | 4 |
+| القراءة | `markMyMessagesSeen` + `markMessagesSeenFromSender` (ثنائي) | 4 |
+| الكتابة | `setTyping` + `clearTyping` (نفس/مختلف + null guards) | 4 |
+| المستقبل الحالي | `setCurrentReceiver` + null | 2 |
+| حقل الإدخال | `setInput` + مسح | 2 |
+
+---
+
+## ملف 2: اختبارات تصفية الرسائل (`filterMessages.test.js`)
+
+**7 اختبارات** — يختبر دالة `getReceiverMessages()` النقية.
+
+| الاختبار | الوصف |
+|---------|-------|
+| تصفية A↔B | الرسائل المتبادلة بين مستخدمين فقط |
+| تصفية A↔C | تغيير الطرف الآخر |
+| مصفوفة فارغة | بدون رسائل |
+| مستخدم غير موجود | لا يتطابق أي طرف |
+| ترتيب المعاملات | النتيجة ثابتة بتبديل المعاملات |
+| استبعاد الأطراف الأخرى | رسائل مستخدم ثالث لا تظهر |
+| قيم null/undefined | معالجة آمنة |
+
+---
+
+## ملف 3: اختبارات الطلبات (`requests.test.js`)
+
+**27 اختبار** — يختبر Axios instance + interceptors + جميع دوال API.
+
+| القسم | الوصف | العدد |
+|-------|-------|------|
+| الإعداد | `axios.create` + تسجيل interceptors | 3 |
+| Request Interceptor | حقن التوكن + بدون توكن | 3 |
+| Response Interceptor | نجاح + 401→logout + خطأ عام + خطأ شبكة + مسح AsyncStorage | 5 |
+| المصادقة | `login` + `register` (نجاح + فشل + خطأ شبكة) | 6 |
+| الدوال المحمية | `getProfile` + `getUsers` + `updateUser` + `updateProfilePicture` + `createMessage` + `getMessages` + FormData | 7 |
+| سيناريوهات تكاملية | دخول→توكن→interceptor + 401→مسح جلسة + خطأ شبكة→تمرير | 3 |
+
+---
+
+## ملف 4: الاختبارات التكاملية (`integration.test.js`)
+
+**28 اختبار** — يختبر تدفق أحداث Socket.IO الكامل عبر محاكاة الأحداث مع متجر Zustand.
+
+| القسم | الوصف | العدد |
+|-------|-------|------|
+| تدفق الرسائل | إرسال تفاؤلي + تأكيد + وارد + متعدد + `_id` dedup | 4 |
+| إشعارات القراءة | `markMyMessagesSeen` + `markMessagesSeenFromSender` + تدفق كامل | 3 |
+| مؤشر الكتابة | `setTyping` + `clearTyping` (نفس/مختلف) + تبديل محادثة + نطاق | 6 |
+| بث المستخدمين | `addFriend` + `updateFriend` + `setUser` + `currentReceiver` update | 5 |
+| تدفق شامل | سيناريو كامل + محادثتين متوازيتين | 2 |
+| AsyncStorage | حفظ/استعادة جلسة + خروج يمسح الكل | 2 |
+| عزل المحادثات | seen لا يؤثر على محادثة أخرى + messages معزولة | 2 |
+| أحداث متعددة | متزامنة + `clearTyping(undefined)` + `clearTyping(null)` guards | 3 |
+
+---
+
+## ما يُختبر (الموبايل)
+
+### متجر Zustand + AsyncStorage
+- جميع الإجراءات (setUser, setAccessToken, logout, addFriend, updateFriend, addMessage...)
+- مزامنة مع AsyncStorage (حفظ واستعادة)
+- **Immutable updates**: `addFriend` و `updateFriend` ينسخان المصفوفة
+- **Message deduplication**: عبر `clientId` (دمج) و `_id` (تجاهل)
+- **Bidirectional seen**: `markMyMessagesSeen` + `markMessagesSeenFromSender`
+- **Scoped typing**: `clearTyping(senderId)` يمسح فقط إذا تطابق المرسل
+
+### طبقة HTTP (Axios)
+- **Request Interceptor**: يحقن التوكن من `useStore.getState().accessToken`
+- **Response Interceptor**: 401 → `logout()` (مسح AsyncStorage + المتجر)
+- **Error normalization**: `login()`/`register()` تُرجع `{ error: "رسالة" }` عند الفشل
+- **FormData**: `updateProfilePicture(uri)` يبني FormData بنمط React Native (`{ uri, name, type }`)
+
+### تكامل Socket.IO (محاكاة)
+- الأحداث: `receive_message`, `typing`, `stop_typing`, `seen`, `user_created`, `user_updated`
+- عزل المحادثات: رسائل وإشعارات لا تؤثر على محادثات أخرى
+- حراسة undefined/null: `clearTyping(undefined)` لا يمسح حالة موجودة
+- تحديث `currentReceiver` عند `user_updated`
+
+---
+
+## إعداد بيئة اختبار الموبايل
+
+### Babel Configuration
+
+```javascript
+// babel.config.js — استبعاد plugins في بيئة الاختبار
+if (process.env.NODE_ENV !== "test") {
+  plugins.push(["module:react-native-dotenv", { ... }]);
+  plugins.push("react-native-reanimated/plugin");
+}
+```
+
+### Jest Configuration في `package.json`
+
+```json
+"jest": {
+  "preset": "jest-expo",
+  "testPathIgnorePatterns": ["/node_modules/", "/android/", "/ios/"],
+  "transformIgnorePatterns": [
+    "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nent)?|...)"
+  ],
+  "moduleNameMapper": {
+    "^@env$": "<rootDir>/tests/__mocks__/@env.js"
+  }
+}
+```
+
+---
+
+## استكشاف أخطاء اختبارات الموبايل
+
+| المشكلة | الحل |
+|---------|------|
+| `__ExpoImportMetaRegistry` | استخدم Jest 29 (ليس 30) |
+| `Cannot find module @env` | استبعد `react-native-dotenv` في test env في babel.config.js |
+| `Cannot find module worklets` | استبعد `react-native-reanimated/plugin` في test env |
+| `act() warning` | لف العمليات غير المتزامنة في `await act(async () => {})` |
+| اختبار يؤثر على آخر | أضف `beforeEach` لإعادة تعيين المتجر + `AsyncStorage.clear()` |
+| `SyntaxError: Unexpected token` | أضف المكتبة لـ `transformIgnorePatterns` |

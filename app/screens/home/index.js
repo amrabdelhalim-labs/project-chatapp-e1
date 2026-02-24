@@ -22,12 +22,14 @@ export default function Home() {
     setUser,
     updateFriend,
     setTyping,
+    clearTyping,
     addFriend,
     setCurrentReceiver,
     user,
     accessToken,
     currentReceiver,
     markMessagesSeenFromSender,
+    markMyMessagesSeen,
   } = useStore();
 
   useEffect(() => {
@@ -58,18 +60,22 @@ export default function Home() {
     });
 
     socket.on("typing", (senderId) => {
-      setTyping(senderId || true);
+      setTyping(senderId); // تخزين مُعرّف من يكتب بدلاً من قيمة منطقية
     });
 
-    socket.on("stop_typing", () => {
-      setTyping(null);
+    socket.on("stop_typing", (senderId) => {
+      clearTyping(senderId); // إيقاف الكتابة فقط إذا كان نفس الشخص
     });
 
-    socket.on("seen", (senderId) => {
-      // حدّث الحالة محلياً ليظهر تأثير القراءة فوراً
-      if (senderId && user?._id) {
+    socket.on("seen", ({ readerId, senderId }) => {
+      if (!user?._id) return;
+      if (user._id === readerId) {
+        // أنا القارئ — علّم الرسائل الواردة من المرسل كمقروءة
         markMessagesSeenFromSender(senderId, user._id);
-      };
+      } else if (user._id === senderId) {
+        // أنا المرسل — الطرف الآخر قرأ رسائلي
+        markMyMessagesSeen(user._id, readerId);
+      }
     });
 
     socket.on("user_updated", (updatedUser) => {
@@ -94,8 +100,8 @@ export default function Home() {
 
     const fetchData = async () => {
       try {
-        const users = await getUsers(accessToken);
-        const messages = await getMessages(accessToken);
+        const users = await getUsers();
+        const messages = await getMessages();
 
         setFriends(users);
         setMessages(messages);

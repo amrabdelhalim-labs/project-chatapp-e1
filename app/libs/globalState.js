@@ -14,6 +14,11 @@ export const useStore = create((set) => ({
   friends: null,
   typing: null,
   setTyping: (typing) => set({ typing }),
+  // إيقاف الكتابة فقط إذا كان نفس الشخص الذي يكتب حالياً
+  clearTyping: (senderId) =>
+    set(({ typing }) => ({
+      typing: typing === senderId ? null : typing,
+    })),
   setFriends: (friends) => set({ friends }),
   addFriend: (friend) =>
     set(({ friends }) => {
@@ -22,8 +27,10 @@ export const useStore = create((set) => ({
   updateFriend: (user) =>
     set(({ friends }) => {
       const index = friends.findIndex((f) => f._id === user._id);
-      friends[index] = user;
-      return { friends: [...friends] };
+      if (index === -1) return { friends };
+      const updated = [...friends];
+      updated[index] = user;
+      return { friends: updated };
     }),
 
   setUser: async (user) => {
@@ -43,6 +50,13 @@ export const useStore = create((set) => ({
     set(({ messages }) => ({
       messages: messages.map((m) =>
         m.sender === senderId && m.recipient === currentUserId ? { ...m, seen: true } : m
+      ),
+    })),
+  // تعليم رسائلي المُرسلة لمستلم محدد كمقروءة (عندما يقرأها الطرف الآخر)
+  markMyMessagesSeen: (myUserId, recipientId) =>
+    set(({ messages }) => ({
+      messages: messages.map((m) =>
+        m.sender === myUserId && m.recipient === recipientId ? { ...m, seen: true } : m
       ),
     })),
   addMessage: (message) => {

@@ -217,6 +217,34 @@ const useStore = create((set) => ({
 const { user, messages, addMessage } = useStore();
 ```
 
+**الفرق بين Web و Mobile:**
+- **الويب**: Zustand يُخزّن في `localStorage` (متزامن — `localStorage.setItem()`)
+- **الموبايل**: Zustand يُخزّن في `AsyncStorage` (غير متزامن — `await AsyncStorage.setItem()`)
+
+---
+
+### 2.1. **AsyncStorage (تخزين الموبايل)**
+- بديل `localStorage` في React Native
+- جميع العمليات **غير متزامنة** (async/await)
+- يُخزّن فقط **نصوص** (يجب `JSON.stringify`/`JSON.parse`)
+
+```javascript
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+// حفظ
+await AsyncStorage.setItem('user', JSON.stringify(user));
+
+// قراءة
+const stored = await AsyncStorage.getItem('user');
+const user = JSON.parse(stored);
+
+// حذف
+await AsyncStorage.removeItem('user');
+
+// مسح كل شيء
+await AsyncStorage.clear();
+```
+
 ---
 
 ### 3. **Socket.IO Client**
@@ -496,6 +524,9 @@ export const login = async (req, res) => {
 - **React**: https://react.dev/
 - **React Router**: https://reactrouter.com/
 - **React Native**: https://reactnative.dev/
+- **Expo**: https://docs.expo.dev/
+- **React Navigation**: https://reactnavigation.org/
+- **AsyncStorage**: https://react-native-async-storage.github.io/async-storage/
 - **Zustand**: https://zustand-demo.pmnd.rs/
 - **Axios**: https://axios-http.com/
 - **JWT**: https://jwt.io/
