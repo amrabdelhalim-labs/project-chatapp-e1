@@ -17,7 +17,7 @@ A **real-time chat application** with 1:1 messaging, typing indicators, read rec
 | 👤 **Profiles** | Update name, status, upload/change profile picture |
 | 📱 **Multi-Platform** | Web (React) + Mobile (Expo/React Native) + Shared Server |
 | 🗄️ **Flexible Storage** | Pluggable architecture: Local, Cloudinary, or AWS S3 |
-| 🧪 **Comprehensive Tests** | 414 tests across server, web, and mobile |
+| 🧪 **Comprehensive Tests** | 452 tests across server, web, and mobile |
 | 🎨 **Code Quality** | Prettier formatting + LF normalization + Contributing standards |
 
 ---
