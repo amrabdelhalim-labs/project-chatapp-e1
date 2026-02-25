@@ -1,0 +1,178 @@
+name: Build & Deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "What to deploy?"
+        type: choice
+        required: true
+        default: both
+        options:
+          - both
+          - server
+          - web
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-and-deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy-server:
+    name: Deploy Server
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && (inputs.target == 'server' || inputs.target == 'both'))
+
+    services:
+      mongodb:
+        image: mongo:7-jammy
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+          cache-dependency-path: server/package-lock.json
+
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci
+
+      - name: Run server tests
+        working-directory: server
+        run: npm run test:all
+        env:
+          NODE_ENV: test
+          JWT_SECRET: test_jwt_secret_key_for_ci_testing_only_32chars
+          MONGODB_URL: mongodb://localhost:27017/test_chatapp_db
+
+      - name: Push to server branch
+        run: |
+          set -euo pipefail
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name  "github-actions[bot]"
+
+          mkdir -p /tmp/server-deploy
+          cp -r server/* /tmp/server-deploy/
+          cp server/.env* /tmp/server-deploy/ 2>/dev/null || true
+          cp server/.prettier* /tmp/server-deploy/ 2>/dev/null || true
+          printf 'web: node index.js\n' > /tmp/server-deploy/Procfile
+
+          # Strip test/dev scripts and devDependencies for production
+          node -e "
+            const fs = require('fs');
+            const p = JSON.parse(fs.readFileSync('/tmp/server-deploy/package.json'));
+            delete p.scripts['test:all'];
+            delete p.scripts['test'];
+            delete p.scripts['test:repos'];
+            delete p.scripts['test:integration'];
+            delete p.scripts['test:e2e'];
+            delete p.scripts['format'];
+            delete p.scripts['format:check'];
+            delete p.devDependencies;
+            delete p.scripts.dev;
+            fs.writeFileSync('/tmp/server-deploy/package.json', JSON.stringify(p, null, 2));
+          "
+
+          git checkout --orphan server-new-clean
+          git rm -rf . --cached 2>/dev/null || true
+          find . -maxdepth 1 ! -name '.' ! -name '.git' -exec rm -rf {} + 2>/dev/null || true
+          cp -r /tmp/server-deploy/* .
+          git add -A
+
+          if [ -z "$(git diff --cached --name-only)" ]; then
+            echo "⏭️  No changes to deploy (server)"
+            exit 0
+          fi
+
+          git commit -m "deploy(server): $(date -u +'%Y-%m-%d %H:%M UTC') [skip ci]"
+          git branch -M server-new-clean server
+          git push origin server --force
+
+  deploy-web:
+    name: Deploy Web
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      (github.event_name == 'workflow_dispatch' && (inputs.target == 'web' || inputs.target == 'both'))
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install web dependencies
+        working-directory: web
+        run: npm ci
+
+      - name: Run web tests
+        working-directory: web
+        run: npm run test:ci
+
+      - name: Build web
+        working-directory: web
+        run: npm run build
+        env:
+          REACT_APP_API_URL: ${{ vars.REACT_APP_API_URL }}
+
+      - name: Verify build folder
+        run: |
+          set -euo pipefail
+          if [ ! -d "web/build" ]; then
+            echo "❌ Build failed: web/build not found"
+            exit 1
+          fi
+          echo "✅ Web build successful:"
+          du -sh web/build
+          find web/build -type f | wc -l
+
+      - name: Publish to web branch (clean orphan)
+        run: |
+          set -euo pipefail
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name  "github-actions[bot]"
+
+          mkdir -p /tmp/web-deploy
+          cp -r web/build/* /tmp/web-deploy/
+          touch /tmp/web-deploy/.nojekyll
+
+          git checkout --orphan web-new-clean
+          git rm -rf . --cached 2>/dev/null || true
+          find . -maxdepth 1 ! -name '.' ! -name '.git' -exec rm -rf {} + 2>/dev/null || true
+          cp -r /tmp/web-deploy/* .
+          git add -A
+
+          if [ -z "$(git diff --cached --name-only)" ]; then
+            echo "⏭️  No changes to deploy (web)"
+            exit 0
+          fi
+
+          git commit -m "deploy(web): $(date -u +'%Y-%m-%d %H:%M UTC') [skip ci]"
+          git branch -M web-new-clean web
+          git push origin web --force
