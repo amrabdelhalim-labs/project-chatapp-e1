@@ -45,9 +45,49 @@ socket.on("seen", ({ readerId, senderId }) => {
 {typing === currentReceiver._id ? "typing..." : currentReceiver.status}
 ```
 
-## Authentication Flow
+## Profile Picture Handling
+
+### Storage Layer (Server)
+
+All profile pictures are stored locally on the server in `server/public/uploads/`:
+
+| Flow | Details |
+|------|---------|
+| **Upload** | `POST /api/user/profile-picture` → multer → `LocalStorageStrategy.uploadFile()` |
+| **Returns** | `{ url: "/uploads/1234567890-abc123.jpg", filename: "1234567890-abc123.jpg" }` |
+| **Stored** | Relative path stored in `User.profilePicture` (DB) |
+| **Served** | `express.static('public')` makes `server/public/uploads/pic.jpg` available at `/uploads/pic.jpg` |
+| **Delete** | `LocalStorageStrategy.deleteFile()` removes file, skips `default-picture.jpg` |
+
+### Client-Side Image Resolution (Web)
+
+Profile pictures must be resolved intelligently to support multiple sources:
+
+```javascript
+// In Profile and Sidebar components
+const imageUrl = user.profilePicture 
+  ? (user.profilePicture.startsWith('http') 
+      ? user.profilePicture                           // Already absolute URL (e.g., from S3)
+      : `${process.env.REACT_APP_API_URL}${user.profilePicture}`)  // Relative path → prepend API URL
+  : `${process.env.REACT_APP_API_URL}/uploads/default-picture.jpg`  // Default fallback
+```
+
+**Why this matters:**
+- **Local development**: `REACT_APP_API_URL=http://localhost:5000` → images load from server
+- **Production on GitHub Pages**: Falls back to default if API unreachable
+- **Future expansion**: Supports Cloudinary/S3 absolute URLs without code change
+
+### Git Ignore for Local Uploads
 
 ```
+# .gitignore
+server/public/uploads/*      # Ignore user-uploaded files
+!server/public/uploads/.gitkeep  # Preserve directory structure
+!server/public/uploads/default-picture.jpg  # Keep default fallback image
+```
+
+---
+
 1. Client sends credentials → POST /api/user/login
 2. Server validates → findByEmail → bcrypt.compare
 3. Server creates JWT → createToken(userId) → 7-day expiry

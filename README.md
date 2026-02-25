@@ -309,6 +309,24 @@ cd web && npm run format
 - **Singleton Pattern** — `RepositoryManager` and `StorageService` instantiated once
 - **Validators** — Input validation with Arabic error messages, errors accumulated and thrown at once
 
+### Profile Picture Storage & Retrieval
+
+**Important:** Profile pictures are stored on the **server**, not bundled with the web app.
+
+| Step | Details |
+|------|---------|
+| **Upload** | Web sends `FormData` to `PUT /api/user/profile-picture` → multer → stored in `server/public/uploads/` |
+| **Storage** | Relative path (`/uploads/pic.jpg`) saved in `User.profilePicture` (MongoDB) |
+| **Retrieval (Web)** | Image URL constructed as: `${REACT_APP_API_URL}${user.profilePicture}` |
+| **Why?** | Allows image swap without rebuilding the web app; supports future CDN migration |
+
+**GitHub Pages Note:** Since GitHub Pages only serves static files (HTML/CSS/JS), profile pictures require a **real backend server**. When using GitHub Pages for the web:
+- Local dev: Images work (server running locally)
+- Production: GitHub Pages cannot add profile pictures (no server)
+- Future: Deploy server to Render/Railway/Heroku for full functionality
+
+
+
 ### Client Patterns (Web + Mobile)
 
 - **Zustand Store** — Shared state management with persistence (localStorage on web, AsyncStorage on mobile)

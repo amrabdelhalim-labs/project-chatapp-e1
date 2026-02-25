@@ -101,6 +101,20 @@ npm start
 ✅ Web build successful                   # دلالة النجاح
 ```
 
+### ملاحظة مهمة حول الصور (Profile Pictures)
+
+**الصور لا تظهر في GitHub Pages** لأن:
+- صور الملفات الشخصية مُخزنة على **الخادم** (`server/public/uploads/`)
+- GitHub Pages يخدم فقط **الواجهة الثابتة** (ملفات HTML/CSS/JS)
+- الروابط النسبية `/uploads/pic.jpg` لا تعمل في GitHub Pages
+
+**الحل:**
+1. الصور تُستدعى من **الخادم** باستخدام `REACT_APP_API_URL` 
+2. مثال: `https://api.example.com/uploads/pic.jpg` (الخادم الحقيقي)
+3. في GitHub Pages المحلي: الخادم المحلي يخدم الصور (`http://localhost:5000/uploads/pic.jpg`)
+
+
+
 ---
 
 ## التشغيل المحلي
