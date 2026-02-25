@@ -1,10 +1,10 @@
 // ─────────────────────────────────────────────────────────────────
-// اختبارات التكامل لطبقة HTTP (requests.js)
-// يختبر: Axios Instance + Interceptors + جميع دوال API
-// يتكامل مع: globalState.js (للتوكن وتسجيل الخروج), @env (محاكى)
+// Integration tests for the HTTP layer — requests.js
+// Tests: Axios Instance + Interceptors + all API functions
+// Integrates with: globalState.js (token + logout), @env (mocked)
 // ─────────────────────────────────────────────────────────────────
 
-// ─── إعداد Mock لـ Axios ─────────────────────────────────────────
+// ─── Axios Mock Setup ─────────────────────────────────────────────
 const mockApi = {
   get: jest.fn(),
   post: jest.fn(),
@@ -19,7 +19,7 @@ jest.mock('axios', () => ({
   create: jest.fn(() => mockApi),
 }));
 
-// ─── إعداد Mock لـ globalState ───────────────────────────────────
+// ─── globalState Mock Setup ────────────────────────────────────────
 const mockLogout = jest.fn(() => Promise.resolve());
 const mockGetState = jest.fn(() => ({
   accessToken: 'test-token-123',
@@ -30,7 +30,7 @@ jest.mock('../libs/globalState', () => ({
   useStore: { getState: mockGetState },
 }));
 
-// ─── استيراد الوحدة بعد إعداد المحاكاة ──────────────────────────
+// ─── Import module after mocks are set up ──────────────────────
 const axios = require('axios');
 const {
   register,
@@ -44,7 +44,7 @@ const {
 } = require('../libs/requests');
 
 // ═══════════════════════════════════════════════════════════════
-// 1. إعداد Axios Instance — Interceptors
+// 1. Axios Instance Setup — Interceptors
 // ═══════════════════════════════════════════════════════════════
 
 describe('إعداد Axios Instance — Interceptors', () => {
@@ -64,7 +64,7 @@ describe('إعداد Axios Instance — Interceptors', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 2. Request Interceptor — إضافة التوكن تلقائياً
+// 2. Request Interceptor — auto-attach the access token
 // ═══════════════════════════════════════════════════════════════
 
 describe('Request Interceptor — إضافة التوكن تلقائياً', () => {
@@ -95,7 +95,7 @@ describe('Request Interceptor — إضافة التوكن تلقائياً', () 
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 3. Response Interceptor — التعامل مع أخطاء الخادم
+// 3. Response Interceptor — server error handling (401 / 5xx)
 // ═══════════════════════════════════════════════════════════════
 
 describe('Response Interceptor — التعامل مع أخطاء الخادم', () => {
@@ -132,13 +132,13 @@ describe('Response Interceptor — التعامل مع أخطاء الخادم',
     mockLogout.mockClear();
     const error = { message: 'Network Error' };
     await expect(errorHandler(error)).rejects.toEqual(error);
-    // لا يستدعي logout لأنه ليس 401
+    // logout should NOT be called — status is not 401
     expect(mockLogout).not.toHaveBeenCalled();
   });
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 4. دوال المصادقة — تكامل مع نقاط نهاية الخادم
+// 4. Auth Functions — server endpoint integration
 // ═══════════════════════════════════════════════════════════════
 
 describe('دوال المصادقة — تكامل مع نقاط نهاية الخادم', () => {
@@ -235,7 +235,7 @@ describe('دوال المصادقة — تكامل مع نقاط نهاية ال
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 5. دوال API المحمية — Protected Endpoints
+// 5. Protected API Functions — require auth token
 // ═══════════════════════════════════════════════════════════════
 
 describe('دوال API المحمية — Protected Endpoints', () => {
@@ -318,8 +318,8 @@ describe('دوال API المحمية — Protected Endpoints', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 6. سيناريوهات تكاملية — Interceptor + API + Store
-// يحاكي: تدفقات واقعية بين طبقة HTTP والمتجر
+// 6. Integration Scenarios — Interceptor + API + Store
+// Simulates: real-world flows between the HTTP layer and the store
 // ═══════════════════════════════════════════════════════════════
 
 describe('سيناريوهات تكاملية — Interceptor + API', () => {
@@ -330,7 +330,7 @@ describe('سيناريوهات تكاملية — Interceptor + API', () => {
   });
 
   it('سيناريو: تسجيل دخول → تخزين توكن → طلب محمي بالتوكن', async () => {
-    // 1. تسجيل الدخول
+    // 1. Login
     const loginResponse = {
       user: { _id: 'u1', firstName: 'أحمد' },
       accessToken: 'fresh-jwt-token',
@@ -340,13 +340,13 @@ describe('سيناريوهات تكاملية — Interceptor + API', () => {
     const result = await login({ email: 'ahmed@test.com', password: '123456' });
     expect(result.accessToken).toBe('fresh-jwt-token');
 
-    // 2. محاكاة تخزين التوكن في المتجر (كما يفعل Login screen)
+    // 2. Simulate storing the token in the store (as the Login screen does)
     mockGetState.mockReturnValueOnce({
       accessToken: result.accessToken,
       logout: mockLogout,
     });
 
-    // 3. التحقق أن Interceptor سيضيف التوكن للطلب التالي
+    // 3. Verify the interceptor will attach the token to the next request
     const config = requestInterceptor({ headers: {} });
     expect(config.headers.Authorization).toBe('Bearer fresh-jwt-token');
   });
@@ -355,7 +355,7 @@ describe('سيناريوهات تكاملية — Interceptor + API', () => {
     const [, errorHandler] = mockApi.interceptors.response.use.mock.calls[0];
     mockLogout.mockClear();
 
-    // محاكاة استجابة 401 من الخادم (توكن منتهي الصلاحية)
+    // Simulate a 401 response from the server (expired token)
     const error = {
       response: { status: 401, data: { message: 'التوكن منتهي الصلاحية' } },
     };
@@ -366,7 +366,7 @@ describe('سيناريوهات تكاملية — Interceptor + API', () => {
       // متوقع — الخطأ يُرفض دائماً
     }
 
-    // تحقق: logout استُدعيت (تمسح AsyncStorage والمتجر)
+    // Verify: logout was called (it clears AsyncStorage and the store)
     expect(mockLogout).toHaveBeenCalledTimes(1);
   });
 
@@ -374,7 +374,7 @@ describe('سيناريوهات تكاملية — Interceptor + API', () => {
     const [, errorHandler] = mockApi.interceptors.response.use.mock.calls[0];
     mockLogout.mockClear();
 
-    // خطأ شبكة بدون response (مثل: الخادم غير متاح)
+    // Network error with no response (e.g., server unreachable)
     const error = { message: 'Network Error' };
 
     try {

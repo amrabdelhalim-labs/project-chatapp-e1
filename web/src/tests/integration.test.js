@@ -1,11 +1,11 @@
 import { useStore } from '../libs/globalState';
 
 // ─────────────────────────────────────────────────────────────────
-// اختبارات تكاملية — تدفق الأحداث بين العميل والخادم
-// يحاكي التسلسل الحقيقي لأحداث Socket.IO كما يحدث بين الخادم والعميل
+// Integration tests — client–server event flow
+// Simulates the real Socket.IO event sequence between server and client
 //
-// الخادم يبث:                     العميل يستقبل ويعالج:
-// ─────────────────────           ────────────────────────
+// Server broadcasts:               Client receives and handles:
+// ─────────────────────  ────────────────────────
 // receive_message(msg)    →       addMessage(msg) → store.messages
 // typing(senderId)        →       setTyping(senderId) → store.typing
 // stop_typing(senderId)   →       clearTyping(senderId) → store.typing
@@ -51,8 +51,7 @@ const resetStore = () => {
 beforeEach(resetStore);
 
 // ═══════════════════════════════════════════════════════════════
-// 1. تدفق الرسائل — Message Flow
-// يحاكي: send_message → الخادم ينشئ رسالة → receive_message
+// 1. Message Flow — send_message → server creates → receive_message
 // ═══════════════════════════════════════════════════════════════
 
 describe('تدفق الرسائل — Message Lifecycle', () => {
@@ -146,7 +145,7 @@ describe('تدفق الرسائل — Message Lifecycle', () => {
     const { messages } = useStore.getState();
     expect(messages).toHaveLength(3);
 
-    // التحقق من عزل الرسائل حسب المحادثة
+    // Verify isolation: each message belongs to the correct conversation
     const saraConversation = messages.filter(
       (m) =>
         (m.sender === USERS.sara._id && m.recipient === USERS.me._id) ||
@@ -182,7 +181,7 @@ describe('تدفق الرسائل — Message Lifecycle', () => {
 
     const { messages } = useStore.getState();
     expect(messages).toHaveLength(1);
-    expect(messages[0].seen).toBe(true); // التحديث تم
+    expect(messages[0].seen).toBe(true); // update applied
   });
 });
 
@@ -194,7 +193,7 @@ describe('تدفق الرسائل — Message Lifecycle', () => {
 describe('تدفق إشعارات القراءة — Bidirectional Seen', () => {
   beforeEach(() => {
     const { setMessages } = useStore.getState();
-    // إعداد رسائل بين أحمد وسارة
+    // Seed messages between the two users
     setMessages([
       {
         _id: 'm1',
@@ -224,7 +223,7 @@ describe('تدفق إشعارات القراءة — Bidirectional Seen', () => 
         content: 'وأنتِ؟',
         seen: false,
       },
-      // رسالة من علي — يجب أن لا تتأثر
+      // A message from Ali — must NOT be affected
       {
         _id: 'm5',
         sender: USERS.ali._id,
@@ -280,10 +279,10 @@ describe('تدفق إشعارات القراءة — Bidirectional Seen', () => 
   it('تدفق كامل: أنا أقرأ ثم سارة تقرأ → جميع الرسائل مقروءة', () => {
     const { markMessagesSeenFromSender, markMyMessagesSeen } = useStore.getState();
 
-    // الخطوة 1: أنا فتحت المحادثة → قرأت رسائل سارة
+    // Step 1: I open the conversation → read Sara's messages
     markMessagesSeenFromSender(USERS.sara._id, USERS.me._id);
 
-    // الخطوة 2: سارة فتحت المحادثة → قرأت رسائلي
+    // Step 2: Sara opens the conversation → reads my messages
     markMyMessagesSeen(USERS.me._id, USERS.sara._id);
 
     const { messages } = useStore.getState();
@@ -333,7 +332,7 @@ describe('تدفق مؤشر الكتابة — Scoped Typing', () => {
     // سارة تكتب
     setTyping(USERS.sara._id);
 
-    // stop_typing من علي (لا يجب أن يمسح كتابة سارة)
+    // stop_typing from Ali — must NOT clear Sara's typing indicator
     clearTyping(USERS.ali._id);
 
     expect(useStore.getState().typing).toBe(USERS.sara._id);
@@ -356,7 +355,7 @@ describe('تدفق مؤشر الكتابة — Scoped Typing', () => {
     // سارة تكتب
     setTyping(USERS.sara._id);
 
-    // المستلم الحالي هو سارة → يجب عرض مؤشر الكتابة
+    // Current receiver is Sara → typing indicator should appear
     const { typing, currentReceiver } = useStore.getState();
     expect(typing === currentReceiver._id).toBe(true);
   });

@@ -1,11 +1,11 @@
 // ─────────────────────────────────────────────────────────────────
-// اختبارات تكاملية لطبقة HTTP — requests.js
-// يختبر: Axios Instance + Interceptors + جميع دوال API
-// يتكامل مع: سلوك الخادم (نقاط النهاية + أكواد الاستجابة + البيانات)
+// Integration tests for the HTTP layer — requests.js
+// Tests: Axios Instance + Interceptors + all API functions
+// Integrates with: server endpoints + response codes + data shapes
 // ─────────────────────────────────────────────────────────────────
 
 /* eslint-disable import/first */
-// إعداد Mock لـ Axios قبل أي استيراد (يُرفع تلقائياً بواسطة Jest)
+// Axios must be mocked before any imports (Jest auto-hoisting applies)
 jest.mock('axios', () => {
   const instance = {
     get: jest.fn(),
@@ -37,7 +37,7 @@ import {
 // ─── مرجع Mock Instance ────────────────────────────────────────
 const mockApi = axios.create();
 
-// التقاط دوال Interceptors المسجلة من requests.js عند التحميل
+// Capture the interceptors registered by requests.js when the module loads
 const requestInterceptor = mockApi.interceptors.request.use.mock.calls[0]?.[0];
 const [responseOnSuccess, responseOnError] = mockApi.interceptors.response.use.mock.calls[0] || [];
 
@@ -50,7 +50,7 @@ beforeEach(() => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 1. التحقق من وجود Interceptors فعّالة
+// 1. Interceptors setup verification
 // ═══════════════════════════════════════════════════════════════
 
 describe('إعداد Axios Instance — Interceptors', () => {
@@ -68,7 +68,7 @@ describe('إعداد Axios Instance — Interceptors', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 2. Request Interceptor — إضافة التوكن تلقائياً
+// 2. Request Interceptor — auto-attach the token
 // ═══════════════════════════════════════════════════════════════
 
 describe('Request Interceptor — إضافة التوكن تلقائياً', () => {
@@ -120,7 +120,7 @@ describe('Request Interceptor — إضافة التوكن تلقائياً', () 
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 3. Response Interceptor — التعامل مع أخطاء 401
+// 3. Response Interceptor — 401 error handling
 // ═══════════════════════════════════════════════════════════════
 
 describe('Response Interceptor — التعامل مع أخطاء الخادم', () => {
@@ -151,12 +151,12 @@ describe('Response Interceptor — التعامل مع أخطاء الخادم',
 
     await expect(responseOnError(error)).rejects.toEqual(error);
 
-    // تحقق من مسح التخزين المحلي
+    // Verify local storage was cleared
     expect(localStorage.getItem('user')).toBeNull();
     expect(localStorage.getItem('accessToken')).toBeNull();
     expect(localStorage.getItem('currentReceiver')).toBeNull();
 
-    // تحقق من إعادة التوجيه
+    // Verify redirect to login
     expect(window.location.href).toBe('/login');
   });
 
@@ -180,8 +180,8 @@ describe('Response Interceptor — التعامل مع أخطاء الخادم',
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 4. دوال المصادقة — login & register
-// تتكامل مع: POST /api/user/login و POST /api/user/register
+// 4. Auth Functions — login & register
+// Integrates with: POST /api/user/login and POST /api/user/register
 // ═══════════════════════════════════════════════════════════════
 
 describe('دوال المصادقة — تكامل مع نقاط نهاية الخادم', () => {
@@ -304,7 +304,7 @@ describe('دوال المصادقة — تكامل مع نقاط نهاية ال
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 5. دوال API المحمية — تتكامل مع نقاط نهاية الخادم
+// 5. Protected API Functions — require auth token
 // ═══════════════════════════════════════════════════════════════
 
 describe('دوال API المحمية — Protected Endpoints', () => {
@@ -395,12 +395,12 @@ describe('دوال API المحمية — Protected Endpoints', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 6. سيناريوهات تكاملية — Integration Scenarios
+// 6. Integration Scenarios — Interceptor + API
 // ═══════════════════════════════════════════════════════════════
 
 describe('سيناريوهات تكاملية — Interceptor + API', () => {
   it('سيناريو: تسجيل دخول → تخزين توكن → طلب محمي بالتوكن', async () => {
-    // 1. تسجيل الدخول
+    // 1. Login
     const loginResponse = {
       user: { _id: 'u1', firstName: 'أحمد' },
       accessToken: 'fresh-jwt-token',
@@ -413,16 +413,16 @@ describe('سيناريوهات تكاملية — Interceptor + API', () => {
     });
     expect(result.accessToken).toBe('fresh-jwt-token');
 
-    // 2. تخزين التوكن (كما يفعل Login component)
+    // 2. Store the token (as the Login component does)
     localStorage.setItem('accessToken', result.accessToken);
 
-    // 3. التحقق أن Interceptor سيضيف التوكن للطلب التالي
+    // 3. Verify the interceptor will attach the token to the next request
     const config = requestInterceptor({ headers: {} });
     expect(config.headers.Authorization).toBe('Bearer fresh-jwt-token');
   });
 
   it('سيناريو: خطأ 401 يمسح الجلسة ويعيد التوجيه', async () => {
-    // إعداد جلسة نشطة
+    // Set up an active session
     localStorage.setItem('accessToken', 'expired-token');
     localStorage.setItem('user', JSON.stringify({ _id: 'u1' }));
     localStorage.setItem('currentReceiver', JSON.stringify({ _id: 'u2' }));
@@ -431,7 +431,7 @@ describe('سيناريوهات تكاملية — Interceptor + API', () => {
     delete window.location;
     window.location = { href: '' };
 
-    // محاكاة استجابة 401 من الخادم
+    // Simulate a 401 response from the server (expired token)
     const error = {
       response: { status: 401, data: { message: 'التوكن منتهي الصلاحية' } },
     };
@@ -439,10 +439,10 @@ describe('سيناريوهات تكاملية — Interceptor + API', () => {
     try {
       await responseOnError(error);
     } catch (e) {
-      // متوقع
+      // expected — error is always re-thrown
     }
 
-    // تحقق: الجلسة مُسحت بالكامل
+    // Verify: session was fully cleared
     expect(localStorage.getItem('accessToken')).toBeNull();
     expect(localStorage.getItem('user')).toBeNull();
     expect(localStorage.getItem('currentReceiver')).toBeNull();

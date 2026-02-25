@@ -1,9 +1,9 @@
 // ─────────────────────────────────────────────────────────────────
-// اختبارات تكاملية — تدفق الأحداث في التطبيق
-// يختبر: تدفق الرسائل، إشعارات القراءة، مؤشر الكتابة، تحديثات المستخدمين
-// يتكامل مع: globalState.js (Zustand Store)
+// Integration tests — application event flow
+// Tests: message flow, read receipts, typing indicator, user updates
+// Integrates with: globalState.js (Zustand Store)
 //
-// يحاكي تدفق أحداث Socket.IO بدون مكتبة Socket.IO فعلية:
+// Simulates Socket.IO event flows without a real Socket.IO library:
 //   receive_message  →  addMessage        → store.messages
 //   typing(senderId) →  setTyping(id)     → store.typing
 //   stop_typing(id)  →  clearTyping(id)   → store.typing
@@ -38,14 +38,14 @@ function resetStore() {
 beforeEach(resetStore);
 
 // ═══════════════════════════════════════════════════════════════
-// 1. تدفق الرسائل — Message Lifecycle
+// 1. Message Lifecycle
 // ═══════════════════════════════════════════════════════════════
 
 describe('تدفق الرسائل — Message Lifecycle', () => {
   it('يجب أن تُدمج الرسالة التفاؤلية مع تأكيد الخادم عبر clientId', () => {
     const { addMessage } = useStore.getState();
 
-    // رسالة تفاؤلية
+    // Optimistic message (no _id yet)
     addMessage({
       clientId: 'client-uuid-001',
       sender: USERS.me._id,
@@ -123,12 +123,12 @@ describe('تدفق الرسائل — Message Lifecycle', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 2. تدفق إشعارات القراءة — Bidirectional Seen
+// 2. Bidirectional Read Receipts
 // ═══════════════════════════════════════════════════════════════
 
 describe('تدفق إشعارات القراءة — Bidirectional Seen', () => {
   beforeEach(() => {
-    // إضافة رسائل بين أحمد وسارة
+    // Seed messages between the two users
     const { addMessage } = useStore.getState();
     addMessage({
       _id: 'm1',
@@ -191,7 +191,7 @@ describe('تدفق إشعارات القراءة — Bidirectional Seen', () => 
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 3. تدفق مؤشر الكتابة — Scoped Typing
+// 3. Typing Indicator — Scoped per Conversation
 // ═══════════════════════════════════════════════════════════════
 
 describe('تدفق مؤشر الكتابة — Scoped Typing', () => {
@@ -255,8 +255,7 @@ describe('تدفق مؤشر الكتابة — Scoped Typing', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 4. تحديثات المستخدمين — User Broadcasts
-// يحاكي: user_created و user_updated من الخادم
+// 4. User Broadcasts — user_created and user_updated events
 // ═══════════════════════════════════════════════════════════════
 
 describe('تحديثات المستخدمين — User Broadcasts', () => {
@@ -286,7 +285,7 @@ describe('تحديثات المستخدمين — User Broadcasts', () => {
       profilePicture: '/uploads/sara-new.jpg',
     };
 
-    // الخادم يبث user_updated عبر Socket.IO
+    // Server broadcasts user_updated via Socket.IO
     updateFriend(updatedSara);
 
     const sara = useStore.getState().friends.find((f) => f._id === USERS.sara._id);
@@ -303,7 +302,7 @@ describe('تحديثات المستخدمين — User Broadcasts', () => {
       status: 'في العمل',
     };
 
-    // كما يفعل Home handler: if (user._id === updatedUser._id) → setUser
+    // Same handler as Home: if (user._id === updatedUser._id) → setUser
     await setUser(updatedMe);
 
     const { user } = useStore.getState();
@@ -327,7 +326,7 @@ describe('تحديثات المستخدمين — User Broadcasts', () => {
       status: 'عدت!',
     };
 
-    // كما يفعل Home handler: updateFriend + setCurrentReceiver
+    // Same handler as Home: updateFriend + setCurrentReceiver
     updateFriend(updatedSara);
     // if (currentReceiver?._id === updatedUser._id) → setCurrentReceiver
     setCurrentReceiver(updatedSara);
@@ -341,14 +340,14 @@ describe('تحديثات المستخدمين — User Broadcasts', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 5. سيناريو محادثة كاملة — End-to-End Flow
+// 5. Complete Conversation Flow — End-to-End
 // ═══════════════════════════════════════════════════════════════
 
 describe('سيناريو محادثة كاملة — End-to-End Flow', () => {
   it('يجب أن يعمل تدفق الرسالة الكامل: إرسال → استقبال → قراءة', () => {
     const store = useStore.getState();
 
-    // 1. أرسل رسالة (تفاؤلية)
+    // 1. Send optimistic message
     store.addMessage({
       clientId: 'opt-001',
       sender: USERS.me._id,
@@ -358,7 +357,7 @@ describe('سيناريو محادثة كاملة — End-to-End Flow', () => {
     });
     expect(useStore.getState().messages).toHaveLength(1);
 
-    // 2. تأكيد الخادم
+    // 2. Server confirmation
     store.addMessage({
       _id: 'srv-001',
       clientId: 'opt-001',
@@ -370,7 +369,7 @@ describe('سيناريو محادثة كاملة — End-to-End Flow', () => {
     expect(useStore.getState().messages).toHaveLength(1);
     expect(useStore.getState().messages[0]._id).toBe('srv-001');
 
-    // 3. سارة ترد
+    // 3. Sara replies
     store.addMessage({
       _id: 'srv-002',
       sender: USERS.sara._id,
@@ -380,19 +379,19 @@ describe('سيناريو محادثة كاملة — End-to-End Flow', () => {
     });
     expect(useStore.getState().messages).toHaveLength(2);
 
-    // 4. سارة تكتب
+    // 4. Sara starts typing
     store.setTyping(USERS.sara._id);
     expect(useStore.getState().typing).toBe(USERS.sara._id);
 
-    // 5. سارة توقف الكتابة
+    // 5. Sara stops typing
     store.clearTyping(USERS.sara._id);
     expect(useStore.getState().typing).toBeNull();
 
-    // 6. سارة تقرأ رسالتي
+    // 6. Sara reads my message
     store.markMyMessagesSeen(USERS.me._id, USERS.sara._id);
     expect(useStore.getState().messages[0].seen).toBe(true);
 
-    // 7. أنا أقرأ رسالة سارة
+    // 7. I read Sara's reply
     store.markMessagesSeenFromSender(USERS.sara._id, USERS.me._id);
     expect(useStore.getState().messages[1].seen).toBe(true);
   });
@@ -428,7 +427,7 @@ describe('سيناريو محادثة كاملة — End-to-End Flow', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 6. تكامل AsyncStorage — حفظ واستعادة الجلسة
+// 6. AsyncStorage Integration — session persistence
 // ═══════════════════════════════════════════════════════════════
 
 describe('تكامل AsyncStorage — حفظ واستعادة الجلسة', () => {
@@ -461,8 +460,7 @@ describe('تكامل AsyncStorage — حفظ واستعادة الجلسة', () 
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 7. عزل المحادثات — Conversation Isolation
-// يحاكي: تصفية الرسائل بين محادثات مختلفة
+// 7. Conversation Isolation
 // ═══════════════════════════════════════════════════════════════
 
 describe('عزل المحادثات — Conversation Isolation', () => {
@@ -549,8 +547,7 @@ describe('عزل المحادثات — Conversation Isolation', () => {
 });
 
 // ═══════════════════════════════════════════════════════════════
-// 8. أحداث متعددة متزامنة — Multi-Event Scenarios
-// يحاكي: تدفق أحداث Socket.IO متعددة في الوقت نفسه
+// 8. Concurrent Multi-Event Flow
 // ═══════════════════════════════════════════════════════════════
 
 describe('أحداث متعددة متزامنة — Multi-Event Flow', () => {
