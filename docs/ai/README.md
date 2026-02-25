@@ -26,6 +26,7 @@ This directory contains machine-facing documentation for AI assistants working o
 - **Mobile Testing:** Jest 29 + jest-expo 54, 83 mobile tests (4 test suites)
 - **Total Tests:** 414 (232 server + 99 web + 83 mobile)
 - **Deployment:** Heroku-ready with Procfile
+- **CI/CD:** GitHub Actions — server tests (MongoDB service) + web tests/build → deploy to orphan branches
 - **Formatting:** Prettier with LF normalization (`.prettierrc.json` in each package, `format.mjs` at root)
 - **Contributing:** `CONTRIBUTING.md` at project root — commit format, tagging, pre-commit checklist
 - **Tutorials:** 9 server tutorials + 5 web tutorials + 5 mobile tutorials (Arabic) in `docs/tutorials/`
@@ -107,3 +108,6 @@ cd web && npm run format:check
 - Line endings are always LF — enforced by `.gitattributes` and Prettier `endOfLine: "lf"`
 - Never mix formatting commits with feature commits — use `chore(format)` or `style` type
 - Follow `CONTRIBUTING.md` for commit messages (Conventional Commits, English only)
+- CI/CD runs on push to main — validate workflow changes locally before pushing (see `docs/testing.md`)
+- Workflow `if:` conditions exclude PRs — deploy jobs run only on push + workflow_dispatch
+- Deploy commits use `[skip ci]` suffix to prevent infinite loops

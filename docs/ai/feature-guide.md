@@ -321,3 +321,32 @@ git tag -a v1.5.0 -m "v1.5.0 - Add Group Chat System
 
 See `CONTRIBUTING.md` §3 (Commit Messages) and §4 (Tagging Strategy) for full rules.  
 See workspace tagging rules: [`docs/ai-improvement-guide.md`](../../../../docs/ai-improvement-guide.md) § Tagging Strategy.
+
+### CI/CD Awareness
+
+After pushing to `main`, GitHub Actions automatically runs server tests + web build & deploy.
+Keep in mind:
+
+1. **Server tests require MongoDB** — CI provides a `mongo:7-jammy` service container automatically
+2. **Web build uses `REACT_APP_API_URL`** — set as GitHub repository variable, not hardcoded
+3. **Mobile is excluded from CI** — Expo/React Native uses platform-specific tools (EAS)
+4. **Deploy branches are orphan** — `server` and `web` branches are recreated on every deploy
+5. **[skip ci] suffix** — deploy commits use this to prevent infinite workflow loops
+
+If you modify the workflow file (`.github/workflows/build-and-deploy.yml`), validate locally first:
+
+```bash
+# 1. Check YAML structure
+node -e "const wf=require('fs').readFileSync('.github/workflows/build-and-deploy.yml','utf8'); console.log('Lines:', wf.split('\n').length, '| Tabs:', wf.includes('\t') ? 'BAD' : 'OK')"
+
+# 2. Run server tests with CI env vars (needs local MongoDB)
+cd server && NODE_ENV=test JWT_SECRET=test_jwt_secret MONGODB_URL=mongodb://localhost:27017/test_db npm run test:all
+
+# 3. Run web tests + build
+cd web && npm run test:ci && REACT_APP_API_URL=https://example.com npm run build
+
+# 4. Simulate deploy cleanup script
+node -e "const p=JSON.parse(require('fs').readFileSync('server/package.json')); delete p.devDependencies; ['test:all','test','test:repos','test:integration','test:e2e','format','format:check','dev'].forEach(s=>delete p.scripts[s]); console.log('Remaining:', Object.keys(p.scripts))"
+```
+
+See [`docs/testing.md`](../testing.md) § "التحقق المحلي من سلسلة CI" for the full local validation guide.

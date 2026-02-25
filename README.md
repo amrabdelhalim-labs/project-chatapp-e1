@@ -67,6 +67,7 @@ A **real-time chat application** with 1:1 messaging, typing indicators, read rec
 
 ```
 project-chatapp-e1/
+├── .github/workflows/          # GitHub Actions CI/CD (server tests + web build & deploy)
 ├── .gitattributes              # LF line endings enforcement
 ├── .gitignore                  # node_modules, .expo, .env, coverage
 ├── CONTRIBUTING.md             # Branch naming, commits, tagging, formatting
@@ -382,6 +383,27 @@ cd web && npm run format
 
 ---
 
+## ⚙️ CI/CD Pipeline
+
+GitHub Actions workflow (`.github/workflows/build-and-deploy.yml`) runs on every push to `main`:
+
+| Job | What it does |
+|-----|-------------|
+| **Deploy Server** | Install → Run 232 tests (MongoDB service) → Push to `server` branch |
+| **Deploy Web** | Install → Run 99 tests → Build React → Push to `web` branch |
+
+Both jobs run **in parallel**. Deploy commits use `[skip ci]` to prevent recursive triggers.
+
+### GitHub Repository Variables
+
+| Variable | Example | Description |
+|----------|---------|-------------|
+| `REACT_APP_API_URL` | `https://your-server.onrender.com` | Server URL for web client build |
+
+See [`.github/workflows/README.md`](.github/workflows/README.md) for full setup guide (Arabic).
+
+---
+
 ## 🤝 Contributing
 
 Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) before making any changes. Key points:
@@ -395,11 +417,21 @@ Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) before making any changes. Key 
 
 ## 📅 Project History
 
+### Tags (SemVer)
+
+| Tag | Title | Key Changes |
+|-----|-------|------------|
+| `v1.0.0` | App Feature-Complete | Server + Web + Mobile with full CRUD, Socket.IO real-time messaging |
+| `v1.1.0` | Repository Pattern, Storage & Server Tests | Repository Pattern, Storage Strategy, 232 server tests, tutorials |
+| `v1.2.0` | Web Client Security & Tests | Axios interceptors, Zustand, Formik/Yup, 99 web tests, tutorials |
+| `v1.3.0` | Mobile Client & Cross-Platform Tests | Mobile interceptors, Zustand/AsyncStorage, 83 mobile tests |
+| `v1.4.0` | Code Quality and Contributing Standards | Prettier, .gitattributes, CONTRIBUTING.md, README.md, 414 tests |
+| `v1.5.0` | CI/CD Pipeline | GitHub Actions: server tests + web build & deploy |
+
+### Commits
+
 ```
-ee3534a feat(mobile): bug fixes, Axios interceptors, 83 tests, mobile tutorials & docs
-c53aa2a feat(web): security fixes, Axios interceptors, 99 tests, web tutorials & docs
-70dcb0f feat(server): repository pattern, storage service, validators, 232 tests, docs & tutorials
-3e2bd24 Project Dev Finished
+git log --oneline --decorate
 ```
 
 ---

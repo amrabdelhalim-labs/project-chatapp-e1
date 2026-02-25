@@ -628,3 +628,180 @@ node format.mjs --check
 ```
 
 جميع الخطوات الأربع يجب أن تنجح قبل التضمين. راجع `CONTRIBUTING.md` للمعايير الكاملة.
+
+---
+
+## التكامل المستمر (CI/CD)
+
+### نظرة عامة
+
+المشروع يستخدم **GitHub Actions** لتشغيل الاختبارات والنشر تلقائياً.
+ملف الإعدادات: `.github/workflows/build-and-deploy.yml`
+
+### المحفّزات (Triggers)
+
+| الحدث | النتيجة |
+|-------|---------|
+| `push` على `main` | تشغيل الوظيفتين (خادم + ويب) |
+| `pull_request` على `main` | لا شيء — الوظائف لا تعمل على PR (فقط push و workflow_dispatch) |
+| `workflow_dispatch` | تشغيل يدوي (اختيار: خادم فقط / ويب فقط / كلاهما) |
+
+### الوظائف (Jobs)
+
+يعمل خطان متوازيان:
+
+#### 1. Deploy Server
+```
+npm ci → npm run test:all (232 اختبار) → حذف devDeps → دفع إلى فرع server
+```
+
+- يستخدم **MongoDB 7** كخدمة مرافقة (service container)
+- متغيرات البيئة في CI:
+  - `MONGODB_URL=mongodb://localhost:27017/test_chatapp_db`
+  - `JWT_SECRET=test_jwt_secret_key_for_ci_testing_only_32chars`
+  - `NODE_ENV=test`
+
+#### 2. Deploy Web
+```
+npm ci → npm run test:ci (99 اختبار) → npm run build → دفع إلى فرع web
+```
+
+- متغيرات البيئة في CI:
+  - `REACT_APP_API_URL` من GitHub Repository Variables
+
+### فروع النشر
+
+| الفرع | المحتوى | الاستخدام |
+|-------|---------|-----------|
+| `server` | كود الخادم فقط (بدون اختبارات أو devDependencies) | Render / Railway / Heroku |
+| `web` | تطبيق React المبني (`web/build/`) | GitHub Pages / Netlify / Vercel |
+
+- فروع النشر **orphan** (بدون تاريخ) — تُحذف وتُعاد في كل نشر
+- إيداعات النشر تحمل لاحقة `[skip ci]` لمنع التكرار اللانهائي
+- الخادم ليس له خطوة بناء (JavaScript ESM) — يُنسخ مباشرة
+- الويب يستخدم `react-scripts build` → مخرجات في `web/build/`
+
+### إعداد GitHub Repository Variables
+
+لتفعيل النشر على مستودع GitHub:
+
+1. اذهب إلى **Settings → Secrets and variables → Actions → Variables**
+2. أضف متغير `REACT_APP_API_URL` بقيمة رابط الخادم المنشور
+
+📖 **الدليل الكامل**: [`.github/workflows/README.md`](../.github/workflows/README.md) (بالعربية)
+
+---
+
+## التحقق المحلي من سلسلة CI (قبل الرفع)
+
+عند إنشاء أو تعديل ملف GitHub Actions، يُفضل التحقق محلياً قبل الدفع إلى GitHub.
+هذا يوفر الوقت ويكشف الأخطاء مبكراً.
+
+### خطوات التحقق المحلي
+
+#### 1. فحص هيكل YAML
+
+```bash
+# التأكد من صحة الملف (عدد الأسطر، المسافات البادئة)
+node -e "
+  const fs = require('fs');
+  const wf = fs.readFileSync('.github/workflows/build-and-deploy.yml', 'utf8');
+  console.log('Lines:', wf.split('\n').length);
+  console.log('Tabs:', wf.includes('\t') ? 'FOUND (bad!)' : 'None (good)');
+  console.log('Has name:', wf.includes('name:'));
+  console.log('Has jobs:', wf.includes('jobs:'));
+"
+```
+
+#### 2. التحقق من المتطلبات
+
+```bash
+# التأكد من وجود package-lock.json (مطلوب لـ npm ci)
+ls server/package-lock.json
+ls web/package-lock.json
+
+# التأكد من وجود السكربتات المذكورة في الورك فلو
+node -e "
+  const sp = JSON.parse(require('fs').readFileSync('server/package.json'));
+  console.log('test:all:', sp.scripts['test:all'] ? 'OK' : 'MISSING');
+  const wp = JSON.parse(require('fs').readFileSync('web/package.json'));
+  console.log('test:ci:', wp.scripts['test:ci'] ? 'OK' : 'MISSING');
+  console.log('build:', wp.scripts['build'] ? 'OK' : 'MISSING');
+"
+```
+
+#### 3. تشغيل اختبارات الخادم (يحتاج MongoDB)
+
+```bash
+cd server
+# استخدم نفس متغيرات البيئة المستخدمة في CI
+NODE_ENV=test \
+JWT_SECRET=test_jwt_secret_key_for_ci_testing_only_32chars \
+MONGODB_URL=mongodb://localhost:27017/test_chatapp_db \
+npm run test:all
+# المتوقع: 232 اختبار ناجح
+```
+
+> **ملاحظة**: إذا لم يكن MongoDB مثبتاً محلياً، هذه الخطوة ستفشل.
+> في CI يتم توفير MongoDB عبر service container تلقائياً.
+
+#### 4. تشغيل اختبارات وبناء الويب
+
+```bash
+cd web
+# اختبارات (لا تحتاج خادم — كلها mocks)
+npm run test:ci
+# المتوقع: 99 اختبار ناجح
+
+# بناء التطبيق
+REACT_APP_API_URL=https://example.com npm run build
+# المتوقع: "Compiled successfully." + مجلد web/build/
+```
+
+#### 5. محاكاة سكربت النشر (Deploy Script)
+
+```bash
+# اختبار أن سكربت تنظيف package.json يعمل بشكل صحيح
+node -e "
+  const p = JSON.parse(require('fs').readFileSync('server/package.json'));
+  delete p.scripts['test:all'];
+  delete p.scripts['test'];
+  delete p.scripts['test:repos'];
+  delete p.scripts['test:integration'];
+  delete p.scripts['test:e2e'];
+  delete p.scripts['format'];
+  delete p.scripts['format:check'];
+  delete p.scripts.dev;
+  delete p.devDependencies;
+  console.log('Remaining scripts:', Object.keys(p.scripts));
+  console.log('devDeps removed:', p.devDependencies === undefined);
+"
+# المتوقع: Remaining scripts: [ 'start' ] — devDeps removed: true
+```
+
+#### 6. فحص شروط التشغيل
+
+```bash
+# التأكد من أن الورك فلو لا يعمل على PR (فقط push + workflow_dispatch)
+node -e "
+  const wf = require('fs').readFileSync('.github/workflows/build-and-deploy.yml','utf8');
+  const serverIf = wf.match(/deploy-server:[\\s\\S]*?if:\\s*\\|([^]*?)services:/);
+  console.log('Server runs on push:', serverIf[1].includes('push'));
+  console.log('Server runs on PR:', serverIf[1].includes('pull_request'));
+  console.log('cancel-in-progress:', wf.match(/cancel-in-progress:\\s*(\\w+)/)[1]);
+"
+# المتوقع: push=true, PR=false, cancel-in-progress=false
+```
+
+### ملخص نتائج التحقق المحلي
+
+| الفحص | النتيجة المتوقعة |
+|-------|-----------------|
+| هيكل YAML (مسافات، مفاتيح) | ✅ بدون tabs، جميع المفاتيح موجودة |
+| `package-lock.json` موجود | ✅ server + web |
+| السكربتات المذكورة موجودة | ✅ `test:all`, `test:ci`, `build` |
+| اختبارات الخادم (232) | ✅ تمر (تحتاج MongoDB) |
+| اختبارات الويب (99) | ✅ تمر |
+| بناء الويب | ✅ "Compiled successfully." |
+| سكربت التنظيف | ✅ يبقى `start` فقط |
+| شروط التشغيل | ✅ push + dispatch فقط، لا PR |

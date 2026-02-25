@@ -39,6 +39,7 @@
 - Design Patterns (Singleton, Factory, Strategy, Repository)
 - Conventional Commits, Annotated Tags, SemVer
 - HTTP Status Codes, Best Practices, Code Formatting (Prettier)
+- CI/CD (GitHub Actions), Service Containers, Orphan Branches
 
 **الوقت المتوقع**: 30-45 دقيقة
 
@@ -472,6 +473,8 @@
 | 📖 الفهرس الرئيسي | [README.md](./README.md) |
 | ⚙️ المساهمة | [CONTRIBUTING.md](../../CONTRIBUTING.md) |
 | 🎨 التنسيق | `node format.mjs` — `node format.mjs --check` |
+| 🚀 CI/CD | [.github/workflows/README.md](../../.github/workflows/README.md) |
+| 🧪 التحقق المحلي | [docs/testing.md](../testing.md) § التحقق المحلي من سلسلة CI |
 
 ---
 

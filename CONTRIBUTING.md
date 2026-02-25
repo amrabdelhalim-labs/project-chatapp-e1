@@ -73,6 +73,7 @@ refactor/<topic> ← refactor without behavior change
 | `web` | `web/` directory (React CRA web) |
 | `docs` | `docs/` directory |
 | `ai` | `docs/ai/` specifically |
+| `ci` | `.github/workflows/` |
 
 ### Rules
 

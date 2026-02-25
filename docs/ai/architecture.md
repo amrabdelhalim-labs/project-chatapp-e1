@@ -15,6 +15,7 @@
 
 ```
 project-chatapp-e1/
+├── .github/workflows/          # GitHub Actions CI/CD (build-and-deploy.yml + README.md)
 ├── .gitattributes              # LF line-ending enforcement (* text=auto eol=lf)
 ├── .gitignore                  # node_modules, .expo, .env, coverage, dist, build
 ├── CONTRIBUTING.md             # Branch naming, commits, tagging, formatting, pre-commit checklist
@@ -349,3 +350,52 @@ cd web && npm run format          # src/**/*.{js,jsx,css}
 6. Pre-Commit Checklist — tests + formatting
 7. Documentation Updates — table mapping change types to required doc updates
 8. Testing Requirements — all suites with counts and commands
+
+## CI/CD Pipeline
+
+### GitHub Actions Workflow (`.github/workflows/build-and-deploy.yml`)
+
+Two parallel jobs triggered on `push` to `main`, `pull_request` to `main`, or manual `workflow_dispatch`:
+
+| Job | Service | Steps | Deploy Target |
+|-----|---------|-------|---------------|
+| **Deploy Server** | MongoDB 7 (service container) | `npm ci` → `npm run test:all` (232 tests) → strip devDeps → push to `server` branch | Render / Railway / Heroku |
+| **Deploy Web** | — | `npm ci` → `npm run test:ci` (99 tests) → `npm run build` → push to `web` branch | GitHub Pages / Netlify / Vercel |
+
+### CI Environment Variables
+
+| Variable | Where | Value |
+|----------|-------|-------|
+| `MONGODB_URL` | Server job env | `mongodb://localhost:27017/test_chatapp_db` (service container) |
+| `JWT_SECRET` | Server job env | CI-only test secret |
+| `REACT_APP_API_URL` | Web job env | GitHub repository variable (`vars.REACT_APP_API_URL`) |
+
+### Deployment Branches
+
+- **`server`** — orphan branch with production server code only (no tests, no devDependencies)
+- **`web`** — orphan branch with built React app (`web/build/` contents)
+- Deploy commits use `[skip ci]` suffix to prevent recursive workflow triggers
+
+### Key Design Decisions
+
+1. **Server has no build step** — JavaScript (ESM), deployed as source
+2. **Web uses `react-scripts build`** — CRA toolchain, outputs to `web/build/`
+3. **Mobile is excluded from CI** — React Native/Expo deployments use platform-specific tools (EAS)
+4. **Concurrency:** `cancel-in-progress: false` — ensures deploys complete even if new pushes arrive
+5. **MongoDB 7 service container** — matches production MongoDB version for test fidelity
+
+### Local Workflow Validation
+
+Before pushing workflow changes, validate locally to catch errors without CI round-trips:
+
+| Step | Command | What it checks |
+|------|---------|----------------|
+| YAML structure | `node -e "..."` (read + check tabs/keys) | No YAML syntax issues, all required keys present |
+| Prerequisites | Check `package-lock.json` + script names exist | `npm ci` won't fail, script references are valid |
+| Server tests | `npm run test:all` (with CI env vars) | Same tests that CI runs — needs local MongoDB |
+| Web tests | `npm run test:ci` | 99 tests pass in single-run mode |
+| Web build | `npm run build` (with `REACT_APP_API_URL` set) | CRA compiles successfully, `web/build/` created |
+| Deploy script | `node -e "..."` (strip devDeps + test scripts) | Only `start` script remains, no devDependencies |
+| Job conditions | Parse `if:` blocks with regex | Jobs trigger on push + dispatch, NOT on PR |
+
+Full validation procedure with code: see [`docs/testing.md`](../testing.md) § "التحقق المحلي من سلسلة CI"
