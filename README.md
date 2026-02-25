@@ -418,6 +418,14 @@ Both jobs run **in parallel**. Deploy commits use `[skip ci]` to prevent recursi
 |----------|---------|-------------|
 | `REACT_APP_API_URL` | `https://your-server.onrender.com` | Server URL for web client build |
 
+**Multi-Platform Deployment:**  
+The web app uses `PUBLIC_URL` environment variable for dynamic path configuration:
+- **GitHub Pages**: `PUBLIC_URL=/project-chatapp-e1` (set in workflow)
+- **Netlify/Vercel/Other**: No `PUBLIC_URL` needed (root path `/`)
+- **Local Development**: No `PUBLIC_URL` needed (root path `/`)
+
+This allows deploying to any platform without code changes.
+
 See [`.github/workflows/README.md`](.github/workflows/README.md) for full setup guide (Arabic).
 
 ---

@@ -369,9 +369,16 @@ Keep in mind:
 
 1. **Server tests require MongoDB** — CI provides a `mongo:7-jammy` service container automatically
 2. **Web build uses `REACT_APP_API_URL`** — set as GitHub repository variable, not hardcoded
-3. **Mobile is excluded from CI** — Expo/React Native uses platform-specific tools (EAS)
-4. **Deploy branches are orphan** — `server` and `web` branches are recreated on every deploy
-5. **[skip ci] suffix** — deploy commits use this to prevent infinite workflow loops
+3. **Web routing uses `PUBLIC_URL`** — set to `/project-chatapp-e1` in workflow for GitHub Pages, omit for other platforms
+4. **Mobile is excluded from CI** — Expo/React Native uses platform-specific tools (EAS)
+5. **Deploy branches are orphan** — `server` and `web` branches are recreated on every deploy
+6. **[skip ci] suffix** — deploy commits use this to prevent infinite workflow loops
+
+**Multi-Platform Deployment:**  
+The web app is platform-agnostic. Deploy to:
+- **GitHub Pages**: Set `PUBLIC_URL=/project-chatapp-e1` in workflow (subfolder routing)
+- **Netlify/Vercel**: No `PUBLIC_URL` needed (root routing)
+- **Local Dev**: No `PUBLIC_URL` needed (root routing)
 
 If you modify the workflow file (`.github/workflows/build-and-deploy.yml`), validate locally first:
 
