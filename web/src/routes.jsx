@@ -6,34 +6,39 @@ import Chat from './components/Chat';
 import NoUserSelected from './components/Chat/NoUserSelected';
 import ProtectedRoute from './components/ProtectedRoute';
 
-const router = createBrowserRouter([
+const router = createBrowserRouter(
+  [
+    {
+      path: '/',
+      element: (
+        <ProtectedRoute>
+          <Home />
+        </ProtectedRoute>
+      ),
+      children: [
+        {
+          path: '',
+          element: <NoUserSelected />,
+        },
+        {
+          path: ':receiverId',
+          element: <Chat />,
+        },
+      ],
+    },
+    {
+      path: '/login',
+      element: <Login />,
+    },
+    {
+      path: '/register',
+      element: <Register />,
+    },
+  ],
   {
-    path: '/',
-    element: (
-      <ProtectedRoute>
-        <Home />
-      </ProtectedRoute>
-    ),
-    children: [
-      {
-        path: '',
-        element: <NoUserSelected />,
-      },
-      {
-        path: ':receiverId',
-        element: <Chat />,
-      },
-    ],
-  },
-  {
-    path: '/login',
-    element: <Login />,
-  },
-  {
-    path: '/register',
-    element: <Register />,
-  },
-]);
+    basename: process.env.PUBLIC_URL || '',
+  }
+);
 
 export default function Router() {
   return <RouterProvider router={router} />;

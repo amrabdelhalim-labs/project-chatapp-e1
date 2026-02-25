@@ -162,6 +162,7 @@ jobs:
         run: npm run build
         env:
           REACT_APP_API_URL: ${{ vars.REACT_APP_API_URL }}
+          PUBLIC_URL: /project-chatapp-e1
 
       - name: Verify build folder
         run: |
