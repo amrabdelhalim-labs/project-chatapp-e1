@@ -73,10 +73,25 @@ jobs:
           git config --global user.name  "github-actions[bot]"
 
           mkdir -p /tmp/server-deploy
-          cp -r server/* /tmp/server-deploy/
+          # Copy server files, excluding build artifacts and node_modules
+          cp -r --exclude=node_modules --exclude=.git --exclude=dist --exclude=coverage \
+            --exclude=.eslintcache --exclude='*.log' server/* /tmp/server-deploy/
           cp server/.env* /tmp/server-deploy/ 2>/dev/null || true
           cp server/.prettier* /tmp/server-deploy/ 2>/dev/null || true
           printf 'web: node index.js\n' > /tmp/server-deploy/Procfile
+
+          # Create .gitignore to keep deploy branch clean
+          cat > /tmp/server-deploy/.gitignore << 'EOF'
+          node_modules/
+          .git/
+          dist/
+          coverage/
+          .eslintcache
+          *.log
+          .env
+          .env.local
+          .env.test
+          EOF
 
           # Strip test/dev scripts and devDependencies for production
           node -e "
@@ -98,6 +113,7 @@ jobs:
           git rm -rf . --cached 2>/dev/null || true
           find . -maxdepth 1 ! -name '.' ! -name '.git' -exec rm -rf {} + 2>/dev/null || true
           cp -r /tmp/server-deploy/* .
+          cp /tmp/server-deploy/.gitignore . 2>/dev/null || true
           git add -A
 
           if [ -z "$(git diff --cached --name-only)" ]; then
@@ -162,10 +178,26 @@ jobs:
           cp -r web/build/* /tmp/web-deploy/
           touch /tmp/web-deploy/.nojekyll
 
+          # Create .gitignore to keep deploy branch clean (exclude source & config files)
+          cat > /tmp/web-deploy/.gitignore << 'EOF'
+          src/
+          public/
+          node_modules/
+          .git/
+          package.json
+          package-lock.json
+          tsconfig.json
+          vite.config.ts
+          .eslintcache
+          *.log
+          .env*
+          EOF
+
           git checkout --orphan web-new-clean
           git rm -rf . --cached 2>/dev/null || true
           find . -maxdepth 1 ! -name '.' ! -name '.git' -exec rm -rf {} + 2>/dev/null || true
           cp -r /tmp/web-deploy/* .
+          cp /tmp/web-deploy/.gitignore . 2>/dev/null || true
           git add -A
 
           if [ -z "$(git diff --cached --name-only)" ]; then
