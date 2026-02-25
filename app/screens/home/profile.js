@@ -15,7 +15,7 @@ import * as ImagePicker from 'expo-image-picker';
 import EditUserModal from '../../components/EditUserModal';
 import { useStore } from '../../libs/globalState';
 import { updateProfilePicture } from '../../libs/requests';
-import { API_URL } from '@env';
+import { normalizeImageUrl } from '../../libs/imageUtils';
 
 export default function Profile() {
   const { user, setUser } = useStore();
@@ -26,20 +26,15 @@ export default function Profile() {
   const status = user?.status;
   const actualStatus = status || 'No status';
 
-  // Normalize any legacy localhost URLs to current API_URL host, else use default fallback
-  const normalizedProfilePicture = useMemo(() => {
-    try {
-      if (!profilePicture) return `${API_URL}/uploads/default-picture.jpg`;
-      const url = new URL(profilePicture);
-      const api = new URL(API_URL);
-      if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
-        return `${api.origin}${url.pathname}`;
-      }
-      return profilePicture;
-    } catch {
-      return `${API_URL}/uploads/default-picture.jpg`;
-    }
-  }, [profilePicture]);
+  // Normalize profile picture URL for all storage providers:
+  //  - null/undefined           → default picture
+  //  - relative path (/uploads) → prepend API_URL (local storage, SERVER_URL not set)
+  //  - absolute localhost URL   → replace host with current API_URL (dev convenience)
+  //  - absolute https URL       → use as-is (Cloudinary / S3 / local with SERVER_URL)
+  const normalizedProfilePicture = useMemo(
+    () => normalizeImageUrl(profilePicture),
+    [profilePicture]
+  );
 
   // Stores the currently shown image URI
   const [file, setFile] = useState(normalizedProfilePicture);
@@ -58,39 +53,82 @@ export default function Profile() {
     setModalVisible(true);
   };
 
-  // Function to pick an image from the device's media library
-  const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  // Common image picker options: cap dimensions to 800×800 and compress to ~55%
+  // to keep upload size reasonable without visible quality loss.
+  const IMAGE_OPTIONS = {
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsEditing: true,
+    aspect: [1, 1], // square crop — consistent with circular avatar display
+    quality: 0.55, // 0–1; 0.55 gives ~150–300 KB for a typical photo
+  };
 
-    if (status !== 'granted') {
-      // If permission is denied, show an alert
-      Alert.alert(
-        'Permission Denied',
-        `Sorry, we need camera  
-        roll permission to upload images.`
-      );
-    } else {
-      // Launch the image library and get the selected image
-      const result = await ImagePicker.launchImageLibraryAsync();
+  /**
+   * Upload the selected/captured URI and update the user profile.
+   */
+  const handleImageResult = async (result) => {
+    if (result.canceled) return;
 
-      if (!result.canceled) {
-        // If an image is selected (not cancelled), update the file state variable
-        const localUri = result.assets[0].uri;
-        setFile(localUri);
-        try {
-          const updatedUser = await updateProfilePicture(localUri);
-          if (updatedUser?.profilePicture) {
-            setUser(updatedUser);
-            setFile(updatedUser.profilePicture);
-          }
-        } catch (err) {
-          Alert.alert(
-            'Upload failed',
-            err?.response?.data?.message || err?.message || 'Please try again.'
-          );
-        }
+    const localUri = result.assets[0].uri;
+    // Show local image immediately as an optimistic update
+    setFile(localUri);
+    try {
+      const updatedUser = await updateProfilePicture(localUri);
+      if (updatedUser?.profilePicture) {
+        // setUser triggers the normalizedProfilePicture memo → useEffect → setFile.
+        // Do NOT call setFile(updatedUser.profilePicture) directly: the server returns a
+        // relative path (/uploads/...) that React Native cannot render as a URI.
+        setUser(updatedUser);
       }
+    } catch (err) {
+      // Revert optimistic update on failure
+      setFile(normalizedProfilePicture);
+      Alert.alert(
+        'Upload failed',
+        err?.response?.data?.message || err?.message || 'Please try again.'
+      );
     }
+  };
+
+  /**
+   * Launch the camera to capture a new profile picture.
+   */
+  const openCamera = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'Camera access is required to take a photo.');
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync(IMAGE_OPTIONS);
+    await handleImageResult(result);
+  };
+
+  /**
+   * Open the device gallery to pick an existing image.
+   */
+  const openGallery = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert('Permission Denied', 'Gallery access is required to choose a photo.');
+      return;
+    }
+    const result = await ImagePicker.launchImageLibraryAsync(IMAGE_OPTIONS);
+    await handleImageResult(result);
+  };
+
+  /**
+   * Show a choice sheet — Camera or Gallery — then delegate to the right handler.
+   */
+  const pickImage = () => {
+    Alert.alert(
+      'Change Profile Picture',
+      'Choose a source',
+      [
+        { text: 'Camera', onPress: openCamera },
+        { text: 'Gallery', onPress: openGallery },
+        { text: 'Cancel', style: 'cancel' },
+      ],
+      { cancelable: true }
+    );
   };
 
   if (!user) {
