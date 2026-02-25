@@ -1,48 +1,47 @@
-# Contributing Guide — محادثتي (project-chatapp-e1)
+# دليل المساهمة — محادثتي (project-chatapp-e1)
 
-> **Read this before making any change.**
-> These rules are non-negotiable and enforced at code review. Deviations require explicit
-> justification.
-
----
-
-## 1. Architecture First
-
-Before writing any code, read the AI guidance docs:
-
-| Document | Read when |
-|----------|-----------|
-| [`docs/ai/README.md`](docs/ai/README.md) | Always — start here |
-| [`docs/ai/architecture.md`](docs/ai/architecture.md) | Making any server or client change |
-| [`docs/ai/feature-guide.md`](docs/ai/feature-guide.md) | Adding a new entity or feature |
-
-**Critical rules summary (full list in `docs/ai/README.md`):**
-- Never import a Mongoose model directly in a controller — use `getRepositoryManager()`
-- Route middleware order is fixed: `isAuthenticated` → `upload` → validators → controller
-- Validators use custom functions with Arabic error messages — never inline validation in controllers
-- Auth token via Zustand store — never `localStorage` (web) or raw `AsyncStorage` (mobile)
-- File storage via `getStorageService()` — never instantiate `StorageService` directly
-- HTTP requests via the `api` axios instance — never raw `fetch` or `axios`
-- Socket.IO events must be scoped (typing per sender, seen bidirectional)
+> **اقرأ هذا الملف قبل إجراء أي تغيير.**
+> هذه القواعد غير قابلة للتفاوض وتُطبَّق عند مراجعة الكود. أي انحراف يتطلب مبرراً صريحاً.
 
 ---
 
-## 2. Branch Naming
+## 1. المعمارية أولاً
+
+قبل كتابة أي كود، اقرأ توثيق توجيهات AI:
+
+| الملف | اقرأه عند |
+|-------|---------|
+| [`docs/ai/README.md`](docs/ai/README.md) | دائماً — ابدأ من هنا |
+| [`docs/ai/architecture.md`](docs/ai/architecture.md) | إجراء أي تغيير في الخادم أو العميل |
+| [`docs/ai/feature-guide.md`](docs/ai/feature-guide.md) | إضافة كيان أو ميزة جديدة |
+
+**ملخص القواعد الحرجة (القائمة الكاملة في `docs/ai/README.md`):**
+- لا تستورد نموذج Mongoose مباشرة في المتحكم — استخدم `getRepositoryManager()`
+- ترتيب middleware ثابت: `isAuthenticated` → `upload` → المحققون → المتحكم
+- المحققون يستخدمون دوالّ مخصصة برسائل خطأ عربية — لا تضع التحقق داخل المتحكمات
+- رمز المصادقة عبر Zustand store — لا `localStorage` (ويب) ولا `AsyncStorage` خام (جوال)
+- التخزين عبر `getStorageService()` — لا تنشئ `StorageService` مباشرة
+- طلبات HTTP عبر `api` (axios instance) — لا `fetch` أو `axios` خاماً
+- أحداث Socket.IO يجب أن تكون مقيّدة (typing بالمرسل، seen ثنائي الاتجاه)
+
+---
+
+## 2. أسماء الفروع
 
 ```
-main           ← production-ready code only; never commit directly
-feat/<topic>   ← new feature (e.g., feat/group-chat)
-fix/<topic>    ← bug fix (e.g., fix/typing-indicator-scope)
-docs/<topic>   ← documentation only (e.g., docs/update-ai-guide)
-chore/<topic>  ← tooling, dependencies, config (e.g., chore/add-prettier)
-refactor/<topic> ← refactor without behavior change
+main             ← كود جاهز للإنتاج فقط؛ لا تُودِع مباشرة
+feat/<topic>     ← ميزة جديدة (مثال: feat/group-chat)
+fix/<topic>      ← إصلاح خطأ (مثال: fix/typing-indicator-scope)
+docs/<topic>     ← توثيق فقط (مثال: docs/update-ai-guide)
+chore/<topic>    ← أدوات، اعتماديات، إعداد (مثال: chore/add-prettier)
+refactor/<topic> ← إعادة هيكلة بدون تغيير في السلوك
 ```
 
 ---
 
-## 3. Commit Messages
+## 3. رسائل الإيداع (Commit Messages)
 
-**Format:** [Conventional Commits](https://www.conventionalcommits.org/) — English only.
+**الصيغة:** [Conventional Commits](https://www.conventionalcommits.org/) — **بالإنجليزية فقط**.
 
 ```
 <type>(<scope>): <short description>
@@ -52,42 +51,42 @@ refactor/<topic> ← refactor without behavior change
 <footer — breaking changes or issue references>
 ```
 
-### Types
+### الأنواع (Types)
 
-| Type | When to use |
-|------|-------------|
-| `feat` | New feature or behavior |
-| `fix` | Bug fix |
-| `docs` | Documentation changes only |
-| `test` | Adding or updating tests |
-| `refactor` | Code restructure without behavior change |
-| `chore` | Tooling, config, dependencies, CI |
-| `style` | Formatting only (no logic change) |
+| النوع | متى تستخدمه |
+|-------|------------|
+| `feat` | ميزة أو سلوك جديد |
+| `fix` | إصلاح خطأ |
+| `docs` | تغييرات في التوثيق فقط |
+| `test` | إضافة أو تحديث اختبارات |
+| `refactor` | إعادة هيكلة بدون تغيير في السلوك |
+| `chore` | أدوات، إعداد، اعتماديات، CI |
+| `style` | تنسيق فقط (بدون تغيير منطقي) |
 
-### Scopes
+### النطاقات (Scopes)
 
-| Scope | Applies to |
-|-------|-----------|
-| `server` | `server/` directory |
-| `app` | `app/` directory (React Native mobile) |
-| `web` | `web/` directory (React CRA web) |
-| `docs` | `docs/` directory |
-| `ai` | `docs/ai/` specifically |
+| النطاق | ينطبق على |
+|--------|----------|
+| `server` | مجلد `server/` |
+| `app` | مجلد `app/` (React Native جوال) |
+| `web` | مجلد `web/` (React CRA ويب) |
+| `docs` | مجلد `docs/` |
+| `ai` | `docs/ai/` تحديداً |
 | `ci` | `.github/workflows/` |
 
-### Rules
+### قواعد الإيداع
 
-1. **Subject line ≤ 72 characters**
-2. **Subject uses imperative mood** — "add", "fix", "update", not "added", "fixed"
-3. **No period at end of subject line**
-4. **Body mandatory for non-trivial commits** — list each significant change
-5. **Separate subject from body with a blank line**
-6. **One logical change per commit** — do not mix server + app + web + docs in one commit
+1. **سطر الموضوع ≤ 72 حرفاً**
+2. **الموضوع يستخدم صيغة الأمر** — "add"، "fix"، "update"، ليس "added"، "fixed"
+3. **لا نقطة في نهاية سطر الموضوع**
+4. **النص الأساسي إلزامي للإيداعات غير التافهة** — اذكر كل تغيير مهم
+5. **افصل الموضوع عن النص بسطر فارغ**
+6. **تغيير منطقي واحد لكل إيداع** — لا تخلط server + app + web + docs في إيداع واحد
 
-### Examples
+### أمثلة
 
 ```bash
-# ✅ CORRECT
+# ✅ صحيح
 git commit -m "feat(server): add group chat with repository + validators
 
 - Add Group Mongoose model with members array
@@ -97,51 +96,51 @@ git commit -m "feat(server): add group chat with repository + validators
 - Add group routes with correct middleware order
 - Socket.IO: add group_message event handling"
 
-# ✅ CORRECT (patch)
+# ✅ صحيح (patch)
 git commit -m "fix(web): use api axios instance in GroupService
 
 - Replace raw axios.post() with api.post() to ensure token injection"
 
-# ✅ CORRECT (docs only)
+# ✅ صحيح (توثيق فقط)
 git commit -m "docs(ai): update architecture with group chat layer"
 
-# ❌ WRONG — Arabic subject
+# ❌ خاطئ — موضوع عربي
 git commit -m "إضافة المجموعات"
 
-# ❌ WRONG — mixed scope
+# ❌ خاطئ — نطاق مختلط
 git commit -m "feat: add groups server and web and app"
 
-# ❌ WRONG — no body on non-trivial commit
+# ❌ خاطئ — لا نص في إيداع غير تافه
 git commit -m "feat(server): add repository pattern"
 
-# ❌ WRONG — past tense
+# ❌ خاطئ — صيغة الماضي
 git commit -m "feat(server): added group endpoint"
 ```
 
 ---
 
-## 4. Tagging Strategy
+## 4. استراتيجية التاجات (Tagging Strategy)
 
-Tags mark **meaningful release milestones** — not every commit.
+تُحدِّد التاجات **معالم الإصدار المهمة** — ليس كل إيداع.
 
-### When to create a tag
+### متى تنشئ تاجاً
 
-| Version bump | Trigger |
-|---|---|
-| `v1.0.0` (major) | First production-ready version, or breaking change |
-| `v1.X.0` (minor) | New feature complete with tests |
-| `v1.X.Y` (patch) | Documentation fix, bug fix, minor correction |
+| رفع الإصدار | المحفّز |
+|------------|---------|
+| `v1.0.0` (major) | أول إصدار جاهز للإنتاج، أو تغيير جذري (breaking change) |
+| `v1.X.0` (minor) | ميزة جديدة مكتملة مع الاختبارات |
+| `v1.X.Y` (patch) | إصلاح توثيق، إصلاح خطأ، تصحيح ثانوي |
 
-**Never tag:**
-- Work-in-progress commits
-- Commits with failing tests
-- Individual "Finished: X page" style commits
-- Every commit in a feature branch
+**لا تضع تاجاً أبداً على:**
+- إيداعات في منتصف العمل (work-in-progress)
+- إيداعات بها اختبارات فاشلة
+- إيداعات من نوع "Finished: X page"
+- كل إيداع في فرع الميزة
 
-### Tag format — annotated tags only
+### صيغة التاج — annotated tags حصراً
 
 ```bash
-# Annotated tag (ALWAYS use -a flag — never lightweight tags)
+# تاج موصوف (استخدم دائماً -a — لا lightweight tags)
 git tag -a v1.2.0 -m "v1.2.0 - Add Group Chat System
 
 - Group model + GroupRepository (Mongoose/MongoDB)
@@ -149,39 +148,44 @@ git tag -a v1.2.0 -m "v1.2.0 - Add Group Chat System
 - Custom validators: name required, members array min 2
 - Socket.IO: group_message, group_typing events
 - Client: GroupList + GroupChat components
-- Server tests: 232 → 280 passing"
+- Server tests: 232 → 280 passing
+- Web tests: 99 passing
+- Mobile tests: 83 passing"
 
-# Tag on a past commit
+# تاج على إيداع سابق
 git tag -a v1.0.0 <hash> -m "v1.0.0 - ..."
+
+# رفع التاج إلى GitHub
+git push origin v1.2.0
 ```
 
-### Tag message rules
+### قواعد رسالة التاج
 
-1. **First line:** `vX.Y.Z - Human-readable title`
-2. **Body:** bullet list of the most significant changes
-3. **Include test counts** if tests changed
-4. **English only**
+1. **السطر الأول:** `vX.Y.Z - عنوان بشري واضح`
+2. **النص:** قائمة بأهم التغييرات
+3. **اذكر أعداد الاختبارات** عند تغييرها (قبل → بعد)
+4. **بالإنجليزية فقط**
 
 ---
 
-## 5. Code Formatting
+## 5. تنسيق الكود
 
-**All code is formatted with Prettier** before every commit. No manual indentation decisions.
+**جميع الكود منسّق بـ Prettier** قبل كل إيداع. لا قرارات مسافات يدوية.
 
 ```bash
-# Format all source files (run from project root — works on all OS)
+# تنسيق جميع الملفات (من جذر المشروع — يعمل على جميع الأنظمة)
 node format.mjs
 
-# Check without writing (used in CI)
+# التحقق بدون كتابة (CI — يخرج 1 إذا كان غير منسّق)
 node format.mjs --check
 
-# Or per-package:
+# أو لكل حزمة:
 cd server && npm run format
 cd app && npm run format
 cd web && npm run format
 ```
 
-**Prettier config** (`.prettierrc.json` in `server/`, `app/`, and `web/`):
+**إعداد Prettier** (`.prettierrc.json` في `server/`، `app/`، و`web/`):
 ```json
 {
   "semi": true,
@@ -195,67 +199,67 @@ cd web && npm run format
 }
 ```
 
-**Rules:**
-- 2-space indentation — always, no tabs
-- Single quotes for strings
-- Trailing commas in multi-line structures (ES5 compatible)
-- Max line width: 100 characters
-- Never manually adjust whitespace — let Prettier decide
+**القواعد:**
+- مسافة بادئة 2 فراغ — دائماً، لا tabs
+- علامات اقتباس مفردة للسلاسل النصية
+- فواصل trailing في الهياكل متعددة الأسطر (متوافق مع ES5)
+- أقصى عرض للسطر: 100 حرف
+- لا تُعدِّل المسافات يدوياً — دع Prettier يقرر
 
 ---
 
-## 6. Pre-Commit Checklist
+## 6. قائمة التحقق قبل الإيداع
 
-Run this before every `git commit`:
+شغّل هذا قبل كل `git commit`:
 
 ```bash
-# 1. All server tests (232 tests)
+# 1. جميع اختبارات الخادم (270 اختباراً)
 cd server && npm run test:all
 
-# 2. All web tests (99 tests)
+# 2. جميع اختبارات الويب (99 اختباراً)
 cd web && npm run test:ci
 
-# 3. All mobile tests (83 tests)
+# 3. جميع اختبارات الجوال (83 اختباراً)
 cd app && npm run test:ci
 
-# 4. Prettier — ensure formatting is applied
+# 4. Prettier — تأكد من تطبيق التنسيق
 node format.mjs --check
 ```
 
-**All of the above must pass before committing.** A commit with failing tests or
-unformatted code must never reach `main`.
+**يجب أن ينجح كل ما سبق قبل الإيداع.** إيداع بفشل اختبارات أو كود غير منسّق يجب ألا يصل إلى `main`.
 
 ---
 
-## 7. Documentation Updates
+## 7. تحديثات التوثيق
 
-When adding or changing a feature:
+عند إضافة ميزة أو تغييرها:
 
-| Change type | Required doc updates |
-|-------------|---------------------|
-| New entity (model + repo + controller) | `docs/ai/feature-guide.md`, `docs/ai/architecture.md`, `docs/api-endpoints.md` |
-| New REST endpoint | `docs/api-endpoints.md`, `docs/ai/README.md` (API table) |
-| New env var | `docs/ai/README.md` (env vars section), `README.md` |
-| New test file | `docs/testing.md` |
-| New storage provider | `docs/storage.md`, `docs/ai/architecture.md` |
-| Auth change | `docs/ai/architecture.md` (auth section) |
-| New Socket.IO event | `docs/ai/architecture.md`, `docs/api-endpoints.md` |
-| New web/mobile component | `docs/ai/feature-guide.md` |
+| نوع التغيير | تحديثات التوثيق المطلوبة |
+|------------|------------------------|
+| كيان جديد (model + repo + controller) | `docs/ai/feature-guide.md`، `docs/ai/architecture.md`، `docs/api-endpoints.md` |
+| نقطة نهاية REST جديدة | `docs/api-endpoints.md`، `docs/ai/README.md` (جدول API) |
+| متغير بيئة جديد | `docs/ai/README.md` (قسم المتغيرات)، `README.md` |
+| ملف اختبار جديد | `docs/testing.md` |
+| مزود تخزين جديد | `docs/storage.md`، `docs/ai/architecture.md` |
+| تغيير في المصادقة | `docs/ai/architecture.md` (قسم المصادقة) |
+| حدث Socket.IO جديد | `docs/ai/architecture.md`، `docs/api-endpoints.md` |
+| مكوّن ويب أو جوال جديد | `docs/ai/feature-guide.md` |
 
-**Documentation commits must be separate from code commits** (use `docs` type).
+**إيداعات التوثيق يجب أن تكون منفصلة عن إيداعات الكود** (استخدم النوع `docs`).
 
 ---
 
-## 8. Testing Requirements
+## 8. متطلبات الاختبار
 
-| Test suite | Command | Count | Must pass before |
-|-----------|---------|-------|-----------------|
-| Server comprehensive | `cd server && npm test` | 80 | Any server commit |
-| Server repositories | `cd server && npm run test:repos` | 44 | Any server commit |
-| Server integration | `cd server && npm run test:integration` | 45 | Any server commit |
-| Server E2E API | `cd server && npm run test:e2e` | 63 | Any server commit |
-| Web tests | `cd web && npm run test:ci` | 99 | Any web commit |
-| Mobile tests | `cd app && npm run test:ci` | 83 | Any mobile commit |
-| **Total** | — | **414** | Any release tag |
+| مجموعة الاختبار | الأمر | العدد | يجب أن تنجح قبل |
+|----------------|-------|-------|----------------|
+| الخادم الشامل | `cd server && npm test` | 80 | أي إيداع على الخادم |
+| repositories الخادم | `cd server && npm run test:repos` | 44 | أي إيداع على الخادم |
+| التكامل | `cd server && npm run test:integration` | 45 | أي إيداع على الخادم |
+| E2E API | `cd server && npm run test:e2e` | 63 | أي إيداع على الخادم |
+| الصور | `cd server && npm run test:image` | 38 | أي إيداع للتخزين |
+| اختبارات الويب | `cd web && npm run test:ci` | 99 | أي إيداع على الويب |
+| اختبارات الجوال | `cd app && npm run test:ci` | 83 | أي إيداع على الجوال |
+| **الإجمالي** | — | **452** | أي تاج إصدار |
 
-See [`docs/testing.md`](docs/testing.md) for full test documentation.
+راجع [`docs/testing.md`](docs/testing.md) للتوثيق الكامل للاختبارات.

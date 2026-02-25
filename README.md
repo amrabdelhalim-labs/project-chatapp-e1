@@ -1,465 +1,389 @@
-# My Chat - محادثتي
+# محادثتي — تطبيق الدردشة الفوري
 
-A **real-time chat application** with 1:1 messaging, typing indicators, read receipts, and profile management. Built as a multi-platform project with a shared Express server, a React web client, and an Expo/React Native mobile client.
+تطبيق دردشة فوري متعدد المنصات يدعم المحادثات الفردية، مؤشرات الكتابة، إيصالات القراءة، وإدارة الملف الشخصي. مبني بخادم Express مشترك، وعميل ويب React، وعميل جوال Expo/React Native.
 
 > **الاسم العربي:** محادثتي | **الاسم الإنجليزي:** My Chat | **المشروع:** تعليمي
 
 ---
 
-## ✨ Key Features
+## الميزات الرئيسية
 
-| Feature | Description |
-|---------|-------------|
-| 🔐 **Authentication** | JWT-based auth with bcrypt password hashing (7-day expiry) |
-| 💬 **Real-time Chat** | Socket.IO for instant messaging between users |
-| ✍️ **Typing Indicators** | Scoped per-sender — shows "typing..." only for the active conversation |
-| ✅ **Read Receipts** | Bidirectional — both reader and sender see updated status |
-| 👤 **Profiles** | Update name, status, upload/change profile picture |
-| 📱 **Multi-Platform** | Web (React) + Mobile (Expo/React Native) + Shared Server |
-| 🗄️ **Flexible Storage** | Pluggable architecture: Local, Cloudinary, or AWS S3 |
-| 🧪 **Comprehensive Tests** | 452 tests across server, web, and mobile |
-| 🎨 **Code Quality** | Prettier formatting + LF normalization + Contributing standards |
-
----
-
-## 🏗️ Tech Stack
-
-### Server (`server/`)
-
-| Technology | Purpose | Version |
-|-----------|---------|---------|
-| Node.js | JavaScript runtime | 22.x |
-| Express | Web framework | 4.x |
-| MongoDB | NoSQL database | Latest |
-| Mongoose | ODM with schema validation | 8.x |
-| Socket.IO | Real-time bidirectional communication | 4.x |
-| JWT | Stateless authentication | 9.x |
-| bcrypt | Password hashing | 6.x |
-| multer | File upload handling (memoryStorage) | 2.x |
-
-### Web (`web/`)
-
-| Technology | Purpose | Version |
-|-----------|---------|---------|
-| React | UI framework | 19.x |
-| React Router | Client-side routing (Data Router) | 7.x |
-| Zustand | State management | 5.x |
-| Axios | HTTP client with interceptors | 1.x |
-| Tailwind CSS | Utility-first CSS framework | 3.x |
-| Formik + Yup | Form handling + validation | 2.x / 1.x |
-| Socket.IO Client | Real-time events | 4.x |
-
-### Mobile (`app/`)
-
-| Technology | Purpose | Version |
-|-----------|---------|---------|
-| Expo | React Native framework | ~54 |
-| React Native | Mobile UI framework | 0.81.x |
-| React Navigation | Native navigation (Stack + Tab) | 7.x |
-| Zustand | State management + AsyncStorage persistence | 5.x |
-| Axios | HTTP client with interceptors | 1.x |
-| NativeBase | Cross-platform UI components | 3.x |
-| Formik + Yup | Form handling + validation | 2.x / 1.x |
+| الميزة | الوصف |
+|--------|-------|
+| المصادقة | مصادقة JWT مع تجزئة bcrypt (7 أيام صلاحية) |
+| الدردشة الفورية | Socket.IO للرسائل الفورية بين المستخدمين |
+| مؤشرات الكتابة | مقيّدة بكل محادثة — تظهر للمحادثة النشطة فقط |
+| إيصالات القراءة | ثنائية الاتجاه — يرى المرسل والمستقبل حالة القراءة |
+| الملف الشخصي | تحديث الاسم والحالة، رفع/تغيير الصورة الشخصية |
+| متعدد المنصات | ويب (React) + جوال (Expo/React Native) + خادم مشترك |
+| تخزين مرن | بنية قابلة للتوصيل: Local أو Cloudinary أو AWS S3 |
+| اختبارات شاملة | 452 اختباراً: 270 خادم + 99 ويب + 83 جوال |
+| جودة الكود | Prettier + فرض نهايات LF + معايير المساهمة |
 
 ---
 
-## 📁 Project Structure
+## المكدس التقني
+
+### الخادم (`server/`)
+
+| التقنية | الغرض | الإصدار |
+|---------|-------|---------|
+| Node.js | بيئة تشغيل JavaScript | 22.x |
+| Express | إطار عمل الويب | 4.x |
+| MongoDB | قاعدة بيانات NoSQL | الأحدث |
+| Mongoose | ODM مع التحقق من المخطط | 8.x |
+| Socket.IO | التواصل الفوري ثنائي الاتجاه | 4.x |
+| JWT | المصادقة عديمة الحالة | 9.x |
+| bcrypt | تجزئة كلمات المرور | 6.x |
+| multer | معالجة رفع الملفات (memoryStorage) | 2.x |
+
+### الويب (`web/`)
+
+| التقنية | الغرض | الإصدار |
+|---------|-------|---------|
+| React | إطار عمل الواجهة | 19.x |
+| React Router | التوجيه من جانب العميل (Data Router) | 7.x |
+| Zustand | إدارة الحالة | 5.x |
+| Axios | عميل HTTP مع المعترضات | 1.x |
+| Tailwind CSS | إطار CSS | 3.x |
+| Formik + Yup | معالجة النماذج + التحقق | 2.x / 1.x |
+| Socket.IO Client | الأحداث الفورية | 4.x |
+
+### الجوال (`app/`)
+
+| التقنية | الغرض | الإصدار |
+|---------|-------|---------|
+| Expo | إطار React Native | ~54 |
+| React Native | إطار واجهة الجوال | 0.81.x |
+| React Navigation | التنقل الأصيل (Stack + Tab) | 7.x |
+| Zustand | إدارة الحالة + AsyncStorage | 5.x |
+| Axios | عميل HTTP مع المعترضات | 1.x |
+| NativeBase | مكونات واجهة متعددة المنصات | 3.x |
+| Formik + Yup | معالجة النماذج + التحقق | 2.x / 1.x |
+
+---
+
+## هيكل المشروع
 
 ```
 project-chatapp-e1/
-├── .github/workflows/          # GitHub Actions CI/CD (server tests + web build & deploy)
-├── .gitattributes              # LF line endings enforcement
+├── .github/workflows/          # GitHub Actions CI/CD (build-and-deploy.yml)
+├── .gitattributes              # فرض نهايات سطر LF
 ├── .gitignore                  # node_modules, .expo, .env, coverage
-├── CONTRIBUTING.md             # Branch naming, commits, tagging, formatting
-├── format.mjs                  # Cross-platform Prettier runner
-├── README.md                   # This file
+├── CONTRIBUTING.md             # أسماء الفروع، الإيداعات، التاجات، التنسيق
+├── format.mjs                  # تشغيل Prettier عبر المنصات
+├── README.md                   # هذا الملف
 │
 ├── server/                     # Express REST API + Socket.IO
-│   ├── index.js                # Entry point: Express + Socket.IO setup
-│   ├── config.js               # MongoDB connection + server startup
-│   ├── controllers/            # Auth (user.js) + Messages (message.js)
-│   ├── repositories/           # Repository Pattern (base, user, message, manager)
-│   ├── validators/             # Input validation with Arabic error messages
-│   ├── services/storage/       # Strategy Pattern (local, cloudinary, s3)
-│   ├── middlewares/            # JWT auth + multer file upload
-│   ├── models/                 # Mongoose schemas (User, Message)
+│   ├── index.js                # نقطة الدخول: Express + Socket.IO
+│   ├── config.js               # اتصال MongoDB + بدء الخادم
+│   ├── controllers/            # user.js + message.js
+│   ├── repositories/           # نمط Repository (base, user, message, manager)
+│   ├── validators/             # التحقق من المدخلات برسائل عربية
+│   ├── services/storage/       # نمط الاستراتيجية (local, cloudinary, s3)
+│   ├── middlewares/            # JWT auth + multer
+│   ├── models/                 # مخططات Mongoose (User, Message)
 │   ├── utils/                  # JWT helpers + Socket.IO utility
 │   ├── routes/                 # /api/user/* + /api/message/*
-│   ├── tests/                  # 232 tests (4 test suites)
-│   └── Procfile                # Heroku deployment
+│   ├── tests/                  # 270 اختباراً (5 مجموعات)
+│   └── Procfile                # نشر Heroku
 │
-├── web/                        # React CRA web client
+├── web/                        # React CRA
 │   └── src/
 │       ├── pages/              # Home, Login, Register
 │       ├── components/         # Chat, Sidebar, Profile, ProtectedRoute
-│       ├── libs/               # Zustand store, Axios interceptors, message filter
-│       └── tests/              # 99 tests (5 test suites)
+│       ├── libs/               # Zustand store, Axios interceptors
+│       └── tests/              # 99 اختباراً (5 مجموعات)
 │
-├── app/                        # Expo + React Native mobile client
-│   ├── screens/                # Login, Register, Home (chat, messages, profile)
-│   ├── components/             # Header, EditUserModal, Chat sub-components
-│   ├── libs/                   # Zustand store, Axios interceptors, message filter
-│   └── tests/                  # 83 tests (4 test suites)
+├── app/                        # Expo + React Native
+│   ├── screens/                # Login, Register, Home
+│   ├── components/             # Header, EditUserModal
+│   ├── libs/                   # Zustand store, Axios interceptors
+│   └── tests/                  # 83 اختباراً (4 مجموعات)
 │
-└── docs/                       # Documentation
-    ├── ai/                     # AI guidance (architecture, feature-guide)
-    ├── tutorials/              # Arabic tutorials (server, web, mobile)
-    ├── api-endpoints.md        # REST + WebSocket reference
-    ├── database-abstraction.md # Repository Pattern explanation
-    ├── testing.md              # All test documentation
-    └── ...                     # storage, deployment, quick-reference
+└── docs/                       # التوثيق
+    ├── ai/                     # توجيهات AI (المعمارية، دليل الميزات)
+    ├── tutorials/              # الدروس العربية (19 درساً)
+    ├── api-endpoints.md        # مرجع REST + WebSocket
+    ├── database-abstraction.md # شرح نمط Repository
+    ├── testing.md              # توثيق الاختبارات
+    ├── storage.md              # إعداد استراتيجية التخزين
+    └── deployment.md           # دليل النشر
 ```
 
 ---
 
-## 🚀 Getting Started
+## البدء السريع
 
-### Prerequisites
+### المتطلبات المسبقة
 
-- **Node.js** 22.x or later
-- **MongoDB** (local or Atlas)
+- **Node.js** 22.x أو أحدث
+- **MongoDB** (محلي أو Atlas)
 - **npm** 9+
 
 ---
 
-### 🔧 Server Setup
+### إعداد الخادم
 
 ```bash
 cd server
 npm install
-
-# Configure environment
 cp .env.example .env
-# Edit .env with your MongoDB URL, JWT secret, etc.
-
-# Start development server
+# عدّل .env: MONGODB_URL، JWT_SECRET، STORAGE_TYPE
 npm run dev
-# — OR — production mode
-npm start
 ```
 
-Server runs on `http://localhost:5000` by default.
+يعمل الخادم على `http://localhost:5000` افتراضياً.
 
 ---
 
-### 🌐 Web Setup
+### إعداد الويب
 
 ```bash
 cd web
 npm install
-
-# Configure environment
 cp .env.example .env
-# Set REACT_APP_API_URL=http://localhost:5000
-
-# Start development server
+# اضبط REACT_APP_API_URL=http://localhost:5000
 npm start
 ```
 
-Web client runs on `http://localhost:3000`.
+يعمل على `http://localhost:3000`.
 
 ---
 
-### 📱 Mobile Setup
+### إعداد الجوال
 
 ```bash
 cd app
-npm install
-
-# Configure environment
+npm install --legacy-peer-deps
 cp .env.example .env
-# Set API_URL=http://localhost:5000
-
-# Start Expo development server
+# اضبط API_URL=http://localhost:5000
 npm start
 ```
 
 ---
 
-## 🔐 Environment Variables
+## متغيرات البيئة
 
-### Server (`server/.env`)
+### الخادم (`server/.env`)
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `PORT` | No | `5000` | Server port |
-| `MONGODB_URL` | **Yes** | — | MongoDB connection string |
-| `JWT_SECRET` | **Yes** | — | JWT signing secret |
-| `STORAGE_TYPE` | No | `local` | Storage backend: `local` \| `cloudinary` \| `s3` |
+| المتغير | مطلوب | الوصف |
+|---------|-------|-------|
+| `PORT` | لا | منفذ الخادم (افتراضي: `5000`) |
+| `MONGODB_URL` | **نعم** | سلسلة اتصال MongoDB |
+| `JWT_SECRET` | **نعم** | سر توقيع JWT |
+| `STORAGE_TYPE` | لا | `local` \| `cloudinary` \| `s3` (افتراضي: `local`) |
 
-### Web (`web/.env`)
+### الويب (`web/.env`)
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `REACT_APP_API_URL` | No | Server URL for Axios (e.g., `http://localhost:5000`) |
+| المتغير | مطلوب | الوصف |
+|---------|-------|-------|
+| `REACT_APP_API_URL` | لا | عنوان URL للخادم (مثال: `http://localhost:5000`) |
 
-### Mobile (`app/.env`)
+### الجوال (`app/.env`)
 
-| Variable | Required | Description |
-|----------|----------|-------------|
-| `API_URL` | **Yes** | Server URL via `@env` (e.g., `http://localhost:5000`) |
-
----
-
-## 📡 API Reference
-
-### Authentication
-
-All endpoints require `Authorization: Bearer <token>` except Login/Register.
-
-#### Users (`/api/user`)
-
-| Method | Endpoint | Access | Description |
-|--------|----------|--------|-------------|
-| `POST` | `/register` | Public | Create new account |
-| `POST` | `/login` | Public | Get JWT token |
-| `GET` | `/profile` | Auth | Get user profile |
-| `GET` | `/friends` | Auth | Get all users except self |
-| `PUT` | `/profile` | Auth | Update name/status |
-| `PUT` | `/profile/picture` | Auth | Upload profile picture |
-
-#### Messages (`/api/message`)
-
-| Method | Endpoint | Access | Description |
-|--------|----------|--------|-------------|
-| `POST` | `/` | Auth | Send message |
-| `GET` | `/` | Auth | Get all messages (paginated) |
-| `GET` | `/conversation/:contactId` | Auth | Get conversation with a user |
-| `PATCH` | `/seen/:senderId` | Auth | Mark messages as read |
-
-#### WebSocket Events
-
-| Client Event | Server Action | Emitted Event |
-|-------------|---------------|---------------|
-| `send_message` | Create message in DB | `receive_message` → both parties |
-| `typing` | — | `typing` → recipient |
-| `stop_typing` | — | `stop_typing` → recipient |
-| `seen` | Mark messages as read | `seen` → both parties |
-
-Server-initiated: `user_created` (broadcast), `user_updated` (broadcast)
+| المتغير | مطلوب | الوصف |
+|---------|-------|-------|
+| `API_URL` | **نعم** | عنوان URL للخادم عبر `@env` |
 
 ---
 
-## 🧪 Testing
+## مرجع API
 
-**Total: 414 tests** (232 server + 99 web + 83 mobile) — all passing.
+جميع نقاط النهاية تتطلب `Authorization: Bearer <token>` ما عدا تسجيل الدخول والتسجيل.
 
-### Server Tests (232 — custom runner, requires MongoDB)
+### المستخدمون (`/api/user`)
+
+| الطريقة | نقطة النهاية | الوصول | الوصف |
+|---------|-------------|--------|-------|
+| `POST` | `/register` | عام | إنشاء حساب جديد |
+| `POST` | `/login` | عام | الحصول على رمز JWT |
+| `GET` | `/profile` | مصادق | عرض الملف الشخصي |
+| `GET` | `/friends` | مصادق | جميع المستخدمين ما عدا الحالي |
+| `PUT` | `/profile` | مصادق | تحديث الاسم/الحالة |
+| `PUT` | `/profile/picture` | مصادق | رفع الصورة الشخصية |
+
+### الرسائل (`/api/message`)
+
+| الطريقة | نقطة النهاية | الوصول | الوصف |
+|---------|-------------|--------|-------|
+| `POST` | `/` | مصادق | إرسال رسالة |
+| `GET` | `/` | مصادق | جميع الرسائل (مقسّمة) |
+| `GET` | `/conversation/:contactId` | مصادق | محادثة مع مستخدم |
+| `PATCH` | `/seen/:senderId` | مصادق | تحديد الرسائل كمقروءة |
+
+### أحداث WebSocket
+
+| حدث العميل | إجراء الخادم | الحدث المُرسل |
+|------------|-------------|--------------|
+| `send_message` | إنشاء رسالة في DB | `receive_message` → الطرفين |
+| `typing` | — | `typing` → المستقبل |
+| `stop_typing` | — | `stop_typing` → المستقبل |
+| `seen` | تحديد الرسائل كمقروءة | `seen` → الطرفين |
+
+الأحداث التي ينشئها الخادم: `user_created` (بث عام)، `user_updated` (بث عام)
+
+---
+
+## تشغيل الاختبارات
+
+**الإجمالي: 452 اختباراً** (270 خادم + 99 ويب + 83 جوال) — جميعها ناجحة.
+
+### اختبارات الخادم (270 — يتطلب MongoDB)
 
 ```bash
 cd server
-npm run test:all         # All 232 tests (4 suites sequentially)
-npm test                 # comprehensive.test.js (80 tests)
-npm run test:repos       # repositories.test.js (44 tests)
-npm run test:integration # integration.test.js (45 tests)
-npm run test:e2e         # api.test.js (63 tests — port 5001)
+npm run test:all         # جميع الاختبارات (5 مجموعات تسلسلية)
+npm test                 # comprehensive.test.js — 80 اختباراً
+npm run test:repos       # repositories.test.js — 44 اختباراً
+npm run test:integration # integration.test.js — 45 اختباراً
+npm run test:e2e         # api.test.js — 63 اختباراً
+npm run test:image       # image.test.js — 38 اختباراً
 ```
 
-### Web Tests (99 — Jest + @testing-library/react)
+### اختبارات الويب (99 — Jest + @testing-library/react)
 
 ```bash
 cd web
-npm test                 # Watch mode (development)
-npm run test:ci          # Single run (CI/servers)
+npm test                 # وضع المراقبة (التطوير)
+npm run test:ci          # تشغيل واحد (CI)
 ```
 
-### Mobile Tests (83 — Jest 29 + jest-expo 54)
+### اختبارات الجوال (83 — Jest 29 + jest-expo 54)
 
 ```bash
 cd app
-npm test                 # Watch mode (development)
-npm run test:ci          # Single run (CI/servers)
+npm test                 # وضع المراقبة (التطوير)
+npm run test:ci          # تشغيل واحد (CI)
 ```
 
 ---
 
-## 🎨 Code Quality
-
-### Prettier Formatting
-
-All source code is formatted with Prettier. Configuration is identical across all 3 packages.
+## تنسيق الكود
 
 ```bash
-# Format all files (from project root)
+# تنسيق جميع الملفات (من جذر المشروع)
 node format.mjs
 
-# Check without writing (CI — exits 1 if unformatted)
+# التحقق فقط بدون كتابة (CI — يخرج 1 إذا كان غير منسّق)
 node format.mjs --check
 
-# Per-package
+# لكل حزمة
 cd server && npm run format
 cd app && npm run format
 cd web && npm run format
 ```
 
-### Line Endings
+---
 
-- `.gitattributes` enforces LF for all text files (`* text=auto eol=lf`)
-- Prettier `endOfLine: "lf"` ensures consistency
-- Binary files (images, fonts) are marked as binary
+## المعمارية
+
+### أنماط الخادم
+
+- **نمط Repository** — المتحكمات لا تستورد النماذج مباشرة؛ جميع الوصول عبر `getRepositoryManager()`
+- **نمط الاستراتيجية للتخزين** — رفع الملفات مجرّد عبر `getStorageService()`، بدّل بـ `STORAGE_TYPE`
+- **نمط Singleton** — `RepositoryManager` و`StorageService` يُنشآن مرة واحدة
+- **المحققات** — التحقق من المدخلات برسائل خطأ عربية مُجمَّعة
+
+### أنماط العميل (ويب + جوال)
+
+- **Zustand Store** — حالة مشتركة مع الاستمرار (localStorage ويب، AsyncStorage جوال)
+- **Axios Interceptors** — حقن Bearer token تلقائياً + توجيه عند 401
+- **الكتابة المقيّدة** — `typing` تخزن userId المرسل لا قيمة منطقية
+- **إيصالات ثنائية الاتجاه** — `seen` يحمل `{ readerId, senderId }`
 
 ---
 
-## 🏛️ Architecture
+## التوثيق
 
-### Server Patterns
-
-- **Repository Pattern** — Controllers never import models directly; all DB access through `getRepositoryManager()`
-- **Storage Strategy Pattern** — File uploads abstracted via `getStorageService()`, switch providers with `STORAGE_TYPE` env var
-- **Singleton Pattern** — `RepositoryManager` and `StorageService` instantiated once
-- **Validators** — Input validation with Arabic error messages, errors accumulated and thrown at once
-
-### Profile Picture Storage & Retrieval
-
-**Important:** Profile pictures are stored on the **server**, not bundled with the web app.
-
-| Step | Details |
-|------|---------|
-| **Upload** | Web sends `FormData` to `PUT /api/user/profile-picture` → multer → stored in `server/public/uploads/` |
-| **Storage** | Relative path (`/uploads/pic.jpg`) saved in `User.profilePicture` (MongoDB) |
-| **Retrieval (Web)** | Image URL constructed as: `${REACT_APP_API_URL}${user.profilePicture}` |
-| **Why?** | Allows image swap without rebuilding the web app; supports future CDN migration |
-
-**GitHub Pages Note:** Since GitHub Pages only serves static files (HTML/CSS/JS), profile pictures require a **real backend server**. When using GitHub Pages for the web:
-- Local dev: Images work (server running locally)
-- Production: GitHub Pages cannot add profile pictures (no server)
-- Future: Deploy server to Render/Railway/Heroku for full functionality
-
-
-
-### Client Patterns (Web + Mobile)
-
-- **Zustand Store** — Shared state management with persistence (localStorage on web, AsyncStorage on mobile)
-- **Axios Interceptors** — Auto-inject Bearer token + handle 401 (redirect on web, logout on mobile)
-- **Scoped Typing** — `typing` state stores sender's userId, not a boolean
-- **Bidirectional Read Receipts** — `seen` event carries `{ readerId, senderId }`
-- **Optimistic Updates** — Messages added locally before server confirmation, deduplicated by `_id` or `clientId`
-- **XSS Prevention** — `whitespace-pre-wrap` text rendering on web (no `dangerouslySetInnerHTML`)
+| الملف | الوصف |
+|-------|-------|
+| [`docs/api-endpoints.md`](docs/api-endpoints.md) | مرجع REST + WebSocket الكامل |
+| [`docs/database-abstraction.md`](docs/database-abstraction.md) | شرح نمط Repository |
+| [`docs/testing.md`](docs/testing.md) | الاختبارات، الأعداد، الإعداد، استكشاف الأخطاء |
+| [`docs/storage.md`](docs/storage.md) | إعداد استراتيجية التخزين |
+| [`docs/deployment.md`](docs/deployment.md) | دليل النشر |
+| [`docs/ai/`](docs/ai/) | توجيهات AI (المعمارية، دليل الميزات) |
+| [`docs/tutorials/`](docs/tutorials/) | 19 درساً عربياً (9 خادم + 5 ويب + 5 جوال) |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | معايير الفروع، الإيداعات، التاجات، التنسيق |
 
 ---
 
-## 📚 Documentation
+## جميع أوامر npm
 
-| Document | Description |
-|----------|-------------|
-| [`docs/api-endpoints.md`](docs/api-endpoints.md) | REST + WebSocket API reference |
-| [`docs/database-abstraction.md`](docs/database-abstraction.md) | Repository Pattern explanation |
-| [`docs/testing.md`](docs/testing.md) | All test suites, counts, setup, troubleshooting |
-| [`docs/storage.md`](docs/storage.md) | File storage strategy configuration |
-| [`docs/deployment.md`](docs/deployment.md) | Deployment guide |
-| [`docs/ai/`](docs/ai/) | AI guidance (architecture, feature guide) |
-| [`docs/tutorials/`](docs/tutorials/) | Arabic tutorials (19 total: 9 server + 5 web + 5 mobile) |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Branch, commit, tag, formatting standards |
+### الخادم
 
----
+| الأمر | الوصف |
+|-------|-------|
+| `npm start` | الخادم للإنتاج |
+| `npm run dev` | التطوير مع إعادة التشغيل التلقائي |
+| `npm test` | 80 اختباراً شاملاً |
+| `npm run test:repos` | 44 اختباراً للـ repositories |
+| `npm run test:integration` | 45 اختباراً متكاملاً |
+| `npm run test:e2e` | 63 اختباراً E2E |
+| `npm run test:image` | 38 اختباراً للصور |
+| `npm run test:all` | جميع 270 اختباراً تسلسلياً |
+| `npm run format` | تنسيق الملفات |
+| `npm run format:check` | التحقق من التنسيق |
 
-## ⚙️ All npm Scripts
+### الويب
 
-### Server
+| الأمر | الوصف |
+|-------|-------|
+| `npm start` | خادم التطوير |
+| `npm run build` | بناء الإنتاج |
+| `npm test` | اختبارات وضع المراقبة |
+| `npm run test:ci` | 99 اختباراً (CI) |
+| `npm run format` | تنسيق الملفات |
 
-| Script | Command | Description |
-|--------|---------|-------------|
-| `start` | `node index.js` | Production server |
-| `dev` | `npx nodemon index.js` | Development with auto-reload |
-| `test` | `node tests/comprehensive.test.js` | 80 comprehensive tests |
-| `test:repos` | `node tests/repositories.test.js` | 44 repository tests |
-| `test:integration` | `node tests/integration.test.js` | 45 integration tests |
-| `test:e2e` | `node tests/api.test.js` | 63 E2E API tests |
-| `test:all` | All 4 test files sequentially | All 232 tests |
-| `format` | `prettier --write "**/*.js"` | Format all JS files |
-| `format:check` | `prettier --check "**/*.js"` | Check formatting |
+### الجوال
 
-### Web
-
-| Script | Command | Description |
-|--------|---------|-------------|
-| `start` | `react-scripts start` | Development server |
-| `build` | `react-scripts build` | Production build |
-| `test` | `react-scripts test` | Watch mode tests |
-| `test:ci` | `react-scripts test --watchAll=false` | CI tests (99 tests) |
-| `format` | `prettier --write "src/**/*.{js,jsx,css}"` | Format source files |
-| `format:check` | `prettier --check "src/**/*.{js,jsx,css}"` | Check formatting |
-
-### Mobile
-
-| Script | Command | Description |
-|--------|---------|-------------|
-| `start` | `expo start` | Expo development server |
-| `android` | `expo start --android` | Android development |
-| `ios` | `expo start --ios` | iOS development |
-| `test` | `jest --watchAll` | Watch mode tests |
-| `test:ci` | `jest --watchAll=false` | CI tests (83 tests) |
-| `format` | `prettier --write "**/*.{js,jsx}"` | Format source files |
-| `format:check` | `prettier --check "**/*.{js,jsx}"` | Check formatting |
-
-### Root
-
-| Script | Command | Description |
-|--------|---------|-------------|
-| — | `node format.mjs` | Format all packages |
-| — | `node format.mjs --check` | Check all packages (CI) |
+| الأمر | الوصف |
+|-------|-------|
+| `npm start` | Expo dev server |
+| `npm run android` | تطوير Android |
+| `npm run ios` | تطوير iOS |
+| `npm test` | اختبارات وضع المراقبة |
+| `npm run test:ci` | 83 اختباراً (CI) |
+| `npm run format` | تنسيق الملفات |
 
 ---
 
-## ⚙️ CI/CD Pipeline
+## خط CI/CD
 
-GitHub Actions workflow (`.github/workflows/build-and-deploy.yml`) runs on every push to `main`:
+سير عمل GitHub Actions يعمل عند كل دفع إلى `main`:
 
-| Job | What it does |
-|-----|-------------|
-| **Deploy Server** | Install → Run 232 tests (MongoDB service) → Push to `server` branch |
-| **Deploy Web** | Install → Run 99 tests → Build React → Push to `web` branch |
+| الوظيفة | ما تفعله |
+|---------|---------|
+| **نشر الخادم** | تثبيت → 270 اختباراً (MongoDB service) → دفع إلى فرع `server` → Heroku |
+| **نشر الويب** | تثبيت → 99 اختباراً → بناء React → دفع إلى فرع `web` → GitHub Pages |
 
-Both jobs run **in parallel**. Deploy commits use `[skip ci]` to prevent recursive triggers.
+كلا الوظيفتين تعملان **بالتوازي**. إيداعات النشر تستخدم `[skip ci]` لمنع التشغيل المتكرر.
 
-### GitHub Repository Variables
+### متغيرات GitHub
 
-| Variable | Example | Description |
-|----------|---------|-------------|
-| `REACT_APP_API_URL` | `https://your-server.onrender.com` | Server URL for web client build |
-
-**Multi-Platform Deployment:**  
-The web app uses `PUBLIC_URL` environment variable for dynamic path configuration:
-- **GitHub Pages**: `PUBLIC_URL=/project-chatapp-e1` (set in workflow)
-- **Netlify/Vercel/Other**: No `PUBLIC_URL` needed (root path `/`)
-- **Local Development**: No `PUBLIC_URL` needed (root path `/`)
-
-This allows deploying to any platform without code changes.
-
-See [`.github/workflows/README.md`](.github/workflows/README.md) for full setup guide (Arabic).
+| المتغير | مثال | الوصف |
+|---------|------|-------|
+| `REACT_APP_API_URL` | `https://your-server.onrender.com` | عنوان URL للخادم لبناء الويب |
 
 ---
 
-## 🤝 Contributing
+## تاريخ المشروع
 
-Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) before making any changes. Key points:
+| التاج | العنوان | التغييرات الرئيسية |
+|-------|---------|-----------------|
+| `v1.0.0` | المشروع مكتمل الميزات | الخادم + الويب + الجوال مع CRUD كامل وSocket.IO |
+| `v1.1.0` | نمط Repository والتخزين واختبارات الخادم | Repository Pattern، Storage Strategy، الدروس التعليمية |
+| `v1.2.0` | أمان واختبارات عميل الويب | Axios interceptors، Zustand، Formik/Yup، 99 اختباراً |
+| `v1.3.0` | عميل الجوال واختبارات متعددة المنصات | جوال، Zustand/AsyncStorage، 83 اختباراً |
+| `v1.4.0` | جودة الكود ومعايير المساهمة | Prettier، .gitattributes، CONTRIBUTING.md |
+| `v1.5.0` | خط CI/CD | GitHub Actions: اختبارات الخادم + بناء ونشر الويب |
+| `v1.6.0` | اختبارات الصور | image.test.js — إجمالي 452 اختباراً، تحسينات التوثيق |
 
-- **Conventional Commits** — English only, imperative mood
-- **Annotated Tags** — SemVer, include test counts
-- **Prettier** — Run `node format.mjs` before every commit
-- **Tests** — All 414 tests must pass before committing
-
----
-
-## 📅 Project History
-
-### Tags (SemVer)
-
-| Tag | Title | Key Changes |
-|-----|-------|------------|
-| `v1.0.0` | App Feature-Complete | Server + Web + Mobile with full CRUD, Socket.IO real-time messaging |
-| `v1.1.0` | Repository Pattern, Storage & Server Tests | Repository Pattern, Storage Strategy, 232 server tests, tutorials |
-| `v1.2.0` | Web Client Security & Tests | Axios interceptors, Zustand, Formik/Yup, 99 web tests, tutorials |
-| `v1.3.0` | Mobile Client & Cross-Platform Tests | Mobile interceptors, Zustand/AsyncStorage, 83 mobile tests |
-| `v1.4.0` | Code Quality and Contributing Standards | Prettier, .gitattributes, CONTRIBUTING.md, README.md, 414 tests |
-| `v1.5.0` | CI/CD Pipeline | GitHub Actions: server tests + web build & deploy |
-
-### Commits
-
-```
+```bash
 git log --oneline --decorate
 ```
 
 ---
 
-**Built with ❤️ — محادثتي**
+**محادثتي — مبني بالحب**
