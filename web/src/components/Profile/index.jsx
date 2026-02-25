@@ -11,7 +11,9 @@ export default function Profile({ onClose }) {
   const [lastName, setLastName] = useState(user.lastName);
   const [status, setStatus] = useState(user.status);
   const [image, setImage] = useState(
-    user.profilePicture || `${process.env.REACT_APP_API_URL}/uploads/default-picture.jpg`
+    user.profilePicture ? 
+      (user.profilePicture.startsWith('http') ? user.profilePicture : `${process.env.REACT_APP_API_URL}${user.profilePicture}`) 
+      : `${process.env.REACT_APP_API_URL}/uploads/default-picture.jpg`
   );
 
   const handleProfilePictureChange = async (e) => {
