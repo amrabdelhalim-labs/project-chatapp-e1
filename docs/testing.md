@@ -557,3 +557,74 @@ if (process.env.NODE_ENV !== "test") {
 | `act() warning` | لف العمليات غير المتزامنة في `await act(async () => {})` |
 | اختبار يؤثر على آخر | أضف `beforeEach` لإعادة تعيين المتجر + `AsyncStorage.clear()` |
 | `SyntaxError: Unexpected token` | أضف المكتبة لـ `transformIgnorePatterns` |
+
+---
+
+---
+
+# فحص التنسيق (Prettier)
+
+## نظرة عامة
+
+جميع ملفات المشروع منسقة بـ **Prettier** مع إعدادات موحدة عبر جميع الحزم (server, app, web).
+
+---
+
+## أوامر التنسيق
+
+```bash
+# تنسيق جميع الملفات (من جذر المشروع)
+node format.mjs
+
+# فحص فقط بدون كتابة (CI — يخرج برمز 1 إذا وجد ملفات غير منسقة)
+node format.mjs --check
+
+# لكل حزمة على حدة
+cd server && npm run format         # **/*.js
+cd app && npm run format             # **/*.{js,jsx}
+cd web && npm run format             # src/**/*.{js,jsx,css}
+
+# فحص لكل حزمة
+cd server && npm run format:check
+cd app && npm run format:check
+cd web && npm run format:check
+```
+
+---
+
+## إعدادات Prettier
+
+جميع الحزم تستخدم نفس الإعدادات (`.prettierrc.json`):
+
+```json
+{
+  "semi": true,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "printWidth": 100,
+  "bracketSpacing": true,
+  "arrowParens": "always",
+  "endOfLine": "lf"
+}
+```
+
+---
+
+## قائمة فحص ما قبل التضمين (Pre-Commit)
+
+```bash
+# 1. اختبارات الخادم (232 اختبار)
+cd server && npm run test:all
+
+# 2. اختبارات الويب (99 اختبار)
+cd web && npm run test:ci
+
+# 3. اختبارات الموبايل (83 اختبار)
+cd app && npm run test:ci
+
+# 4. فحص التنسيق
+node format.mjs --check
+```
+
+جميع الخطوات الأربع يجب أن تنجح قبل التضمين. راجع `CONTRIBUTING.md` للمعايير الكاملة.

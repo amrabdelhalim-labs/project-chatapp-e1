@@ -11,6 +11,21 @@
 └─────────────┘     └─────────────┘     └────────────────┘
 ```
 
+## Project Root
+
+```
+project-chatapp-e1/
+├── .gitattributes              # LF line-ending enforcement (* text=auto eol=lf)
+├── .gitignore                  # node_modules, .expo, .env, coverage, dist, build
+├── CONTRIBUTING.md             # Branch naming, commits, tagging, formatting, pre-commit checklist
+├── format.mjs                  # Cross-platform Prettier runner (node format.mjs [--check])
+├── README.md                   # Project overview, setup, architecture, scripts
+├── server/                     # Express REST API + Socket.IO + MongoDB
+├── web/                        # React CRA web client
+├── app/                        # Expo + React Native mobile client
+└── docs/                       # Documentation (reference, tutorials, AI guidance)
+```
+
 ## Server Architecture
 
 ```
@@ -49,6 +64,8 @@ server/
 │   ├── user.js                 # /api/user/*
 │   └── message.js              # /api/message/*
 ├── Procfile                     # Heroku deployment (web: node index.js)
+├── .prettierrc.json             # Prettier config (singleQuote, tabWidth:2, endOfLine:lf)
+├── .prettierignore              # Excludes node_modules/, public/uploads/
 └── tests/
     ├── test.helpers.js          # assert, colors, logSection, printSummary
     ├── comprehensive.test.js    # 80 integration tests (8 phases)
@@ -63,6 +80,8 @@ server/
 web/
 ├── package.json                # React 19, CRA, Zustand, Socket.IO, Axios, Formik, Yup, Tailwind
 ├── .env.example                # REACT_APP_API_URL=http://localhost:5000
+├── .prettierrc.json            # Prettier config (same as server)
+├── .prettierignore             # Excludes node_modules/, build/, coverage/
 └── src/
     ├── index.jsx               # ReactDOM.createRoot entry point
     ├── App.jsx                 # Renders <Router />
@@ -119,6 +138,8 @@ app/
 ├── navigation.js               # Stack Navigator (Login, Register, Home → Tab Navigator)
 ├── babel.config.js             # babel-preset-expo + dotenv/reanimated (excluded in test env)
 ├── .env                        # API_URL=http://localhost:5000
+├── .prettierrc.json            # Prettier config (same as server)
+├── .prettierignore             # Excludes node_modules/, android/, ios/, .expo/, *.d.ts
 ├── libs/
 │   ├── globalState.js          # Zustand store + AsyncStorage persistence (not localStorage)
 │   ├── requests.js             # axios.create() + interceptors (token from Zustand, 401→logout)
@@ -275,3 +296,56 @@ npx jest --watchAll=false --verbose  # verbose output
 - **moduleNameMapper:** Maps `^@env$` to `tests/__mocks__/@env.js` (exports `API_URL = "http://localhost:5000"`)
 - **AsyncStorage mock:** In-memory Map-based mock in `tests/__mocks__/@react-native-async-storage/async-storage.js`
 - **No real server needed:** All mobile tests mock Axios and AsyncStorage — they run without a backend
+
+## Code Quality Toolchain
+
+### Prettier Formatting
+
+All source code is formatted with Prettier. Configuration is identical across all 3 packages:
+
+```json
+{
+  "semi": true,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "trailingComma": "es5",
+  "printWidth": 100,
+  "bracketSpacing": true,
+  "arrowParens": "always",
+  "endOfLine": "lf"
+}
+```
+
+### Formatting Commands
+
+```bash
+# Format all packages from project root
+node format.mjs
+
+# Check only (CI — exit 1 if unformatted)
+node format.mjs --check
+
+# Per-package
+cd server && npm run format      # **/*.js
+cd app && npm run format          # **/*.{js,jsx}
+cd web && npm run format          # src/**/*.{js,jsx,css}
+```
+
+### Line Ending Enforcement
+
+- `.gitattributes` at project root: `* text=auto eol=lf`
+- Prettier `endOfLine: "lf"` in all packages
+- After adding `.gitattributes`: `git add --renormalize .` was run to normalize all tracked files
+- Binary files (images, fonts, PDFs, ZIPs) are marked as binary in `.gitattributes`
+
+### Contributing Standards
+
+`CONTRIBUTING.md` at project root defines 8 sections:
+1. Architecture First — read `docs/ai/` before coding
+2. Branch Naming — `feat/`, `fix/`, `docs/`, `chore/`, `refactor/`
+3. Commit Messages — Conventional Commits, English, imperative mood
+4. Tagging Strategy — annotated tags only, SemVer, test counts in message
+5. Code Formatting — Prettier config, `format.mjs` usage
+6. Pre-Commit Checklist — tests + formatting
+7. Documentation Updates — table mapping change types to required doc updates
+8. Testing Requirements — all suites with counts and commands

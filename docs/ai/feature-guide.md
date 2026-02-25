@@ -67,6 +67,7 @@ socket.on("seen", ({ readerId, senderId }) => {
 5. Add route in `routes/`
 6. Add tests in `tests/comprehensive.test.js`
 7. Update `docs/api-endpoints.md`
+8. Run `node format.mjs` to format new code
 
 ### New Socket.IO Event
 
@@ -244,3 +245,79 @@ npx jest --watchAll=false --verbose  # verbose output
 - Axios/API calls → `requests.test.js`
 - Socket events → `integration.test.js`
 - Message filtering → `filterMessages.test.js`
+
+### Pre-Commit Checklist
+
+Before every commit, verify:
+
+```bash
+# 1. Server tests (232)
+cd server && npm run test:all
+
+# 2. Web tests (99)
+cd web && npm run test:ci
+
+# 3. Mobile tests (83)
+cd app && npm run test:ci
+
+# 4. Formatting — must pass with zero issues
+node format.mjs --check
+```
+
+All 4 steps must pass. See `CONTRIBUTING.md` for full standards.
+
+### Commit
+
+Separate commits by scope — never mix server + web + app + docs in one commit.
+
+```bash
+# Server changes first:
+git add server/ && git commit -m "feat(server): add group chat with repository + validators
+
+- Add Group Mongoose model with members array
+- Register in models and add GroupRepository extending BaseRepository
+- Register in RepositoryManager as getGroupRepository()
+- Add group validators with Arabic error messages
+- Add group routes with correct middleware order
+- Socket.IO: add group_message event handling"
+
+# Then web client:
+git add web/ && git commit -m "feat(web): add group chat UI components
+
+- GroupList sidebar with create/join actions
+- GroupChat page with message list + input
+- Zustand store: groups slice with CRUD + socket sync"
+
+# Then mobile client:
+git add app/ && git commit -m "feat(app): add group chat screens
+
+- GroupListScreen with FlatList + pull-to-refresh
+- GroupChatScreen with message input + typing indicator
+- Navigation: add group stack to drawer"
+
+# Documentation (always last, always separate):
+git add docs/ && git commit -m "docs(ai): update architecture with group chat layer"
+```
+
+### Tagging (when applicable)
+
+Create an annotated tag only if this commit represents a **significant milestone** — a new feature
+complete with tests, or a notable improvement. Patch-level fixes (docs, renames) use `vX.Y.Z`;
+new features use `vX.(Y+1).0`.
+
+```bash
+git tag -a v1.5.0 -m "v1.5.0 - Add Group Chat System
+
+- Group model + GroupRepository (Mongoose/MongoDB)
+- REST routes: POST /groups, GET /groups, DELETE /groups/:id
+- Custom validators: name required, members array min 2
+- Socket.IO: group_message, group_typing events
+- Web: GroupList + GroupChat components
+- Mobile: GroupListScreen + GroupChatScreen
+- Server tests: 232 → 280 passing
+- Web tests: 99 → 115 passing
+- Mobile tests: 83 → 96 passing"
+```
+
+See `CONTRIBUTING.md` §3 (Commit Messages) and §4 (Tagging Strategy) for full rules.  
+See workspace tagging rules: [`docs/ai-improvement-guide.md`](../../../../docs/ai-improvement-guide.md) § Tagging Strategy.

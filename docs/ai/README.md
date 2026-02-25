@@ -6,6 +6,7 @@ This directory contains machine-facing documentation for AI assistants working o
 
 | File | Purpose |
 |------|---------|
+| [CONTRIBUTING.md](../../CONTRIBUTING.md) | Branch naming, commit format, tagging, formatting, pre-commit checklist |
 | [architecture.md](architecture.md) | System architecture (server + web), tech stack, data flow |
 | [feature-guide.md](feature-guide.md) | Feature implementation patterns, Socket.IO events, storage, state management |
 
@@ -25,6 +26,8 @@ This directory contains machine-facing documentation for AI assistants working o
 - **Mobile Testing:** Jest 29 + jest-expo 54, 83 mobile tests (4 test suites)
 - **Total Tests:** 414 (232 server + 99 web + 83 mobile)
 - **Deployment:** Heroku-ready with Procfile
+- **Formatting:** Prettier with LF normalization (`.prettierrc.json` in each package, `format.mjs` at root)
+- **Contributing:** `CONTRIBUTING.md` at project root — commit format, tagging, pre-commit checklist
 - **Tutorials:** 9 server tutorials + 5 web tutorials + 5 mobile tutorials (Arabic) in `docs/tutorials/`
 
 ## Test Commands
@@ -56,6 +59,25 @@ npx jest --watchAll=false --verbose  # verbose output
 # 83 tests across 4 suites — all pass
 ```
 
+### Formatting (Prettier — all packages)
+```bash
+# From project root — format all source files
+node format.mjs
+
+# Check only (CI — exit 1 if unformatted)
+node format.mjs --check
+
+# Per-package
+cd server && npm run format
+cd app && npm run format
+cd web && npm run format
+
+# Check per-package
+cd server && npm run format:check
+cd app && npm run format:check
+cd web && npm run format:check
+```
+
 ## Environment Variables
 
 | Variable | Package | Required | Default | Description |
@@ -81,3 +103,7 @@ npx jest --watchAll=false --verbose  # verbose output
 - Mobile `logout()` clears both AsyncStorage and Zustand store
 - Mobile babel plugins (dotenv + reanimated) excluded in test env
 - Mobile must use Jest 29 (not 30) — jest-expo 54 incompatibility
+- All code must be formatted with Prettier before commit (`node format.mjs`)
+- Line endings are always LF — enforced by `.gitattributes` and Prettier `endOfLine: "lf"`
+- Never mix formatting commits with feature commits — use `chore(format)` or `style` type
+- Follow `CONTRIBUTING.md` for commit messages (Conventional Commits, English only)

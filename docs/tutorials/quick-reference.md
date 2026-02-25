@@ -37,7 +37,8 @@
 - ODM (Mongoose), CORS
 - React Hooks, Zustand, React Router, React Navigation
 - Design Patterns (Singleton, Factory, Strategy, Repository)
-- HTTP Status Codes, Best Practices
+- Conventional Commits, Annotated Tags, SemVer
+- HTTP Status Codes, Best Practices, Code Formatting (Prettier)
 
 **الوقت المتوقع**: 30-45 دقيقة
 
@@ -469,6 +470,8 @@
 | 🌐 الويب | [web/](./web/) |
 | 📱 الموبايل | [mobile/](./mobile/) |
 | 📖 الفهرس الرئيسي | [README.md](./README.md) |
+| ⚙️ المساهمة | [CONTRIBUTING.md](../../CONTRIBUTING.md) |
+| 🎨 التنسيق | `node format.mjs` — `node format.mjs --check` |
 
 ---
 
