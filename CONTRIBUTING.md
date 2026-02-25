@@ -224,6 +224,9 @@ cd app && npm run test:ci
 
 # 4. Prettier — تأكد من تطبيق التنسيق
 node format.mjs --check
+
+# 5. فحص الورك فلو (لازم عند تعديل .github/workflows أو server/package.json)
+node validate-workflow.mjs
 ```
 
 **يجب أن ينجح كل ما سبق قبل الإيداع.** إيداع بفشل اختبارات أو كود غير منسّق يجب ألا يصل إلى `main`.

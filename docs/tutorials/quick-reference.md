@@ -473,8 +473,9 @@
 | 📖 الفهرس الرئيسي | [README.md](./README.md) |
 | ⚙️ المساهمة | [CONTRIBUTING.md](../../CONTRIBUTING.md) |
 | 🎨 التنسيق | `node format.mjs` — `node format.mjs --check` |
+| � فحص الورك فلو | `node validate-workflow.mjs` |
 | 🚀 CI/CD | [.github/workflows/README.md](../../.github/workflows/README.md) |
-| 🧪 التحقق المحلي | [docs/testing.md](../testing.md) § التحقق المحلي من سلسلة CI |
+| 🧪 التحقق المحلي | [docs/testing.md](../testing.md) § التحقق المحلي |
 
 ---
 

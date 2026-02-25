@@ -616,7 +616,7 @@ cd web && npm run format:check
 ## قائمة فحص ما قبل التضمين (Pre-Commit)
 
 ```bash
-# 1. اختبارات الخادم (232 اختبار)
+# 1. اختبارات الخادم (270 اختبار)
 cd server && npm run test:all
 
 # 2. اختبارات الويب (99 اختبار)
@@ -627,9 +627,12 @@ cd app && npm run test:ci
 
 # 4. فحص التنسيق
 node format.mjs --check
+
+# 5. فحص الورك فلو (يكتشف أخطاء النشر قبل الرفع)
+node validate-workflow.mjs
 ```
 
-جميع الخطوات الأربع يجب أن تنجح قبل التضمين. راجع `CONTRIBUTING.md` للمعايير الكاملة.
+جميع الخطوات الخمس يجب أن تنجح قبل التضمين. راجع `CONTRIBUTING.md` للمعايير الكاملة.
 
 ---
 
@@ -699,7 +702,27 @@ npm ci → npm run test:ci (99 اختبار) → npm run build → دفع إلى
 عند إنشاء أو تعديل ملف GitHub Actions، يُفضل التحقق محلياً قبل الدفع إلى GitHub.
 هذا يوفر الوقت ويكشف الأخطاء مبكراً.
 
-### خطوات التحقق المحلي
+### الطريقة الموصى بها: `validate-workflow.mjs`
+
+يتوفر سكريبت آلي يُشغَّل بأمر واحد، على غرار `format.mjs` تماماً:
+
+```bash
+node validate-workflow.mjs
+```
+
+يفحص السكريبت:
+- هيكل YAML (لا tabs، المفاتيح الأساسية موجودة، `[skip ci]` موجود)
+- rsync excludes: `node_modules`, `tests`, `dist`, `coverage` جميعها مُستثناة
+- عدم وجود `cp` لملفات prettier أو node_modules
+- محاكاة كاملة لسكريبت `package.json` على الملف الحقيقي — يتأكد من بقاء `start` فقط وحذف `devDependencies`
+
+**ناتج ناجح:**
+```
+  Passed: 15   Failed: 0
+[OK] Workflow is valid and ready to push.
+```
+
+### خطوات التحقق المحلي التفصيلية
 
 #### 1. فحص هيكل YAML
 

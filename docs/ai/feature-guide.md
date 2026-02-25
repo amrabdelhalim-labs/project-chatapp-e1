@@ -291,7 +291,7 @@ npx jest --watchAll=false --verbose  # verbose output
 Before every commit, verify:
 
 ```bash
-# 1. Server tests (232)
+# 1. Server tests (270)
 cd server && npm run test:all
 
 # 2. Web tests (99)
@@ -302,9 +302,12 @@ cd app && npm run test:ci
 
 # 4. Formatting — must pass with zero issues
 node format.mjs --check
+
+# 5. Workflow validation (لازم عند تعديل .github/workflows أو package.json)
+node validate-workflow.mjs
 ```
 
-All 4 steps must pass. See `CONTRIBUTING.md` for full standards.
+All 5 steps must pass. See `CONTRIBUTING.md` for full standards.
 
 ### Commit
 
@@ -380,27 +383,17 @@ The web app is platform-agnostic. Deploy to:
 - **Netlify/Vercel**: No `PUBLIC_URL` needed (root routing)
 - **Local Dev**: No `PUBLIC_URL` needed (root routing)
 
-If you modify the workflow file (`.github/workflows/build-and-deploy.yml`), validate locally first:
+If you modify the workflow file (`.github/workflows/build-and-deploy.yml`), validate locally first
+using the automated script — mirrors the same pattern as `format.mjs`:
 
 ```bash
-# 1. Check YAML structure
-node -e "const wf=require('fs').readFileSync('.github/workflows/build-and-deploy.yml','utf8'); console.log('Lines:', wf.split('\n').length, '| Tabs:', wf.includes('\t') ? 'BAD' : 'OK')"
-
-# 2. Run server tests with CI env vars (needs local MongoDB)
-cd server && NODE_ENV=test JWT_SECRET=test_jwt_secret MONGODB_URL=mongodb://localhost:27017/test_db npm run test:all
-
-# 3. Run web tests + build
-cd web && npm run test:ci && REACT_APP_API_URL=https://example.com npm run build
-
-# 4. Simulate deploy cleanup script
-node -e "const p=JSON.parse(require('fs').readFileSync('server/package.json')); delete p.devDependencies; ['test:all','test','test:repos','test:integration','test:e2e','format','format:check','dev'].forEach(s=>delete p.scripts[s]); console.log('Remaining:', Object.keys(p.scripts))"
-
-# 5. Test rsync exclusions (build artifacts removal)
-mkdir -p /tmp/test-deploy
-rsync -r --exclude=node_modules --exclude=.git --exclude=dist --exclude=coverage \
-  --exclude=.eslintcache --exclude='*.log' server/ /tmp/test-deploy/
-echo "Files deployed (should be < 100):" && find /tmp/test-deploy -type f | wc -l
+# Single command covers: YAML structure, rsync excludes, package.json strip simulation
+node validate-workflow.mjs
+# Expected: Passed: 15   Failed: 0  |  [OK] Workflow is valid and ready to push.
 ```
+
+The script automatically extracts the delete list from the workflow YAML itself and simulates it
+against the real `server/package.json` — no manual maintenance required.
 
 **✅ التحقق الدوري:**
 
