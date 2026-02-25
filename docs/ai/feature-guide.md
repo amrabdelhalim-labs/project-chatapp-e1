@@ -347,6 +347,18 @@ cd web && npm run test:ci && REACT_APP_API_URL=https://example.com npm run build
 
 # 4. Simulate deploy cleanup script
 node -e "const p=JSON.parse(require('fs').readFileSync('server/package.json')); delete p.devDependencies; ['test:all','test','test:repos','test:integration','test:e2e','format','format:check','dev'].forEach(s=>delete p.scripts[s]); console.log('Remaining:', Object.keys(p.scripts))"
+
+# 5. Test rsync exclusions (build artifacts removal)
+mkdir -p /tmp/test-deploy
+rsync -r --exclude=node_modules --exclude=.git --exclude=dist --exclude=coverage \
+  --exclude=.eslintcache --exclude='*.log' server/ /tmp/test-deploy/
+echo "Files deployed (should be < 100):" && find /tmp/test-deploy -type f | wc -l
 ```
 
-See [`docs/testing.md`](../testing.md) § "التحقق المحلي من سلسلة CI" for the full local validation guide.
+**✅ التحقق الدوري:**
+
+بعد كل إيداع على `main`، تحقق من:
+1. **GitHub Actions UI** — تأكد من نجاح Job التوازي
+2. **GitHub Pages** — زيارة `https://YOUR_USERNAME.github.io/project-chatapp-e1/`
+3. **فرع `web`** — تحقق من وجود `index.html` + assets
+4. **فرع `server`** — تحقق من عدم وجود `node_modules`، `dist`، أو ملفات الاختبار

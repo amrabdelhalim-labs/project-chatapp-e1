@@ -779,7 +779,18 @@ node -e "
 # المتوقع: Remaining scripts: [ 'start' ] — devDeps removed: true
 ```
 
-#### 6. فحص شروط التشغيل
+#### 6. فحص استثناء ملفات البناء
+
+```bash
+# التحقق من أن rsync يستثني ملفات البناء والـ node_modules
+rsync -r --exclude=node_modules --exclude=.git --exclude=dist --exclude=coverage \
+  --exclude=.eslintcache --exclude='*.log' server/ /tmp/test-deploy/
+
+ls -la /tmp/test-deploy/
+# المتوقع: بدون node_modules، dist، coverage - ملفات المصدر فقط
+```
+
+#### 7. فحص شروط التشغيل
 
 ```bash
 # التأكد من أن الورك فلو لا يعمل على PR (فقط push + workflow_dispatch)
@@ -805,3 +816,5 @@ node -e "
 | بناء الويب | ✅ "Compiled successfully." |
 | سكربت التنظيف | ✅ يبقى `start` فقط |
 | شروط التشغيل | ✅ push + dispatch فقط، لا PR |
+| استثناء البناء (rsync) | ✅ بدون node_modules, dist, coverage |
+| ملفات الويب في الـ build | ✅ index.html, main.js, style.css موجودة |
