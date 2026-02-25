@@ -77,6 +77,7 @@ jobs:
           rsync -r \
             --exclude=node_modules \
             --exclude=.git \
+            --exclude=tests \
             --exclude=dist \
             --exclude=coverage \
             --exclude=.eslintcache \
