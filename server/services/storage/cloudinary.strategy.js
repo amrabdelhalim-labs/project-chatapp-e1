@@ -80,8 +80,23 @@ class CloudinaryStorageStrategy {
     return results;
   }
 
+  /**
+   * Get the public URL for a Cloudinary asset.
+   * Safely returns publicId as-is if Cloudinary is not yet initialized
+   * (e.g. called in the same tick as server startup before the async init resolves).
+   * @param {string} publicId - Cloudinary public_id or existing absolute URL
+   * @returns {string}
+   */
   getFileUrl(publicId) {
+    if (!publicId) return publicId;
     if (publicId.startsWith('http://') || publicId.startsWith('https://')) return publicId;
+    if (!this.cloudinary) {
+      // Async init not yet resolved — return as-is (safe fallback).
+      console.warn(
+        '[Cloudinary] getFileUrl called before initialization — returning publicId as-is'
+      );
+      return publicId;
+    }
     return this.cloudinary.url(publicId, {
       secure: true,
       transformation: [{ quality: 'auto:good' }],

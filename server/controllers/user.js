@@ -28,7 +28,10 @@ export const register = async (req, res) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
   const storage = getStorageService();
-  const defaultPicture = storage.getFileUrl('default-picture.jpg');
+  // DEFAULT_PROFILE_PICTURE_URL should be set when using cloud providers (Cloudinary/S3)
+  // to a pre-uploaded asset URL. Falls back to the locally-served default for local storage.
+  const defaultPicture =
+    process.env.DEFAULT_PROFILE_PICTURE_URL || storage.getFileUrl('default-picture.jpg');
 
   const newUser = await repos.user.createUser({
     firstName,

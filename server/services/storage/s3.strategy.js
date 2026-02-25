@@ -33,6 +33,14 @@ class S3StorageStrategy {
     }
   }
 
+  /**
+   * Upload a file to S3.
+   * The generated URL uses the standard AWS S3 path-style:
+   * https://<bucket>.s3.<region>.amazonaws.com/<folder>/<filename>
+   * For custom domains or CloudFront, override getFileUrl() or set a CDN_URL env var.
+   * @param {Express.Multer.File} file - Multer file object (memoryStorage required)
+   * @returns {Promise<{url: string, filename: string}>}
+   */
   async uploadFile(file) {
     if (!this.s3Client) await this._initializeS3();
     const { PutObjectCommand } = await import('@aws-sdk/client-s3');
@@ -46,7 +54,9 @@ class S3StorageStrategy {
         Key: key,
         Body: file.buffer,
         ContentType: file.mimetype,
-        ACL: 'public-read',
+        // Note: Bucket must allow public read access via a bucket policy or CloudFront distribution.
+        // Do NOT add ACL: 'public-read' — modern AWS accounts have "Block all public access" enabled
+        // by default and will reject uploads that set ACLs.
       })
     );
 
@@ -83,7 +93,14 @@ class S3StorageStrategy {
     return results;
   }
 
+  /**
+   * Get the public URL for an S3 object.
+   * Returns standard AWS S3 URL; override or use CloudFront for custom CDN domains.
+   * @param {string} key - S3 object key or existing absolute URL
+   * @returns {string}
+   */
   getFileUrl(key) {
+    if (!key) return key;
     if (key.startsWith('http://') || key.startsWith('https://')) return key;
     return `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`;
   }

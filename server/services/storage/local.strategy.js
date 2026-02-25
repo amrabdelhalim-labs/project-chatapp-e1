@@ -19,6 +19,12 @@ class LocalStorageStrategy {
     }
   }
 
+  /**
+   * Upload a single file to local disk.
+   * Supports both buffer (multer memoryStorage) and file.path (diskStorage).
+   * @param {Express.Multer.File} file - Multer file object
+   * @returns {Promise<{url: string, filename: string}>}
+   */
   async uploadFile(file) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     const fileExtension = path.extname(file.originalname);
@@ -32,13 +38,19 @@ class LocalStorageStrategy {
       await fs.promises.copyFile(file.path, filePath);
     }
 
-    return { url: `${this.baseUrl}/${filename}`, filename };
+    return { url: this.getFileUrl(filename), filename };
   }
 
   async uploadFiles(files) {
     return Promise.all(files.map((file) => this.uploadFile(file)));
   }
 
+  /**
+   * Delete a file from local disk.
+   * Skips deletion of the default profile picture to prevent data loss.
+   * @param {string} filename - Filename, relative path, or absolute URL
+   * @returns {Promise<boolean>} True if deleted successfully
+   */
   async deleteFile(filename) {
     try {
       const cleanFilename = this._extractFilename(filename);
@@ -68,12 +80,29 @@ class LocalStorageStrategy {
     return results;
   }
 
+  /**
+   * Get the public URL for a stored file.
+   * When SERVER_URL env var is set, returns an absolute URL — required for
+   * consistent API responses across all storage providers and HTTPS deployments.
+   * Without SERVER_URL, returns a relative path (e.g. /uploads/file.jpg).
+   * @param {string} filename - Filename, relative path, or existing absolute URL
+   * @returns {string}
+   */
   getFileUrl(filename) {
+    if (!filename) return filename;
     if (filename.startsWith('http://') || filename.startsWith('https://')) return filename;
-    if (filename.startsWith(this.baseUrl)) return filename;
-    return `${this.baseUrl}/${filename}`;
+    const relativePath = filename.startsWith(this.baseUrl)
+      ? filename
+      : `${this.baseUrl}/${filename}`;
+    // SERVER_URL makes local storage behave like cloud providers: always absolute URLs.
+    const serverUrl = (process.env.SERVER_URL || '').replace(/\/$/, '');
+    return serverUrl ? `${serverUrl}${relativePath}` : relativePath;
   }
 
+  /**
+   * Health check — verifies the uploads directory exists and is writable.
+   * @returns {Promise<boolean>}
+   */
   async healthCheck() {
     try {
       await fs.promises.access(this.uploadsDir, fs.constants.W_OK);

@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     maxHeight: 100,
     color: '#000',
-    marginRight: 8, // بدلاً من gap
+    marginRight: 8, // instead of gap (not supported in older React Native)
   },
   button: {
     backgroundColor: '#005C4B',

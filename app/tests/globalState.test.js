@@ -1,14 +1,14 @@
-// ─────────────────────────────────────────────────────────────────
-// اختبارات وحدة لمتجر Zustand (globalState.js)
-// يختبر: جميع الإجراءات والحالات في المتجر بشكل مستقل
-// يتكامل مع: AsyncStorage (مُحاكى)
-// ─────────────────────────────────────────────────────────────────
+﻿// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// Unit tests for the Zustand store (globalState.js)
+// Tests: all actions and state slices in isolation
+// Integration: AsyncStorage (mocked)
+// â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 import { renderHook, act } from '@testing-library/react-native';
 import { useStore } from '../libs/globalState';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-// ─── إعادة تعيين المتجر قبل كل اختبار ───────────────────────────
+// â”€â”€â”€ Reset the store before every test â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 beforeEach(async () => {
   await AsyncStorage.clear();
   useStore.setState({
@@ -23,12 +23,12 @@ beforeEach(async () => {
   });
 });
 
-// ═══════════════════════════════════════════════════════════════
-// 1. القيم الأولية — Initial State
-// ═══════════════════════════════════════════════════════════════
+// â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ
+// 1. Initial State
+// â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ
 
-describe('القيم الأولية — Initial State', () => {
-  it('يجب أن تبدأ جميع القيم بحالتها الأولية', () => {
+describe('Initial State', () => {
+  it('should start with all values at their initial state', () => {
     const { result } = renderHook(() => useStore());
     expect(result.current.socket).toBeNull();
     expect(result.current.accessToken).toBeNull();
@@ -41,14 +41,14 @@ describe('القيم الأولية — Initial State', () => {
   });
 });
 
-// ═══════════════════════════════════════════════════════════════
-// 2. المصادقة — Authentication
-// ═══════════════════════════════════════════════════════════════
+// â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ
+// 2. Authentication
+// â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ
 
-describe('المصادقة — Authentication', () => {
-  it('يجب أن تحفظ setUser المستخدم في المتجر و AsyncStorage', async () => {
+describe('Authentication', () => {
+  it('setUser should save the user to the store and AsyncStorage', async () => {
     const { result } = renderHook(() => useStore());
-    const mockUser = { _id: 'u1', firstName: 'أحمد', lastName: 'محمد' };
+    const mockUser = { _id: 'u1', firstName: 'Ahmed', lastName: 'Mohamed' };
 
     await act(async () => {
       await result.current.setUser(mockUser);
@@ -58,7 +58,7 @@ describe('المصادقة — Authentication', () => {
     expect(AsyncStorage.setItem).toHaveBeenCalledWith('user', JSON.stringify(mockUser));
   });
 
-  it('يجب أن تحفظ setAccessToken التوكن في المتجر و AsyncStorage', async () => {
+  it('setAccessToken should save the token to the store and AsyncStorage', async () => {
     const { result } = renderHook(() => useStore());
 
     await act(async () => {
@@ -69,11 +69,11 @@ describe('المصادقة — Authentication', () => {
     expect(AsyncStorage.setItem).toHaveBeenCalledWith('accessToken', 'test-token-123');
   });
 
-  it('يجب أن تمسح logout جميع البيانات من المتجر و AsyncStorage', async () => {
+  it('logout should clear all data from the store and AsyncStorage', async () => {
     const { result } = renderHook(() => useStore());
 
     await act(async () => {
-      await result.current.setUser({ _id: 'u1', firstName: 'أحمد' });
+      await result.current.setUser({ _id: 'u1', firstName: 'Ahmed' });
       await result.current.setAccessToken('token');
     });
 
@@ -91,10 +91,10 @@ describe('المصادقة — Authentication', () => {
     expect(AsyncStorage.removeItem).toHaveBeenCalledWith('currentReceiver');
   });
 
-  it('يجب أن تعمل دورة تسجيل دخول → خروج → تسجيل دخول', async () => {
+  it('should support a login â†’ logout â†’ login cycle', async () => {
     const { result } = renderHook(() => useStore());
-    const user1 = { _id: 'u1', firstName: 'أحمد' };
-    const user2 = { _id: 'u2', firstName: 'سارة' };
+    const user1 = { _id: 'u1', firstName: 'Ahmed' };
+    const user2 = { _id: 'u2', firstName: 'Sara' };
 
     await act(async () => {
       await result.current.setUser(user1);
@@ -116,16 +116,16 @@ describe('المصادقة — Authentication', () => {
   });
 });
 
-// ═══════════════════════════════════════════════════════════════
-// 3. الأصدقاء — Friends
-// ═══════════════════════════════════════════════════════════════
+// â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ
+// 3. Friends
+// â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ
 
-describe('الأصدقاء — Friends', () => {
-  it('يجب أن تعيّن setFriends قائمة الأصدقاء', () => {
+describe('Friends', () => {
+  it('setFriends should assign the friends list', () => {
     const { result } = renderHook(() => useStore());
     const friends = [
-      { _id: 'f1', firstName: 'سارة' },
-      { _id: 'f2', firstName: 'علي' },
+      { _id: 'f1', firstName: 'Sara' },
+      { _id: 'f2', firstName: 'Ali' },
     ];
 
     act(() => result.current.setFriends(friends));
@@ -133,108 +133,108 @@ describe('الأصدقاء — Friends', () => {
     expect(result.current.friends).toHaveLength(2);
   });
 
-  it('يجب أن تضيف addFriend صديقاً جديداً للقائمة', () => {
+  it('addFriend should append a new friend to the list', () => {
     const { result } = renderHook(() => useStore());
 
-    act(() => result.current.setFriends([{ _id: 'f1', firstName: 'سارة' }]));
-    act(() => result.current.addFriend({ _id: 'f2', firstName: 'علي' }));
+    act(() => result.current.setFriends([{ _id: 'f1', firstName: 'Sara' }]));
+    act(() => result.current.addFriend({ _id: 'f2', firstName: 'Ali' }));
 
     expect(result.current.friends).toHaveLength(2);
-    expect(result.current.friends[1].firstName).toBe('علي');
+    expect(result.current.friends[1].firstName).toBe('Ali');
   });
 
-  it('يجب أن تحدّث updateFriend بيانات صديق بشكل غير متغيّر', () => {
+  it('updateFriend should update a friend immutably', () => {
     const { result } = renderHook(() => useStore());
     const friends = [
-      { _id: 'f1', firstName: 'سارة', status: 'متاح' },
-      { _id: 'f2', firstName: 'علي', status: 'مشغول' },
+      { _id: 'f1', firstName: 'Sara', status: 'available' },
+      { _id: 'f2', firstName: 'Ali', status: 'busy' },
     ];
 
     act(() => result.current.setFriends(friends));
     const originalRef = result.current.friends;
 
-    act(() => result.current.updateFriend({ _id: 'f1', firstName: 'سارة', status: 'غير متاح' }));
+    act(() => result.current.updateFriend({ _id: 'f1', firstName: 'Sara', status: 'offline' }));
 
-    expect(result.current.friends[0].status).toBe('غير متاح');
-    expect(result.current.friends[1].status).toBe('مشغول');
-    // التحقق من الثبات (immutability)
+    expect(result.current.friends[0].status).toBe('offline');
+    expect(result.current.friends[1].status).toBe('busy');
+    // immutability check
     expect(result.current.friends).not.toBe(originalRef);
   });
 
-  it('يجب أن لا تغيّر updateFriend القائمة إذا كان المعرّف غير موجود', () => {
+  it('updateFriend should not modify the list when the id does not exist', () => {
     const { result } = renderHook(() => useStore());
 
-    act(() => result.current.setFriends([{ _id: 'f1', firstName: 'سارة' }]));
-    act(() => result.current.updateFriend({ _id: 'non-existent', firstName: 'مجهول' }));
+    act(() => result.current.setFriends([{ _id: 'f1', firstName: 'Sara' }]));
+    act(() => result.current.updateFriend({ _id: 'non-existent', firstName: 'Unknown' }));
 
     expect(result.current.friends).toHaveLength(1);
-    expect(result.current.friends[0].firstName).toBe('سارة');
+    expect(result.current.friends[0].firstName).toBe('Sara');
   });
 
-  it('يجب أن تنشئ updateFriend مصفوفة جديدة (عدم تغيير المرجع الأصلي)', () => {
+  it('updateFriend should return a new array reference', () => {
     const { result } = renderHook(() => useStore());
-    const original = [{ _id: 'f1', firstName: 'سارة' }];
+    const original = [{ _id: 'f1', firstName: 'Sara' }];
 
     act(() => result.current.setFriends(original));
     const ref = result.current.friends;
-    act(() => result.current.updateFriend({ _id: 'f1', firstName: 'سارة م.' }));
+    act(() => result.current.updateFriend({ _id: 'f1', firstName: 'Sara M.' }));
 
     expect(result.current.friends).not.toBe(ref);
-    expect(result.current.friends[0].firstName).toBe('سارة م.');
+    expect(result.current.friends[0].firstName).toBe('Sara M.');
   });
 });
 
-// ═══════════════════════════════════════════════════════════════
-// 4. الرسائل — Messages
-// ═══════════════════════════════════════════════════════════════
+// â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ
+// 4. Messages
+// â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ
 
-describe('الرسائل — Messages', () => {
-  it('يجب أن تعيّن setMessages قائمة الرسائل', () => {
+describe('Messages', () => {
+  it('setMessages should assign the messages list', () => {
     const { result } = renderHook(() => useStore());
-    const msgs = [{ _id: 'm1', content: 'مرحباً' }];
+    const msgs = [{ _id: 'm1', content: 'Hello' }];
 
     act(() => result.current.setMessages(msgs));
     expect(result.current.messages).toEqual(msgs);
   });
 
-  it('يجب أن تضيف addMessage رسالة جديدة', () => {
+  it('addMessage should append a new message', () => {
     const { result } = renderHook(() => useStore());
 
-    act(() => result.current.addMessage({ _id: 'm1', content: 'مرحباً' }));
+    act(() => result.current.addMessage({ _id: 'm1', content: 'Hello' }));
     expect(result.current.messages).toHaveLength(1);
-    expect(result.current.messages[0].content).toBe('مرحباً');
+    expect(result.current.messages[0].content).toBe('Hello');
   });
 
-  it('يجب أن تدمج addMessage رسالة مكررة بنفس _id', () => {
+  it('addMessage should merge a duplicate message with the same _id', () => {
     const { result } = renderHook(() => useStore());
 
-    act(() => result.current.addMessage({ _id: 'm1', content: 'مرحباً', seen: false }));
-    act(() => result.current.addMessage({ _id: 'm1', content: 'مرحباً', seen: true }));
+    act(() => result.current.addMessage({ _id: 'm1', content: 'Hello', seen: false }));
+    act(() => result.current.addMessage({ _id: 'm1', content: 'Hello', seen: true }));
 
     expect(result.current.messages).toHaveLength(1);
     expect(result.current.messages[0].seen).toBe(true);
   });
 
-  it('يجب أن تستبدل addMessage الرسالة التفاؤلية عند وصول رسالة بنفس clientId', () => {
+  it('addMessage should replace an optimistic message when server confirms with the same clientId', () => {
     const { result } = renderHook(() => useStore());
 
-    // إضافة رسالة تفاؤلية (بدون _id من الخادم)
+    // optimistic message (no server _id yet)
     act(() =>
       result.current.addMessage({
         clientId: 'client-001',
-        content: 'مرحباً',
+        content: 'Hello',
         sender: 'u1',
         recipient: 'u2',
         seen: false,
       })
     );
 
-    // وصول تأكيد الخادم بنفس clientId
+    // server confirmation with same clientId
     act(() =>
       result.current.addMessage({
         _id: 'server-m1',
         clientId: 'client-001',
-        content: 'مرحباً',
+        content: 'Hello',
         sender: 'u1',
         recipient: 'u2',
         seen: false,
@@ -246,22 +246,22 @@ describe('الرسائل — Messages', () => {
     expect(result.current.messages[0].clientId).toBe('client-001');
   });
 
-  it('يجب أن تضيف addMessage رسائل مختلفة بـ clientId مختلف', () => {
+  it('addMessage should add distinct messages with different clientIds', () => {
     const { result } = renderHook(() => useStore());
 
-    act(() => result.current.addMessage({ clientId: 'c1', content: 'أولى' }));
-    act(() => result.current.addMessage({ clientId: 'c2', content: 'ثانية' }));
+    act(() => result.current.addMessage({ clientId: 'c1', content: 'First' }));
+    act(() => result.current.addMessage({ clientId: 'c2', content: 'Second' }));
 
     expect(result.current.messages).toHaveLength(2);
   });
 });
 
-// ═══════════════════════════════════════════════════════════════
-// 5. تعليم الرسائل كمقروءة — Mark Messages Seen
-// ═══════════════════════════════════════════════════════════════
+// â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ
+// 5. Mark Messages Seen
+// â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ
 
-describe('تعليم الرسائل كمقروءة — Mark Messages Seen', () => {
-  it('يجب أن تعلّم markMessagesSeenFromSender رسائل مرسِل محدد كمقروءة', () => {
+describe('Mark Messages Seen', () => {
+  it('markMessagesSeenFromSender should mark messages from a given sender as seen', () => {
     const { result } = renderHook(() => useStore());
 
     act(() =>
@@ -276,11 +276,11 @@ describe('تعليم الرسائل كمقروءة — Mark Messages Seen', () =
 
     expect(result.current.messages[0].seen).toBe(true);
     expect(result.current.messages[1].seen).toBe(true);
-    // رسائلي المُرسلة لا تتأثر
+    // my outgoing messages should not be affected
     expect(result.current.messages[2].seen).toBe(false);
   });
 
-  it('يجب أن تعلّم markMyMessagesSeen رسائلي المرسلة لمستلم محدد', () => {
+  it('markMyMessagesSeen should mark my sent messages to a recipient as seen', () => {
     const { result } = renderHook(() => useStore());
 
     act(() =>
@@ -295,24 +295,24 @@ describe('تعليم الرسائل كمقروءة — Mark Messages Seen', () =
 
     expect(result.current.messages[0].seen).toBe(true);
     expect(result.current.messages[1].seen).toBe(true);
-    // رسائل الطرف الآخر لا تتأثر
+    // incoming messages should not be affected
     expect(result.current.messages[2].seen).toBe(false);
   });
 });
 
-// ═══════════════════════════════════════════════════════════════
-// 6. مؤشر الكتابة — Typing Indicator
-// ═══════════════════════════════════════════════════════════════
+// â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ
+// 6. Typing Indicator
+// â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ
 
-describe('مؤشر الكتابة — Typing Indicator', () => {
-  it('يجب أن تخزّن setTyping مُعرّف من يكتب', () => {
+describe('Typing Indicator', () => {
+  it('setTyping should store the id of the typing user', () => {
     const { result } = renderHook(() => useStore());
 
     act(() => result.current.setTyping('user-abc'));
     expect(result.current.typing).toBe('user-abc');
   });
 
-  it('يجب أن تمسح clearTyping المؤشر إذا كان نفس الشخص', () => {
+  it('clearTyping should clear the indicator when it is the same user', () => {
     const { result } = renderHook(() => useStore());
 
     act(() => result.current.setTyping('user-abc'));
@@ -321,7 +321,7 @@ describe('مؤشر الكتابة — Typing Indicator', () => {
     expect(result.current.typing).toBeNull();
   });
 
-  it('يجب أن لا تمسح clearTyping المؤشر إذا كان شخص مختلف', () => {
+  it('clearTyping should not clear the indicator when it is a different user', () => {
     const { result } = renderHook(() => useStore());
 
     act(() => result.current.setTyping('user-abc'));
@@ -331,14 +331,14 @@ describe('مؤشر الكتابة — Typing Indicator', () => {
   });
 });
 
-// ═══════════════════════════════════════════════════════════════
-// 7. المستلم الحالي — Current Receiver
-// ═══════════════════════════════════════════════════════════════
+// â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ
+// 7. Current Receiver
+// â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ
 
-describe('المستلم الحالي — Current Receiver', () => {
-  it('يجب أن تحفظ setCurrentReceiver المستلم في المتجر و AsyncStorage', () => {
+describe('Current Receiver', () => {
+  it('setCurrentReceiver should save the receiver to the store and AsyncStorage', () => {
     const { result } = renderHook(() => useStore());
-    const receiver = { _id: 'r1', firstName: 'سارة' };
+    const receiver = { _id: 'r1', firstName: 'Sara' };
 
     act(() => result.current.setCurrentReceiver(receiver));
 
@@ -347,22 +347,22 @@ describe('المستلم الحالي — Current Receiver', () => {
   });
 });
 
-// ═══════════════════════════════════════════════════════════════
-// 8. حقل الإدخال — Input Field
-// ═══════════════════════════════════════════════════════════════
+// â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ
+// 8. Input Field
+// â•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گâ•گ
 
-describe('حقل الإدخال — Input Field', () => {
-  it('يجب أن تعيّن setInput قيمة الإدخال', () => {
+describe('Input Field', () => {
+  it('setInput should assign the input value', () => {
     const { result } = renderHook(() => useStore());
 
-    act(() => result.current.setInput('مرحباً'));
-    expect(result.current.input).toBe('مرحباً');
+    act(() => result.current.setInput('Hello'));
+    expect(result.current.input).toBe('Hello');
   });
 
-  it('يجب أن تمسح setInput النص عند تمرير سلسلة فارغة', () => {
+  it('setInput should clear the text when passed an empty string', () => {
     const { result } = renderHook(() => useStore());
 
-    act(() => result.current.setInput('نص'));
+    act(() => result.current.setInput('some text'));
     act(() => result.current.setInput(''));
 
     expect(result.current.input).toBe('');

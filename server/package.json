@@ -11,7 +11,8 @@
     "test:repos": "node tests/repositories.test.js",
     "test:integration": "node tests/integration.test.js",
     "test:e2e": "node tests/api.test.js",
-    "test:all": "node tests/comprehensive.test.js && node tests/repositories.test.js && node tests/integration.test.js && node tests/api.test.js",
+    "test:image": "node tests/image.test.js",
+    "test:all": "node tests/comprehensive.test.js && node tests/repositories.test.js && node tests/integration.test.js && node tests/api.test.js && node tests/image.test.js",
     "format": "prettier --write \"**/*.js\"",
     "format:check": "prettier --check \"**/*.js\""
   },

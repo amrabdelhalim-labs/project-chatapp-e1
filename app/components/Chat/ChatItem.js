@@ -3,19 +3,24 @@ import moment from 'moment';
 import { useNavigation } from '@react-navigation/native';
 import { getReceiverMessages } from '../../libs/filterMessages';
 import { useStore } from '../../libs/globalState';
+import { normalizeImageUrl } from '../../libs/imageUtils';
 
 export default function ChatItem(props) {
-  const { _id, firstName, lastName, profilePicture, createdAt } = props;
+  const { _id, firstName, lastName, profilePicture } = props;
   const navigation = useNavigation();
   const { messages, socket, user } = useStore();
 
   const contactMessages = getReceiverMessages(messages, _id, user?._id);
   const lastMessage = contactMessages[contactMessages.length - 1];
 
-  // عدد الرسائل غير المقروءة من هذا الصديق للمستخدم الحالي
+  // Count of unread messages from this friend to the current user
   const unreadMessages = contactMessages?.filter(
     (message) => message.sender === _id && message.recipient === user?._id && !message.seen
   ).length;
+
+  const avatarUri = normalizeImageUrl(profilePicture);
+  // Use the last message timestamp for the chat row; fall back to nothing if no messages yet
+  const lastMessageTime = lastMessage?.createdAt;
 
   return (
     <TouchableOpacity
@@ -31,7 +36,7 @@ export default function ChatItem(props) {
     >
       <View style={styles.container}>
         <View style={styles.chatContainer}>
-          <Image source={{ uri: profilePicture }} style={styles.image} />
+          <Image source={{ uri: avatarUri }} style={styles.image} />
           <View style={styles.chatContent}>
             <Text>
               {firstName} {lastName}
@@ -51,7 +56,7 @@ export default function ChatItem(props) {
           </View>
         </View>
         <View style={styles.unreadMessageContainer}>
-          <Text>{moment(createdAt).format('hh:mm A')}</Text>
+          <Text>{lastMessageTime ? moment(lastMessageTime).format('hh:mm A') : ''}</Text>
           {unreadMessages > 0 && (
             <View style={styles.unreadMessages}>
               <Text style={{ color: 'white' }}>{unreadMessages < 9 ? unreadMessages : '+9'}</Text>

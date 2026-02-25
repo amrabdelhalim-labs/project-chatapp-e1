@@ -1,6 +1,8 @@
 import 'dotenv/config';
 import 'express-async-errors';
 import express from 'express';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
 import userRouter from './routes/user.js';
 import messageRouter from './routes/message.js';
 import { connectDB, connectServer } from './config.js';
@@ -12,13 +14,16 @@ import { StatusCodes } from 'http-status-codes';
 import { setIO, getIO } from './utils/socket.js';
 import { getRepositoryManager } from './repositories/index.js';
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 // Set up Express app
 const app = express();
 const server = http.createServer(app);
 
 // Middleware
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 
 // Routes
@@ -39,6 +44,24 @@ app.use('/api/message', isAuthenticated, messageRouter);
 // Global error handler
 app.use((err, req, res, _next) => {
   console.error('Unhandled error:', err.message || err);
+
+  // Multer file size exceeded
+  if (err.code === 'LIMIT_FILE_SIZE') {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: 'File size exceeds the allowed limit (1 MB)' });
+  }
+
+  // Multer unexpected field or fileFilter rejection
+  if (
+    err.code === 'LIMIT_UNEXPECTED_FILE' ||
+    err.message?.includes('يجب أن تكون الملفات') ||
+    err.message?.includes('Only image files')
+  ) {
+    return res
+      .status(StatusCodes.BAD_REQUEST)
+      .json({ message: err.message || 'Unsupported file type' });
+  }
 
   if (err.name === 'ValidationError') {
     return res.status(StatusCodes.BAD_REQUEST).json({

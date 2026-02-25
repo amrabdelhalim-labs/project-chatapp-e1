@@ -23,14 +23,14 @@ export default function Messages() {
     navigation.setOptions({ title: `${firstName} ${lastName}` });
   }, [firstName, lastName, navigation]);
 
-  // إرسال حدث "seen" عند فتح المحادثة
+  // Emit the "seen" event when the conversation is opened
   useEffect(() => {
     if (socket && receiverId && user?._id) {
       socket.emit('seen', receiverId);
     }
   }, [socket, receiverId, user]);
 
-  // التحقق من أن typing خاص بالمحادثة الحالية
+  // Check that the typing indicator belongs to this specific conversation
   const isTyping = typing === receiverId;
 
   return (

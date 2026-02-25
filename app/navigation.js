@@ -10,7 +10,7 @@ const Stack = createNativeStackNavigator();
 export default function Navigation() {
   const { user, accessToken } = useStore();
 
-  // 🔥 تحديد الشاشة الابتدائية بناءً على حالة المستخدم
+  // Determine the initial screen based on authentication state
   const initialRoute = user && accessToken ? 'Home' : 'Login';
 
   return (

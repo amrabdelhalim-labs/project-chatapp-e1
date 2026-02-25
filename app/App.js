@@ -30,7 +30,7 @@ export default function App() {
     loadData();
   }, []);
 
-  // 🔥 انتظر لحد ما البيانات تحمل من AsyncStorage
+  // Show a loading indicator until AsyncStorage data has been hydrated
   if (!isReady) {
     return (
       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>

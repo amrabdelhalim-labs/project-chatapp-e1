@@ -4,7 +4,7 @@ import { useNavigation } from '@react-navigation/native';
 import io from 'socket.io-client';
 import { API_URL } from '@env';
 import { useStore } from '../../libs/globalState';
-import { getMessages, getUsers } from '../../libs/requests';
+import { getMessages, getUsers, getProfile } from '../../libs/requests';
 import Chat from './chat';
 import Header from '../../components/Header';
 import Profile from './profile';
@@ -13,7 +13,7 @@ const Tab = createMaterialTopTabNavigator();
 
 export default function Home() {
   const navigation = useNavigation();
-  const socketRef = useRef(null); // 🔥 نحفظ الـ socket نفسه بدل flag
+  const socketRef = useRef(null); // Persist the socket instance so we can check connected state
   const {
     addMessage,
     setFriends,
@@ -25,15 +25,13 @@ export default function Home() {
     clearTyping,
     addFriend,
     setCurrentReceiver,
-    user,
     accessToken,
-    currentReceiver,
     markMessagesSeenFromSender,
     markMyMessagesSeen,
   } = useStore();
 
   useEffect(() => {
-    // 🔥 لو Socket موجود فعلاً ومتصل، متعملش واحد جديد
+    // Skip if a socket connection is already active
     if (socketRef.current?.connected) {
       return;
     }
@@ -42,7 +40,7 @@ export default function Home() {
       query: 'token=' + accessToken,
     });
 
-    // 🔥 احفظ الـ socket في الـ ref
+    // Store the socket in the ref for lifecycle management
     socketRef.current = socket;
 
     socket.on('connect', () => {
@@ -60,38 +58,40 @@ export default function Home() {
     });
 
     socket.on('typing', (senderId) => {
-      setTyping(senderId); // تخزين مُعرّف من يكتب بدلاً من قيمة منطقية
+      setTyping(senderId); // Store the ID of who is typing rather than a boolean
     });
 
     socket.on('stop_typing', (senderId) => {
-      clearTyping(senderId); // إيقاف الكتابة فقط إذا كان نفس الشخص
+      clearTyping(senderId); // Clear typing indicator only if it was this same sender
     });
 
     socket.on('seen', ({ readerId, senderId }) => {
-      if (!user?._id) return;
-      if (user._id === readerId) {
-        // أنا القارئ — علّم الرسائل الواردة من المرسل كمقروءة
-        markMessagesSeenFromSender(senderId, user._id);
-      } else if (user._id === senderId) {
-        // أنا المرسل — الطرف الآخر قرأ رسائلي
-        markMyMessagesSeen(user._id, readerId);
+      const { user: currentUser } = useStore.getState();
+      if (!currentUser?._id) return;
+      if (currentUser._id === readerId) {
+        // I am the reader — mark messages from sender as seen
+        markMessagesSeenFromSender(senderId, currentUser._id);
+      } else if (currentUser._id === senderId) {
+        // I am the sender — the other party read my messages
+        markMyMessagesSeen(currentUser._id, readerId);
       }
     });
 
     socket.on('user_updated', (updatedUser) => {
-      if (user._id === updatedUser._id) {
+      const { user: currentUser, currentReceiver: currentRec } = useStore.getState();
+      if (currentUser._id === updatedUser._id) {
         setUser(updatedUser);
       } else {
         updateFriend(updatedUser);
-
-        if (currentReceiver?._id === updatedUser._id) {
+        if (currentRec?._id === updatedUser._id) {
           setCurrentReceiver(updatedUser);
         }
       }
     });
 
     socket.on('user_created', (userCreated) => {
-      if (userCreated._id !== user._id) {
+      const { user: currentUser } = useStore.getState();
+      if (userCreated._id !== currentUser._id) {
         addFriend(userCreated);
       }
     });
@@ -100,11 +100,11 @@ export default function Home() {
 
     const fetchData = async () => {
       try {
-        const users = await getUsers();
-        const messages = await getMessages();
+        const [users, messages, me] = await Promise.all([getUsers(), getMessages(), getProfile()]);
 
         setFriends(users);
         setMessages(messages);
+        if (me && !me.error) setUser(me);
       } catch (error) {
         // Error handling done by axios interceptor
       }
@@ -113,13 +113,13 @@ export default function Home() {
     fetchData();
 
     return () => {
-      // 🔥 فقط افصل Socket لو موجود فعلاً
+      // Disconnect only if a socket is actually connected
       if (socketRef.current?.connected) {
         socketRef.current.disconnect();
         socketRef.current = null;
       }
     };
-  }, []); // 🔥 بدون dependencies - ينفذ مرة واحدة فقط!
+  }, []); // No dependencies — runs once on mount only
 
   return (
     <>

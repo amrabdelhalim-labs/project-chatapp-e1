@@ -1,7 +1,7 @@
 // ─────────────────────────────────────────────────────────────────
-// اختبارات وحدة لدالة تصفية الرسائل (filterMessages.js)
-// يختبر: تصفية الرسائل بين مستخدمين (ثنائي الاتجاه)
-// يتكامل مع: لا شيء — دالة نقية
+// Unit tests for the message filter function (filterMessages.js)
+// Tests: bidirectional message filtering between two users
+// Integration: none — pure function
 // ─────────────────────────────────────────────────────────────────
 
 import { getReceiverMessages } from '../libs/filterMessages';
@@ -11,39 +11,39 @@ const USER_B = 'user-b';
 const USER_C = 'user-c';
 
 const messages = [
-  { _id: 'm1', sender: USER_A, recipient: USER_B, content: 'مرحباً' },
-  { _id: 'm2', sender: USER_B, recipient: USER_A, content: 'أهلاً' },
-  { _id: 'm3', sender: USER_A, recipient: USER_C, content: 'كيف حالك' },
-  { _id: 'm4', sender: USER_C, recipient: USER_A, content: 'بخير' },
-  { _id: 'm5', sender: USER_B, recipient: USER_C, content: 'مسا الخير' },
+  { _id: 'm1', sender: USER_A, recipient: USER_B, content: 'Hello' },
+  { _id: 'm2', sender: USER_B, recipient: USER_A, content: 'Hi there' },
+  { _id: 'm3', sender: USER_A, recipient: USER_C, content: 'How are you?' },
+  { _id: 'm4', sender: USER_C, recipient: USER_A, content: 'All good' },
+  { _id: 'm5', sender: USER_B, recipient: USER_C, content: 'Good evening' },
 ];
 
 // ═══════════════════════════════════════════════════════════════
-// getReceiverMessages — تصفية الرسائل بين مستخدمين
+// getReceiverMessages — filter messages between two users
 // ═══════════════════════════════════════════════════════════════
 
-describe('getReceiverMessages — تصفية الرسائل بين مستخدمين', () => {
-  it('يجب أن تُرجع الرسائل بين المستخدم A و B فقط', () => {
+describe('getReceiverMessages — filter messages between two users', () => {
+  it('should return only messages between user A and B', () => {
     const result = getReceiverMessages(messages, USER_B, USER_A);
     expect(result).toHaveLength(2);
     expect(result[0]._id).toBe('m1');
     expect(result[1]._id).toBe('m2');
   });
 
-  it('يجب أن تعمل في كلا الاتجاهين (A→B و B→A)', () => {
+  it('should be symmetric (A→B equals B→A)', () => {
     const fromA = getReceiverMessages(messages, USER_B, USER_A);
     const fromB = getReceiverMessages(messages, USER_A, USER_B);
     expect(fromA).toEqual(fromB);
   });
 
-  it('يجب أن تُرجع الرسائل بين A و C فقط', () => {
+  it('should return only messages between A and C', () => {
     const result = getReceiverMessages(messages, USER_C, USER_A);
     expect(result).toHaveLength(2);
     expect(result[0]._id).toBe('m3');
     expect(result[1]._id).toBe('m4');
   });
 
-  it('يجب أن لا تشمل رسائل أطراف أخرى', () => {
+  it('should not include messages involving other parties', () => {
     const result = getReceiverMessages(messages, USER_B, USER_A);
     const ids = result.map((m) => m._id);
     expect(ids).not.toContain('m3');
@@ -51,17 +51,17 @@ describe('getReceiverMessages — تصفية الرسائل بين مستخدم�
     expect(ids).not.toContain('m5');
   });
 
-  it('يجب أن تُرجع مصفوفة فارغة إذا لم تكن هناك رسائل مطابقة', () => {
+  it('should return an empty array when there are no matching messages', () => {
     const result = getReceiverMessages(messages, 'non-existent', USER_A);
     expect(result).toHaveLength(0);
   });
 
-  it('يجب أن تُرجع مصفوفة فارغة إذا كانت قائمة الرسائل فارغة', () => {
+  it('should return an empty array when the message list is empty', () => {
     const result = getReceiverMessages([], USER_B, USER_A);
     expect(result).toHaveLength(0);
   });
 
-  it('يجب أن تُرجع رسالة واحدة لمحادثة B↔C', () => {
+  it('should return a single message for the B↔C conversation', () => {
     const result = getReceiverMessages(messages, USER_C, USER_B);
     expect(result).toHaveLength(1);
     expect(result[0]._id).toBe('m5');

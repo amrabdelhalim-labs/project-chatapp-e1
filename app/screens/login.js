@@ -21,7 +21,7 @@ export default function Login() {
   const navigation = useNavigation();
   const { setAccessToken, setUser } = useStore();
 
-  // 🔥 حذف useEffect - Navigation هيتحكم تلقائياً
+  // No useEffect for navigation — the navigator handles initial route automatically
 
   const formik = useFormik({
     initialValues: {

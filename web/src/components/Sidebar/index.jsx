@@ -47,7 +47,9 @@ export default function Sidebar() {
             className="w-10 h-10 rounded-full cursor-pointer"
             src={
               user.profilePicture
-                ? (user.profilePicture.startsWith('http') ? user.profilePicture : `${process.env.REACT_APP_API_URL}${user.profilePicture}`)
+                ? user.profilePicture.startsWith('http')
+                  ? user.profilePicture
+                  : `${process.env.REACT_APP_API_URL}${user.profilePicture}`
                 : `${process.env.REACT_APP_API_URL}/uploads/default-picture.jpg`
             }
             alt="Avatar"

@@ -14,7 +14,7 @@ export const useStore = create((set) => ({
   friends: null,
   typing: null,
   setTyping: (typing) => set({ typing }),
-  // إيقاف الكتابة فقط إذا كان نفس الشخص الذي يكتب حالياً
+  // Clear typing only if it was the same sender who is currently typing
   clearTyping: (senderId) =>
     set(({ typing }) => ({
       typing: typing === senderId ? null : typing,
@@ -45,14 +45,14 @@ export const useStore = create((set) => ({
   setInput: (input) => set({ input }),
   messages: [],
   setMessages: (messages) => set({ messages }),
-  // تعليم جميع رسائل مرسِل محدد كمقروءة للمستخدم الحالي
+  // Mark all messages from a given sender as seen by the current user
   markMessagesSeenFromSender: (senderId, currentUserId) =>
     set(({ messages }) => ({
       messages: messages.map((m) =>
         m.sender === senderId && m.recipient === currentUserId ? { ...m, seen: true } : m
       ),
     })),
-  // تعليم رسائلي المُرسلة لمستلم محدد كمقروءة (عندما يقرأها الطرف الآخر)
+  // Mark my outgoing messages to a given recipient as seen (when the other party reads them)
   markMyMessagesSeen: (myUserId, recipientId) =>
     set(({ messages }) => ({
       messages: messages.map((m) =>

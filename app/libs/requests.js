@@ -2,12 +2,12 @@ import axios from 'axios';
 import { API_URL } from '@env';
 import { useStore } from './globalState';
 
-// ─── إنشاء Axios Instance مع Interceptors ───────────────────────
+// ─── Create Axios Instance with Interceptors ───────────────────────────────
 const api = axios.create({
   baseURL: API_URL,
 });
 
-// Request Interceptor: إضافة التوكن تلقائياً لكل طلب
+// Request Interceptor: automatically attach the access token to every request
 api.interceptors.request.use((config) => {
   const { accessToken } = useStore.getState();
   if (accessToken) {
@@ -16,7 +16,7 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Response Interceptor: التعامل مع أخطاء 401 (انتهاء الجلسة)
+// Response Interceptor: handle 401 Unauthorized errors (session expiry)
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -28,7 +28,7 @@ api.interceptors.response.use(
   }
 );
 
-// ─── دوال المصادقة (لا تحتاج توكن) ─────────────────────────────
+// ─── Auth functions (no token required) ───────────────────────────────────────
 
 export const register = async ({ firstName, lastName, email, password, confirmPassword }) => {
   try {
@@ -62,7 +62,7 @@ export const login = async ({ email, password }) => {
   }
 };
 
-// ─── دوال تحتاج مصادقة (التوكن يُضاف تلقائياً عبر Interceptor) ─
+// ─── Protected functions (token is auto-attached by the request interceptor) ─────
 
 export const getProfile = async () => {
   const response = await api.get('/api/user/profile');
