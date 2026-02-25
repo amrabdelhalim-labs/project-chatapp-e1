@@ -66,9 +66,7 @@ class S3StorageStrategy {
       const { DeleteObjectCommand } = await import('@aws-sdk/client-s3');
       const key = this._extractKey(keyOrUrl);
       if (!key) return false;
-      await this.s3Client.send(
-        new DeleteObjectCommand({ Bucket: this.bucket, Key: key })
-      );
+      await this.s3Client.send(new DeleteObjectCommand({ Bucket: this.bucket, Key: key }));
       return true;
     } catch (error) {
       console.error(`Failed to delete from S3: ${keyOrUrl}`, error.message);

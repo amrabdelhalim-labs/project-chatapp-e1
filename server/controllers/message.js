@@ -60,4 +60,3 @@ export const markAsSeen = async (req, res) => {
   const result = await repos.message.markAsSeen(senderId, userId);
   res.status(StatusCodes.OK).json({ modifiedCount: result });
 };
-

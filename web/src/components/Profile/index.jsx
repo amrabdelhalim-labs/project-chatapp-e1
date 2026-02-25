@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { FaCamera } from "react-icons/fa";
-import { IoMdReturnLeft } from "react-icons/io";
-import EditableInput from "./EditableInput";
-import { useStore } from "../../libs/globalState";
-import { updateProfilePicture } from "../../libs/requests";
+import { useState } from 'react';
+import { FaCamera } from 'react-icons/fa';
+import { IoMdReturnLeft } from 'react-icons/io';
+import EditableInput from './EditableInput';
+import { useStore } from '../../libs/globalState';
+import { updateProfilePicture } from '../../libs/requests';
 
 export default function Profile({ onClose }) {
   const { user } = useStore();
@@ -13,18 +13,18 @@ export default function Profile({ onClose }) {
   const [image, setImage] = useState(
     user.profilePicture || `${process.env.REACT_APP_API_URL}/uploads/default-picture.jpg`
   );
-  
+
   const handleProfilePictureChange = async (e) => {
     if (e.target.files && e.target.files[0]) {
       // تحرير Object URL السابق لتجنب تسريب الذاكرة
-      if (image && image.startsWith("blob:")) {
+      if (image && image.startsWith('blob:')) {
         URL.revokeObjectURL(image);
       }
       setImage(URL.createObjectURL(e.target.files[0])); // عرض معاينة فورية للصورة المختارة
 
       const formData = new FormData(); // إنشاء كائن FormData لإرسال الملف
       // يجب أن يتطابق اسم الحقل مع ما يتوقعه multer في السيرفر: upload.single("file")
-      formData.append("file", e.target.files[0]); // إضافة الملف إلى النموذج بالحقل الصحيح
+      formData.append('file', e.target.files[0]); // إضافة الملف إلى النموذج بالحقل الصحيح
 
       await updateProfilePicture(formData); // إرسال الطلب إلى الخادم
     }
@@ -37,11 +37,7 @@ export default function Profile({ onClose }) {
           className="justify-center rounded-full p-1 cursor-pointer active:bg-[#005C4B] transition-all"
           onClick={onClose}
         >
-          <IoMdReturnLeft
-            size={24}
-            color="#B0BAC0"
-            className="cursor-pointer"
-          />
+          <IoMdReturnLeft size={24} color="#B0BAC0" className="cursor-pointer" />
         </button>
         <p className="text-white text-lg">Profile</p>
       </div>
@@ -92,4 +88,4 @@ export default function Profile({ onClose }) {
       </div>
     </div>
   );
-};
+}

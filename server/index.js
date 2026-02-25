@@ -48,9 +48,7 @@ app.use((err, req, res, _next) => {
   }
 
   if (err.name === 'CastError') {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ message: 'معرف غير صالح' });
+    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'معرف غير صالح' });
   }
 
   const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
@@ -121,8 +119,7 @@ function setupWebSocket(httpServer) {
 
 // Start server only when running directly (not imported by tests)
 const isMainModule =
-  process.argv[1] &&
-  (process.argv[1].endsWith('index.js') || process.argv[1].includes('nodemon'));
+  process.argv[1] && (process.argv[1].endsWith('index.js') || process.argv[1].includes('nodemon'));
 
 if (isMainModule) {
   connectDB();

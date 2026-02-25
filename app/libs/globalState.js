@@ -1,5 +1,5 @@
-import { create } from "zustand";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { create } from 'zustand';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Initialize with null - will be hydrated after app loads
 const user = null;
@@ -34,14 +34,14 @@ export const useStore = create((set) => ({
     }),
 
   setUser: async (user) => {
-    await AsyncStorage.setItem("user", JSON.stringify(user));
+    await AsyncStorage.setItem('user', JSON.stringify(user));
     return set({ user });
   },
   setAccessToken: async (accessToken) => {
-    await AsyncStorage.setItem("accessToken", accessToken);
+    await AsyncStorage.setItem('accessToken', accessToken);
     return set({ accessToken });
   },
-  input: "",
+  input: '',
   setInput: (input) => set({ input }),
   messages: [],
   setMessages: (messages) => set({ messages }),
@@ -65,33 +65,39 @@ export const useStore = create((set) => ({
       // 1) If server echo arrives with same _id -> replace existing
       // 2) If clientId is present, replace optimistic one with same clientId
       const copy = [...messages];
-      const byIdIndex = message._id ? copy.findIndex(m => m._id === message._id) : -1;
+      const byIdIndex = message._id ? copy.findIndex((m) => m._id === message._id) : -1;
       if (byIdIndex !== -1) {
         copy[byIdIndex] = { ...copy[byIdIndex], ...message };
         return { messages: copy };
-      };
+      }
 
       if (message.clientId) {
-        const byClientIndex = copy.findIndex(m => m.clientId && m.clientId === message.clientId);
+        const byClientIndex = copy.findIndex((m) => m.clientId && m.clientId === message.clientId);
         if (byClientIndex !== -1) {
           copy[byClientIndex] = { ...copy[byClientIndex], ...message };
           return { messages: copy };
-        };
-      };
+        }
+      }
 
       return { messages: [...copy, message] };
     });
   },
   currentReceiver,
   setCurrentReceiver: (currentReceiver) => {
-    AsyncStorage.setItem("currentReceiver", JSON.stringify(currentReceiver));
+    AsyncStorage.setItem('currentReceiver', JSON.stringify(currentReceiver));
     return set({ currentReceiver });
   },
   logout: async () => {
-    await AsyncStorage.removeItem("user");
-    await AsyncStorage.removeItem("accessToken");
-    await AsyncStorage.removeItem("currentReceiver");
-    return set({ user: null, accessToken: null, currentReceiver: null, friends: null, messages: [] });
+    await AsyncStorage.removeItem('user');
+    await AsyncStorage.removeItem('accessToken');
+    await AsyncStorage.removeItem('currentReceiver');
+    return set({
+      user: null,
+      accessToken: null,
+      currentReceiver: null,
+      friends: null,
+      messages: [],
+    });
   },
 }));
 
@@ -99,17 +105,24 @@ export const useStore = create((set) => ({
 export const hydrateStore = async () => {
   try {
     const [userItem, accessTokenItem, currentReceiverItem] = await Promise.all([
-      AsyncStorage.getItem("user"),
-      AsyncStorage.getItem("accessToken"),
-      AsyncStorage.getItem("currentReceiver"),
+      AsyncStorage.getItem('user'),
+      AsyncStorage.getItem('accessToken'),
+      AsyncStorage.getItem('currentReceiver'),
     ]);
 
-    const user = userItem && userItem !== "null" && userItem !== "undefined" ? JSON.parse(userItem) : null;
-    const accessToken = accessTokenItem && accessTokenItem !== "null" && accessTokenItem !== "undefined" ? accessTokenItem : null;
-    const currentReceiver = currentReceiverItem && currentReceiverItem !== "null" && currentReceiverItem !== "undefined" ? JSON.parse(currentReceiverItem) : null;
+    const user =
+      userItem && userItem !== 'null' && userItem !== 'undefined' ? JSON.parse(userItem) : null;
+    const accessToken =
+      accessTokenItem && accessTokenItem !== 'null' && accessTokenItem !== 'undefined'
+        ? accessTokenItem
+        : null;
+    const currentReceiver =
+      currentReceiverItem && currentReceiverItem !== 'null' && currentReceiverItem !== 'undefined'
+        ? JSON.parse(currentReceiverItem)
+        : null;
 
     useStore.setState({ user, accessToken, currentReceiver });
   } catch (error) {
-    console.error("❌ Failed to hydrate store:", error);
+    console.error('❌ Failed to hydrate store:', error);
   }
 };

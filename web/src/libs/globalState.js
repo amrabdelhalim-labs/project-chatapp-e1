@@ -1,10 +1,10 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
 // ─── تحميل البيانات من localStorage بشكل آمن ──────────────────────
 const safeParse = (key) => {
   try {
     const item = localStorage.getItem(key);
-    if (!item || item === "null" || item === "undefined") return null;
+    if (!item || item === 'null' || item === 'undefined') return null;
     return JSON.parse(item);
   } catch {
     localStorage.removeItem(key);
@@ -14,13 +14,13 @@ const safeParse = (key) => {
 
 const safeGet = (key) => {
   const item = localStorage.getItem(key);
-  if (!item || item === "null" || item === "undefined") return null;
+  if (!item || item === 'null' || item === 'undefined') return null;
   return item;
 };
 
-const user = safeParse("user");
-const accessToken = safeGet("accessToken");
-const currentReceiver = safeParse("currentReceiver");
+const user = safeParse('user');
+const accessToken = safeGet('accessToken');
+const currentReceiver = safeParse('currentReceiver');
 
 export const useStore = create((set) => ({
   socket: null,
@@ -50,14 +50,14 @@ export const useStore = create((set) => ({
     }),
 
   setUser: (user) => {
-    localStorage.setItem("user", JSON.stringify(user));
+    localStorage.setItem('user', JSON.stringify(user));
     return set({ user });
   },
   setAccessToken: (accessToken) => {
-    localStorage.setItem("accessToken", accessToken);
+    localStorage.setItem('accessToken', accessToken);
     return set({ accessToken });
   },
-  input: "",
+  input: '',
   setInput: (input) => set({ input }),
   messages: [],
   setMessages: (messages) => set({ messages }),
@@ -81,32 +81,38 @@ export const useStore = create((set) => ({
       // 1) If server echo arrives with same _id -> replace existing
       // 2) If clientId is present, replace optimistic one with same clientId
       const copy = [...messages];
-      const byIdIndex = message._id ? copy.findIndex(m => m._id === message._id) : -1;
+      const byIdIndex = message._id ? copy.findIndex((m) => m._id === message._id) : -1;
       if (byIdIndex !== -1) {
         copy[byIdIndex] = { ...copy[byIdIndex], ...message };
         return { messages: copy };
-      };
+      }
 
       if (message.clientId) {
-        const byClientIndex = copy.findIndex(m => m.clientId && m.clientId === message.clientId);
+        const byClientIndex = copy.findIndex((m) => m.clientId && m.clientId === message.clientId);
         if (byClientIndex !== -1) {
           copy[byClientIndex] = { ...copy[byClientIndex], ...message };
           return { messages: copy };
-        };
-      };
+        }
+      }
 
       return { messages: [...copy, message] };
     });
   },
   currentReceiver,
   setCurrentReceiver: (currentReceiver) => {
-    localStorage.setItem("currentReceiver", JSON.stringify(currentReceiver));
+    localStorage.setItem('currentReceiver', JSON.stringify(currentReceiver));
     return set({ currentReceiver });
   },
   logout: () => {
-    localStorage.removeItem("user");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("currentReceiver");
-    return set({ user: null, accessToken: null, currentReceiver: null, friends: null, messages: [] });
+    localStorage.removeItem('user');
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('currentReceiver');
+    return set({
+      user: null,
+      accessToken: null,
+      currentReceiver: null,
+      friends: null,
+      messages: [],
+    });
   },
 }));

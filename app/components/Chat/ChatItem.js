@@ -1,8 +1,8 @@
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import moment from "moment";
-import { useNavigation } from "@react-navigation/native";
-import { getReceiverMessages } from "../../libs/filterMessages";
-import { useStore } from "../../libs/globalState";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import moment from 'moment';
+import { useNavigation } from '@react-navigation/native';
+import { getReceiverMessages } from '../../libs/filterMessages';
+import { useStore } from '../../libs/globalState';
 
 export default function ChatItem(props) {
   const { _id, firstName, lastName, profilePicture, createdAt } = props;
@@ -20,8 +20,8 @@ export default function ChatItem(props) {
   return (
     <TouchableOpacity
       onPress={() => {
-        socket?.emit("seen", _id);
-        navigation.navigate("Messages", {
+        socket?.emit('seen', _id);
+        navigation.navigate('Messages', {
           _id,
           firstName,
           lastName,
@@ -42,41 +42,39 @@ export default function ChatItem(props) {
               style={[
                 styles.lastMessage,
                 {
-                  color: !lastMessage ? "#9e9e9e" : "black",
+                  color: !lastMessage ? '#9e9e9e' : 'black',
                 },
               ]}
             >
-              {lastMessage?.content || "Start the discussion..."}
+              {lastMessage?.content || 'Start the discussion...'}
             </Text>
           </View>
         </View>
         <View style={styles.unreadMessageContainer}>
-          <Text>{moment(createdAt).format("hh:mm A")}</Text>
+          <Text>{moment(createdAt).format('hh:mm A')}</Text>
           {unreadMessages > 0 && (
             <View style={styles.unreadMessages}>
-              <Text style={{ color: "white" }}>
-                {unreadMessages < 9 ? unreadMessages : "+9"}
-              </Text>
+              <Text style={{ color: 'white' }}>{unreadMessages < 9 ? unreadMessages : '+9'}</Text>
             </View>
           )}
         </View>
       </View>
     </TouchableOpacity>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     padding: 16,
-    borderBottomColor: "#e0e0e0",
+    borderBottomColor: '#e0e0e0',
     borderBottomWidth: 1,
   },
   chatContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     flex: 1,
   },
   image: {
@@ -88,21 +86,21 @@ const styles = StyleSheet.create({
     marginLeft: 16,
   },
   unreadMessageContainer: {
-    flexDirection: "column",
-    alignItems: "flex-end",
+    flexDirection: 'column',
+    alignItems: 'flex-end',
     flex: 1,
   },
   unreadMessages: {
-    backgroundColor: "#0e806a",
+    backgroundColor: '#0e806a',
     width: 25,
     height: 25,
     borderRadius: 10,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     marginTop: 4,
   },
   lastMessage: {
-    color: "#9e9e9e",
+    color: '#9e9e9e',
     width: 200,
   },
 });

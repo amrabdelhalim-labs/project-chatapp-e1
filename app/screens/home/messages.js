@@ -1,11 +1,11 @@
-import { StyleSheet, FlatList, View, KeyboardAvoidingView, Platform } from "react-native";
-import { useEffect, useRef } from "react";
-import { useStore } from "../../libs/globalState";
-import { getReceiverMessages } from "../../libs/filterMessages";
-import { useNavigation, useRoute } from "@react-navigation/native";
-import MessageItem from "../../components/Chat/MessageItem";
-import MessageFooter from "../../components/Chat/MessageFooter";
-import TypingIndicator from "../../components/Chat/TypingIndicator";
+import { StyleSheet, FlatList, View, KeyboardAvoidingView, Platform } from 'react-native';
+import { useEffect, useRef } from 'react';
+import { useStore } from '../../libs/globalState';
+import { getReceiverMessages } from '../../libs/filterMessages';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import MessageItem from '../../components/Chat/MessageItem';
+import MessageFooter from '../../components/Chat/MessageFooter';
+import TypingIndicator from '../../components/Chat/TypingIndicator';
 
 export default function Messages() {
   const { messages, user, socket, typing } = useStore();
@@ -26,7 +26,7 @@ export default function Messages() {
   // إرسال حدث "seen" عند فتح المحادثة
   useEffect(() => {
     if (socket && receiverId && user?._id) {
-      socket.emit("seen", receiverId);
+      socket.emit('seen', receiverId);
     }
   }, [socket, receiverId, user]);
 
@@ -36,17 +36,15 @@ export default function Messages() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
     >
       <View style={styles.container}>
         <FlatList
           data={filteredMessages}
           ref={flatListRef}
           keyExtractor={(item, index) => item._id?.toString() || item.clientId || index.toString()}
-          renderItem={({ item }) => (
-            <MessageItem {...item} isSender={item.sender === user._id} />
-          )}
+          renderItem={({ item }) => <MessageItem {...item} isSender={item.sender === user._id} />}
           contentContainerStyle={styles.messagesList}
           onContentSizeChange={() => {
             if (flatListRef.current && filteredMessages.length > 0) {
@@ -71,7 +69,7 @@ export default function Messages() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: '#f5f5f5',
   },
   messagesList: {
     paddingHorizontal: 8,

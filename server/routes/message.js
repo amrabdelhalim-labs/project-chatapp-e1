@@ -1,10 +1,5 @@
 import express from 'express';
-import {
-  createMessage,
-  getMessages,
-  getConversation,
-  markAsSeen,
-} from '../controllers/message.js';
+import { createMessage, getMessages, getConversation, markAsSeen } from '../controllers/message.js';
 
 const messageRouter = express.Router();
 

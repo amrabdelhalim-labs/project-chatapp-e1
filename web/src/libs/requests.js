@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios from 'axios';
 
 // ─── إنشاء Axios Instance مع Interceptors ───────────────────────
 const api = axios.create({
@@ -7,8 +7,8 @@ const api = axios.create({
 
 // Request Interceptor: إضافة التوكن تلقائياً لكل طلب
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
-  if (token && token !== "null" && token !== "undefined") {
+  const token = localStorage.getItem('accessToken');
+  if (token && token !== 'null' && token !== 'undefined') {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
@@ -19,10 +19,10 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error?.response?.status === 401) {
-      localStorage.removeItem("user");
-      localStorage.removeItem("accessToken");
-      localStorage.removeItem("currentReceiver");
-      window.location.href = "/login";
+      localStorage.removeItem('user');
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('currentReceiver');
+      window.location.href = '/login';
     }
     return Promise.reject(error);
   }
@@ -30,15 +30,9 @@ api.interceptors.response.use(
 
 // ─── دوال المصادقة (لا تحتاج توكن) ─────────────────────────────
 
-export const register = async ({
-  firstName,
-  lastName,
-  email,
-  password,
-  confirmPassword,
-}) => {
+export const register = async ({ firstName, lastName, email, password, confirmPassword }) => {
   try {
-    const response = await api.post("/api/user/register", {
+    const response = await api.post('/api/user/register', {
       firstName,
       lastName,
       email,
@@ -49,27 +43,21 @@ export const register = async ({
     return response.data;
   } catch (error) {
     // Normalize backend validation errors (400) to a simple shape the UI already checks: { error }
-    const message =
-      error?.response?.data?.message ||
-      error?.message ||
-      "Registration failed";
+    const message = error?.response?.data?.message || error?.message || 'Registration failed';
     return { error: message };
   }
 };
 
-export const login = async ({email, password}) => {
+export const login = async ({ email, password }) => {
   try {
-    const response = await api.post("/api/user/login", {
+    const response = await api.post('/api/user/login', {
       email,
       password,
     });
 
     return response.data;
   } catch (error) {
-    const message =
-      error?.response?.data?.message ||
-      error?.message ||
-      "Login failed";
+    const message = error?.response?.data?.message || error?.message || 'Login failed';
     return { error: message };
   }
 };
@@ -77,27 +65,27 @@ export const login = async ({email, password}) => {
 // ─── دوال تحتاج مصادقة (التوكن يُضاف تلقائياً عبر Interceptor) ─
 
 export const getProfile = async () => {
-  const response = await api.get("/api/user/profile");
+  const response = await api.get('/api/user/profile');
   return response.data;
 };
 
 export const getUsers = async () => {
-  const response = await api.get("/api/user/friends");
+  const response = await api.get('/api/user/friends');
   return response.data;
 };
 
 export const updateUser = async (body) => {
-  const response = await api.put("/api/user/profile", body);
+  const response = await api.put('/api/user/profile', body);
   return response.data;
 };
 
 export const updateProfilePicture = async (formData) => {
-  const response = await api.put("/api/user/profile/picture", formData);
+  const response = await api.put('/api/user/profile/picture', formData);
   return response.data;
 };
 
 export const createMessage = async ({ receiverId, content }) => {
-  const response = await api.post("/api/message", {
+  const response = await api.post('/api/message', {
     receiverId,
     content,
   });
@@ -105,6 +93,6 @@ export const createMessage = async ({ receiverId, content }) => {
 };
 
 export const getMessages = async () => {
-  const response = await api.get("/api/message/");
+  const response = await api.get('/api/message/');
   return response.data;
 };

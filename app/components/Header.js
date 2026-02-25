@@ -1,8 +1,8 @@
-import { View, Text, StyleSheet } from "react-native";
-import { Toast } from "native-base";
-import { useStore } from "../libs/globalState.js";
-import { MaterialIcons } from "react-native-vector-icons";
-import { useNavigation } from "@react-navigation/native";
+import { View, Text, StyleSheet } from 'react-native';
+import { Toast } from 'native-base';
+import { useStore } from '../libs/globalState.js';
+import { MaterialIcons } from 'react-native-vector-icons';
+import { useNavigation } from '@react-navigation/native';
 
 export default function Header() {
   const { user, logout } = useStore();
@@ -10,16 +10,16 @@ export default function Header() {
 
   const handleLogout = async () => {
     await logout();
-    
+
     Toast.show({
-      title: "Logged out successfully",
-      status: "success",
-      backgroundColor: "#0e806a",
-      placement: "top",
+      title: 'Logged out successfully',
+      status: 'success',
+      backgroundColor: '#0e806a',
+      placement: 'top',
       duration: 2000,
     });
-    
-    navigation.navigate("Login");
+
+    navigation.navigate('Login');
   };
 
   if (!user) return null;
@@ -40,28 +40,28 @@ export default function Header() {
       </View>
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#0e806a",
+    backgroundColor: '#0e806a',
     paddingTop: 40,
     paddingBottom: 8,
   },
   headerContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
     paddingHorizontal: 20,
   },
   headerText: {
     fontSize: 20,
-    color: "white",
-    fontWeight: "500",
+    color: 'white',
+    fontWeight: '500',
   },
   icon: {
     fontSize: 20,
-    color: "white",
+    color: 'white',
     marginLeft: 20,
   },
 });

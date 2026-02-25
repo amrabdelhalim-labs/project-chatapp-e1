@@ -471,9 +471,7 @@ async function runComprehensiveTests() {
     }
     const remainingMsgs = await repos.message.findAllForUser(user1._id);
     const testMsgIds = testData.messages.map((id) => id.toString());
-    const testMsgsRemaining = remainingMsgs.filter((m) =>
-      testMsgIds.includes(m._id.toString())
-    );
+    const testMsgsRemaining = remainingMsgs.filter((m) => testMsgIds.includes(m._id.toString()));
     assert(testMsgsRemaining.length === 0, 'All test messages deleted');
 
     logStep(55, 'Delete test users');

@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet, Animated } from "react-native";
-import { useEffect, useRef } from "react";
+import { View, Text, StyleSheet, Animated } from 'react-native';
+import { useEffect, useRef } from 'react';
 
 export default function TypingIndicator() {
   const dot1 = useRef(new Animated.Value(0)).current;
@@ -64,35 +64,35 @@ export default function TypingIndicator() {
 
 const styles = StyleSheet.create({
   container: {
-    alignSelf: "flex-start",
+    alignSelf: 'flex-start',
     marginLeft: 12,
     marginVertical: 8,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   bubble: {
-    backgroundColor: "#f0f0f0",
+    backgroundColor: '#f0f0f0',
     borderRadius: 18,
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.1)",
+    borderColor: 'rgba(0,0,0,0.1)',
   },
   dotsContainer: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: "#666",
+    backgroundColor: '#666',
     marginHorizontal: 2,
   },
   text: {
     marginLeft: 8,
     fontSize: 12,
-    color: "#666",
-    fontStyle: "italic",
+    color: '#666',
+    fontStyle: 'italic',
   },
 });

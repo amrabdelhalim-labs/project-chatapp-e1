@@ -1,6 +1,6 @@
-import axios from "axios";
-import { API_URL } from "@env";
-import { useStore } from "./globalState";
+import axios from 'axios';
+import { API_URL } from '@env';
+import { useStore } from './globalState';
 
 // ─── إنشاء Axios Instance مع Interceptors ───────────────────────
 const api = axios.create({
@@ -30,98 +30,88 @@ api.interceptors.response.use(
 
 // ─── دوال المصادقة (لا تحتاج توكن) ─────────────────────────────
 
-export const register = async ({
-    firstName,
-    lastName,
-    email,
-    password,
-    confirmPassword,
-}) => {
-    try {
-        const response = await api.post("/api/user/register", {
-            firstName,
-            lastName,
-            email,
-            password,
-            confirmPassword,
-        });
+export const register = async ({ firstName, lastName, email, password, confirmPassword }) => {
+  try {
+    const response = await api.post('/api/user/register', {
+      firstName,
+      lastName,
+      email,
+      password,
+      confirmPassword,
+    });
 
-        return response.data;
-    } catch (error) {
-        // Normalize backend validation errors (400) to a simple shape the UI already checks: { error }
-        const message =
-            error?.response?.data?.message ||
-            error?.message ||
-            "Registration failed";
-        return { error: message };
-    }
+    return response.data;
+  } catch (error) {
+    // Normalize backend validation errors (400) to a simple shape the UI already checks: { error }
+    const message = error?.response?.data?.message || error?.message || 'Registration failed';
+    return { error: message };
+  }
 };
 
 export const login = async ({ email, password }) => {
-    try {
-        const response = await api.post("/api/user/login", {
-            email,
-            password,
-        });
+  try {
+    const response = await api.post('/api/user/login', {
+      email,
+      password,
+    });
 
-        return response.data;
-    } catch (error) {
-        const message =
-            error?.response?.data?.message ||
-            error?.message ||
-            "Login failed";
-        return { error: message };
-    }
+    return response.data;
+  } catch (error) {
+    const message = error?.response?.data?.message || error?.message || 'Login failed';
+    return { error: message };
+  }
 };
 
 // ─── دوال تحتاج مصادقة (التوكن يُضاف تلقائياً عبر Interceptor) ─
 
 export const getProfile = async () => {
-    const response = await api.get("/api/user/profile");
-    return response.data;
+  const response = await api.get('/api/user/profile');
+  return response.data;
 };
 
 export const getUsers = async () => {
-    const response = await api.get("/api/user/friends");
-    return response.data;
+  const response = await api.get('/api/user/friends');
+  return response.data;
 };
 
 export const updateUser = async (body) => {
-    const response = await api.put("/api/user/profile", body);
-    return response.data;
+  const response = await api.put('/api/user/profile', body);
+  return response.data;
 };
 
 export const updateProfilePicture = async (imageUri) => {
-    // Use axios + FormData for React Native multipart upload
-    const form = new FormData();
-    // Derive a filename and mime based on uri (basic heuristic)
-    const fileName = imageUri.split("/").pop() || `photo.jpg`;
-    const ext = (fileName.split(".").pop() || "jpg").toLowerCase();
-    const mime = ext === "png" ? "image/png" : ext === "jpg" || ext === "jpeg" ? "image/jpeg" : "application/octet-stream";
+  // Use axios + FormData for React Native multipart upload
+  const form = new FormData();
+  // Derive a filename and mime based on uri (basic heuristic)
+  const fileName = imageUri.split('/').pop() || `photo.jpg`;
+  const ext = (fileName.split('.').pop() || 'jpg').toLowerCase();
+  const mime =
+    ext === 'png'
+      ? 'image/png'
+      : ext === 'jpg' || ext === 'jpeg'
+        ? 'image/jpeg'
+        : 'application/octet-stream';
 
-    form.append("file", {
-        uri: imageUri,
-        name: fileName,
-        type: mime,
-    });
+  form.append('file', {
+    uri: imageUri,
+    name: fileName,
+    type: mime,
+  });
 
-    const response = await api.put("/api/user/profile/picture", form);
-    return response.data;
+  const response = await api.put('/api/user/profile/picture', form);
+  return response.data;
 };
 
 export const createMessage = async ({ receiverId, content }) => {
-    const response = await api.post(
-        "/api/message",
-        {
-            receiverId,
-            content,
-        }
-    );
+  const response = await api.post('/api/message', {
+    receiverId,
+    content,
+  });
 
-    return response.data;
+  return response.data;
 };
 
 export const getMessages = async () => {
-    const response = await api.get("/api/message/");
-    return response.data;
+  const response = await api.get('/api/message/');
+  return response.data;
 };

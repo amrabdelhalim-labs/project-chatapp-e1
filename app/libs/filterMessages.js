@@ -4,4 +4,4 @@ export function getReceiverMessages(messages, receiverId, currentUserId) {
       (message.sender === currentUserId && message.recipient === receiverId) ||
       (message.sender === receiverId && message.recipient === currentUserId)
   );
-};
+}

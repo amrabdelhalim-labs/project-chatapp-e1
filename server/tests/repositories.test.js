@@ -15,15 +15,9 @@ import { colors, state, assert, logSection, printSummary } from './test.helpers.
  * Main test runner
  */
 async function runTests() {
-  console.log(
-    `${colors.yellow}┌─────────────────────────────────────────────────┐${colors.reset}`
-  );
-  console.log(
-    `${colors.yellow}│  Repository Pattern Testing Suite - Chat App    │${colors.reset}`
-  );
-  console.log(
-    `${colors.yellow}└─────────────────────────────────────────────────┘${colors.reset}`
-  );
+  console.log(`${colors.yellow}┌─────────────────────────────────────────────────┐${colors.reset}`);
+  console.log(`${colors.yellow}│  Repository Pattern Testing Suite - Chat App    │${colors.reset}`);
+  console.log(`${colors.yellow}└─────────────────────────────────────────────────┘${colors.reset}`);
 
   try {
     // Initialize database connection

@@ -1,5 +1,5 @@
-import { View, Text, StyleSheet } from "react-native";
-import React from "react";
+import { View, Text, StyleSheet } from 'react-native';
+import React from 'react';
 
 export default function MessageItem({ content, createdAt, seen, isSender }) {
   return (
@@ -7,8 +7,8 @@ export default function MessageItem({ content, createdAt, seen, isSender }) {
       style={[
         styles.container,
         {
-          alignSelf: isSender ? "flex-end" : "flex-start",
-          backgroundColor: isSender ? "#0e806a" : "#f0f0f0",
+          alignSelf: isSender ? 'flex-end' : 'flex-start',
+          backgroundColor: isSender ? '#0e806a' : '#f0f0f0',
           borderWidth: isSender ? 0 : 1,
         },
       ]}
@@ -17,7 +17,7 @@ export default function MessageItem({ content, createdAt, seen, isSender }) {
         style={[
           styles.title,
           {
-            color: isSender ? "white" : "black",
+            color: isSender ? 'white' : 'black',
           },
         ]}
       >
@@ -31,13 +31,13 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: 16,
     paddingVertical: 8,
-    borderColor: "rgba(0,0,0,0.2)",
+    borderColor: 'rgba(0,0,0,0.2)',
     margin: 12,
     borderRadius: 10,
-    maxWidth: "70%",
+    maxWidth: '70%',
   },
   title: {
     fontSize: 18,
-    color: "white",
+    color: 'white',
   },
 });

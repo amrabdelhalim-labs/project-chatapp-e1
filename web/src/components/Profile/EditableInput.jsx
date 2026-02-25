@@ -1,21 +1,15 @@
-import { useState } from "react";
-import { FaEdit, FaCheck } from "react-icons/fa";
-import cn from "classnames";
-import { updateUser } from "../../libs/requests";
+import { useState } from 'react';
+import { FaEdit, FaCheck } from 'react-icons/fa';
+import cn from 'classnames';
+import { updateUser } from '../../libs/requests';
 
-export default function EditableInput({
-  value,
-  onChange,
-  label,
-  id,
-  placeholder,
-}) {
+export default function EditableInput({ value, onChange, label, id, placeholder }) {
   const [isEditable, setIsEditable] = useState(false);
 
   const handleEdit = () => {
     setIsEditable(true);
   };
-  
+
   const handleNotEdit = async () => {
     setIsEditable(false);
 
@@ -36,8 +30,8 @@ export default function EditableInput({
           value={value}
           onChange={onChange}
           placeholder={placeholder}
-          className={cn("w-full bg-transparent outline-none text-white py-1", {
-            "border-b border-[#B0BAC0]": isEditable,
+          className={cn('w-full bg-transparent outline-none text-white py-1', {
+            'border-b border-[#B0BAC0]': isEditable,
           })}
           disabled={!isEditable}
         />
@@ -59,4 +53,4 @@ export default function EditableInput({
       </div>
     </div>
   );
-};
+}

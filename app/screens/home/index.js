@@ -1,20 +1,20 @@
-import { useEffect, useRef } from "react";
-import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
-import { useNavigation } from "@react-navigation/native";
-import io from "socket.io-client";
-import { API_URL } from "@env";
-import { useStore } from "../../libs/globalState";
-import { getMessages, getUsers } from "../../libs/requests";
-import Chat from "./chat";
-import Header from "../../components/Header";
-import Profile from "./profile";
+import { useEffect, useRef } from 'react';
+import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
+import { useNavigation } from '@react-navigation/native';
+import io from 'socket.io-client';
+import { API_URL } from '@env';
+import { useStore } from '../../libs/globalState';
+import { getMessages, getUsers } from '../../libs/requests';
+import Chat from './chat';
+import Header from '../../components/Header';
+import Profile from './profile';
 
 const Tab = createMaterialTopTabNavigator();
 
 export default function Home() {
-    const navigation = useNavigation();
-    const socketRef = useRef(null); // 🔥 نحفظ الـ socket نفسه بدل flag
-    const {
+  const navigation = useNavigation();
+  const socketRef = useRef(null); // 🔥 نحفظ الـ socket نفسه بدل flag
+  const {
     addMessage,
     setFriends,
     setSocket,
@@ -36,38 +36,38 @@ export default function Home() {
     // 🔥 لو Socket موجود فعلاً ومتصل، متعملش واحد جديد
     if (socketRef.current?.connected) {
       return;
-    };
+    }
 
     const socket = io(API_URL, {
-      query: "token=" + accessToken,
+      query: 'token=' + accessToken,
     });
 
     // 🔥 احفظ الـ socket في الـ ref
     socketRef.current = socket;
 
-    socket.on("connect", () => {
+    socket.on('connect', () => {
       console.log(`Connected to the server with the id: ${socket.id}`);
       setSocket(socket);
     });
 
-    socket.on("disconnect", () => {
-      console.log("Disconnected from the server");
+    socket.on('disconnect', () => {
+      console.log('Disconnected from the server');
       setSocket(null);
     });
 
-    socket.on("receive_message", (message) => {
+    socket.on('receive_message', (message) => {
       addMessage(message);
     });
 
-    socket.on("typing", (senderId) => {
+    socket.on('typing', (senderId) => {
       setTyping(senderId); // تخزين مُعرّف من يكتب بدلاً من قيمة منطقية
     });
 
-    socket.on("stop_typing", (senderId) => {
+    socket.on('stop_typing', (senderId) => {
       clearTyping(senderId); // إيقاف الكتابة فقط إذا كان نفس الشخص
     });
 
-    socket.on("seen", ({ readerId, senderId }) => {
+    socket.on('seen', ({ readerId, senderId }) => {
       if (!user?._id) return;
       if (user._id === readerId) {
         // أنا القارئ — علّم الرسائل الواردة من المرسل كمقروءة
@@ -78,7 +78,7 @@ export default function Home() {
       }
     });
 
-    socket.on("user_updated", (updatedUser) => {
+    socket.on('user_updated', (updatedUser) => {
       if (user._id === updatedUser._id) {
         setUser(updatedUser);
       } else {
@@ -86,14 +86,14 @@ export default function Home() {
 
         if (currentReceiver?._id === updatedUser._id) {
           setCurrentReceiver(updatedUser);
-        };
-      };
+        }
+      }
     });
 
-    socket.on("user_created", (userCreated) => {
+    socket.on('user_created', (userCreated) => {
       if (userCreated._id !== user._id) {
         addFriend(userCreated);
-      };
+      }
     });
 
     setSocket(socket);
@@ -109,7 +109,7 @@ export default function Home() {
         // Error handling done by axios interceptor
       }
     };
-    
+
     fetchData();
 
     return () => {
@@ -127,13 +127,13 @@ export default function Home() {
       <Tab.Navigator
         initialRouteName="Chat"
         screenOptions={{
-          tabBarActiveTintColor: "white",
+          tabBarActiveTintColor: 'white',
           tabBarLabelStyle: {
-            fontWeight: "bold",
+            fontWeight: 'bold',
             fontSize: 12,
           },
           tabBarStyle: {
-            backgroundColor: "#0e806a",
+            backgroundColor: '#0e806a',
           },
         }}
       >
@@ -142,4 +142,4 @@ export default function Home() {
       </Tab.Navigator>
     </>
   );
-};
+}

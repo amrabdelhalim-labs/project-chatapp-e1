@@ -1,7 +1,7 @@
-import logo from "../../assets/icon.png";
-import { useNavigate } from "react-router-dom";
-import { IoLogOutOutline } from "react-icons/io5";
-import { useStore } from "../../libs/globalState";
+import logo from '../../assets/icon.png';
+import { useNavigate } from 'react-router-dom';
+import { IoLogOutOutline } from 'react-icons/io5';
+import { useStore } from '../../libs/globalState';
 
 export default function NoUserSelected() {
   const navigate = useNavigate();
@@ -9,7 +9,7 @@ export default function NoUserSelected() {
 
   const handleLogout = () => {
     logout();
-    navigate("/");
+    navigate('/');
   };
 
   return (
@@ -20,10 +20,7 @@ export default function NoUserSelected() {
             onClick={handleLogout}
             className="justify-center rounded-full p-1 cursor-pointer active:bg-[#005C4B] transition-all"
           >
-            <IoLogOutOutline
-              size={20}
-              color="#B0BAC0"
-            />
+            <IoLogOutOutline size={20} color="#B0BAC0" />
           </button>
         </div>
       </div>

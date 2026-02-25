@@ -112,10 +112,7 @@ export const updateProfilePicture = async (req, res) => {
   const uploadResult = await storage.uploadFile(req.file);
   const newFileUrl = uploadResult.url;
 
-  const { previousPicture, user } = await repos.user.updateProfilePicture(
-    req.userId,
-    newFileUrl
-  );
+  const { previousPicture, user } = await repos.user.updateProfilePicture(req.userId, newFileUrl);
 
   if (!user) {
     return res.status(StatusCodes.NOT_FOUND).json({ message: 'المستخدم غير موجود' });

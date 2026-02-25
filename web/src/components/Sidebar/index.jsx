@@ -1,13 +1,13 @@
-import { useState } from "react";
-import { FaSearch } from "react-icons/fa";
-import { IoFilter } from "react-icons/io5";
-import MessageItem from "./MessageItem";
-import Profile from "../Profile";
-import { useStore } from "../../libs/globalState";
-import Loading from "../Loading";
-import { useParams } from "react-router-dom";
-import { getReceiverMessages } from "../../libs/filterMessages";
-import classNames from "classnames";
+import { useState } from 'react';
+import { FaSearch } from 'react-icons/fa';
+import { IoFilter } from 'react-icons/io5';
+import MessageItem from './MessageItem';
+import Profile from '../Profile';
+import { useStore } from '../../libs/globalState';
+import Loading from '../Loading';
+import { useParams } from 'react-router-dom';
+import { getReceiverMessages } from '../../libs/filterMessages';
+import classNames from 'classnames';
 
 export default function Sidebar() {
   const { user, setCurrentReceiver, friends, messages } = useStore();
@@ -17,7 +17,7 @@ export default function Sidebar() {
   const [activeMessage, setActiveMessage] = useState(receiverId);
   const [showProfile, setShowProfile] = useState(false);
   const [showUnSeenMessages, setShowUnSeenMessages] = useState(false);
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState('');
 
   // وظيفة لتصفية جهات الاتصال بناءً على البحث
   const handleSearch = ({ firstName, lastName }) => {
@@ -31,9 +31,7 @@ export default function Sidebar() {
     if (!showUnSeenMessages) return true; // إذا لم يتم تفعيل خيار عرض الرسائل غير المقروءة، إرجاع جميع جهات الاتصال
     const contactMessages = getReceiverMessages(messages, contact._id, user._id); // الحصول على رسائل جهة الاتصال المحددة
     // التحقق مما إذا كانت جهة الاتصال تحتوي على رسائل غير مقروءة
-    const containUnseenMessages = contactMessages.some(
-      (message) => !message.seen
-    );
+    const containUnseenMessages = contactMessages.some((message) => !message.seen);
     return containUnseenMessages;
   };
 
@@ -47,7 +45,9 @@ export default function Sidebar() {
         <div className="flex items-center justify-center">
           <img
             className="w-10 h-10 rounded-full cursor-pointer"
-            src={user.profilePicture || `${process.env.REACT_APP_API_URL}/uploads/default-picture.jpg`}
+            src={
+              user.profilePicture || `${process.env.REACT_APP_API_URL}/uploads/default-picture.jpg`
+            }
             alt="Avatar"
             onClick={() => setShowProfile(true)}
           />
@@ -69,13 +69,11 @@ export default function Sidebar() {
           <FaSearch className="absolute top-0 left-0 mt-3 ml-3 text-gray-400" />
         </div>
         <button
-          onClick={() =>
-            setShowUnSeenMessages((showUnSeenMessages) => !showUnSeenMessages)
-          }
+          onClick={() => setShowUnSeenMessages((showUnSeenMessages) => !showUnSeenMessages)}
           className={classNames(
-            "justify-center rounded-full p-1 cursor-pointer active:bg-[#005C4B] transition-all",
+            'justify-center rounded-full p-1 cursor-pointer active:bg-[#005C4B] transition-all',
             {
-              "bg-[#005C4B]": showUnSeenMessages,
+              'bg-[#005C4B]': showUnSeenMessages,
             }
           )}
         >
@@ -94,7 +92,10 @@ export default function Sidebar() {
                   id={friend._id}
                   sender={`${friend.firstName} ${friend.lastName}`}
                   selected={friend._id === activeMessage}
-                  profilePicture={friend.profilePicture || `${process.env.REACT_APP_API_URL}/uploads/default-picture.jpg`}
+                  profilePicture={
+                    friend.profilePicture ||
+                    `${process.env.REACT_APP_API_URL}/uploads/default-picture.jpg`
+                  }
                   setActiveMessage={() => setActiveMessage(friend._id)}
                   setCurrentReceiver={() => {
                     setCurrentReceiver(friend);
@@ -112,4 +113,4 @@ export default function Sidebar() {
       </div>
     </div>
   );
-};
+}

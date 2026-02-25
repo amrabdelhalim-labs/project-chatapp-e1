@@ -118,12 +118,8 @@ async function stopServer() {
 async function runApiTests() {
   console.log(`${'┌' + '─'.repeat(48) + '┐'}`);
   console.log(`│${' '.repeat(48)}│`);
-  console.log(
-    `│  ${colors.magenta}🧪 API ENDPOINT TESTS (E2E)${colors.reset}${' '.repeat(19)}│`
-  );
-  console.log(
-    `│  ${colors.cyan}HTTP Requests → Express Server${colors.reset}${' '.repeat(16)}│`
-  );
+  console.log(`│  ${colors.magenta}🧪 API ENDPOINT TESTS (E2E)${colors.reset}${' '.repeat(19)}│`);
+  console.log(`│  ${colors.cyan}HTTP Requests → Express Server${colors.reset}${' '.repeat(16)}│`);
   console.log(`│${' '.repeat(48)}│`);
   console.log(`${'└' + '─'.repeat(48) + '┘'}`);
 
@@ -191,10 +187,7 @@ async function runApiTests() {
       password: '123456',
       confirmPassword: '654321',
     });
-    assert(
-      mismatchRes.status === 400,
-      `Password mismatch returns 400 (got ${mismatchRes.status})`
-    );
+    assert(mismatchRes.status === 400, `Password mismatch returns 400 (got ${mismatchRes.status})`);
 
     logStep(7, 'Register second user for messaging');
     const reg2Res = await makeRequest('POST', '/api/user/register', {
@@ -240,10 +233,7 @@ async function runApiTests() {
 
     logStep(11, 'POST /api/user/login — missing fields');
     const emptyLoginRes = await makeRequest('POST', '/api/user/login', {});
-    assert(
-      emptyLoginRes.status === 400,
-      `Empty login returns 400 (got ${emptyLoginRes.status})`
-    );
+    assert(emptyLoginRes.status === 400, `Empty login returns 400 (got ${emptyLoginRes.status})`);
 
     // ============================================================
     // PHASE 4: AUTH PROTECTION
@@ -371,10 +361,7 @@ async function runApiTests() {
       { receiverId: testUser2Id, content: '' },
       testToken
     );
-    assert(
-      emptyMsgRes.status === 400,
-      `Empty content returns 400 (got ${emptyMsgRes.status})`
-    );
+    assert(emptyMsgRes.status === 400, `Empty content returns 400 (got ${emptyMsgRes.status})`);
 
     logStep(26, 'POST /api/message — missing receiverId');
     const noRecvRes = await makeRequest(

@@ -1,9 +1,9 @@
-import io from "socket.io-client";
-import { useEffect } from "react";
-import Sidebar from "../components/Sidebar";
-import { Outlet } from "react-router-dom";
-import { useStore } from "../libs/globalState";
-import { getMessages, getUsers } from "../libs/requests";
+import io from 'socket.io-client';
+import { useEffect } from 'react';
+import Sidebar from '../components/Sidebar';
+import { Outlet } from 'react-router-dom';
+import { useStore } from '../libs/globalState';
+import { getMessages, getUsers } from '../libs/requests';
 
 export default function Home() {
   const {
@@ -26,31 +26,31 @@ export default function Home() {
 
   useEffect(() => {
     const socket = io(process.env.REACT_APP_API_URL, {
-      query: "token=" + accessToken,
+      query: 'token=' + accessToken,
     });
 
-    socket.on("connect", () => {
+    socket.on('connect', () => {
       console.log(`Connected to the server with the id: ${socket.id}`);
     });
 
-    socket.on("disconnect", () => {
-      console.log("Disconnected from the server");
+    socket.on('disconnect', () => {
+      console.log('Disconnected from the server');
       setSocket(null);
     });
 
-    socket.on("receive_message", (message) => {
+    socket.on('receive_message', (message) => {
       addMessage(message);
     });
 
-    socket.on("typing", (senderId) => {
+    socket.on('typing', (senderId) => {
       setTyping(senderId); // تخزين مُعرّف من يكتب بدلاً من قيمة منطقية
     });
 
-    socket.on("stop_typing", (senderId) => {
+    socket.on('stop_typing', (senderId) => {
       clearTyping(senderId);
     });
 
-    socket.on("seen", ({ readerId, senderId }) => {
+    socket.on('seen', ({ readerId, senderId }) => {
       if (!user?._id) return;
       if (user._id === readerId) {
         // أنا القارئ — علّم الرسائل الواردة من المرسل كمقروءة
@@ -61,7 +61,7 @@ export default function Home() {
       }
     });
 
-    socket.on("user_updated", (updatedUser) => {
+    socket.on('user_updated', (updatedUser) => {
       if (user._id === updatedUser._id) {
         setUser(updatedUser);
       } else {
@@ -69,14 +69,14 @@ export default function Home() {
 
         if (currentReceiver?._id === updatedUser._id) {
           setCurrentReceiver(updatedUser);
-        };
-      };
+        }
+      }
     });
 
-    socket.on("user_created", (userCreated) => {
+    socket.on('user_created', (userCreated) => {
       if (userCreated._id !== user._id) {
         addFriend(userCreated);
-      };
+      }
     });
 
     setSocket(socket);
@@ -89,11 +89,11 @@ export default function Home() {
         setFriends(users);
         setMessages(messages);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error('Error fetching data:', error);
         // The axios interceptor will handle redirection to login
       }
     };
-    
+
     fetchData();
 
     return () => {
@@ -107,4 +107,4 @@ export default function Home() {
       <Outlet />
     </div>
   );
-};
+}

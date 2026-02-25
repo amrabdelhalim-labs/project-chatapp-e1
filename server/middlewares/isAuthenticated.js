@@ -4,14 +4,10 @@ import { verifyToken } from '../utils/jwt.js';
 export default function isAuthenticated(req, res, next) {
   const authHeader = req.headers.authorization;
   const token =
-    authHeader && authHeader.startsWith('Bearer ')
-      ? authHeader.split(' ')[1]
-      : authHeader;
+    authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
 
   if (!token) {
-    return res
-      .status(StatusCodes.UNAUTHORIZED)
-      .json({ message: 'التوثيق غير صالح' });
+    return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'التوثيق غير صالح' });
   }
 
   try {
@@ -19,9 +15,7 @@ export default function isAuthenticated(req, res, next) {
     req.userId = payload.userId;
     next();
   } catch (error) {
-    return res
-      .status(StatusCodes.UNAUTHORIZED)
-      .json({ message: 'التوثيق غير صالح' });
+    return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'التوثيق غير صالح' });
   }
 }
 

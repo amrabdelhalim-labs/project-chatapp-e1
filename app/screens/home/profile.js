@@ -1,11 +1,21 @@
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
-import { useMemo, useState, useEffect } from "react";
-import { Button } from "native-base";
-import * as ImagePicker from "expo-image-picker";
-import EditUserModal from "../../components/EditUserModal";
-import { useStore } from "../../libs/globalState";
-import { updateProfilePicture } from "../../libs/requests";
-import { API_URL } from "@env";
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from 'react-native';
+import { useMemo, useState, useEffect } from 'react';
+import { Button } from 'native-base';
+import * as ImagePicker from 'expo-image-picker';
+import EditUserModal from '../../components/EditUserModal';
+import { useStore } from '../../libs/globalState';
+import { updateProfilePicture } from '../../libs/requests';
+import { API_URL } from '@env';
 
 export default function Profile() {
   const { user, setUser } = useStore();
@@ -14,7 +24,7 @@ export default function Profile() {
   const email = user?.email;
   const profilePicture = user?.profilePicture;
   const status = user?.status;
-  const actualStatus = status || "No status";
+  const actualStatus = status || 'No status';
 
   // Normalize any legacy localhost URLs to current API_URL host, else use default fallback
   const normalizedProfilePicture = useMemo(() => {
@@ -22,7 +32,7 @@ export default function Profile() {
       if (!profilePicture) return `${API_URL}/uploads/default-picture.jpg`;
       const url = new URL(profilePicture);
       const api = new URL(API_URL);
-      if (url.hostname === "localhost" || url.hostname === "127.0.0.1") {
+      if (url.hostname === 'localhost' || url.hostname === '127.0.0.1') {
         return `${api.origin}${url.pathname}`;
       }
       return profilePicture;
@@ -52,10 +62,10 @@ export default function Profile() {
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
-    if (status !== "granted") {
+    if (status !== 'granted') {
       // If permission is denied, show an alert
       Alert.alert(
-        "Permission Denied",
+        'Permission Denied',
         `Sorry, we need camera  
         roll permission to upload images.`
       );
@@ -74,10 +84,13 @@ export default function Profile() {
             setFile(updatedUser.profilePicture);
           }
         } catch (err) {
-          Alert.alert("Upload failed", err?.response?.data?.message || err?.message || "Please try again.");
+          Alert.alert(
+            'Upload failed',
+            err?.response?.data?.message || err?.message || 'Please try again.'
+          );
         }
-      };
-    };
+      }
+    }
   };
 
   if (!user) {
@@ -86,52 +99,52 @@ export default function Profile() {
   }
 
   return (
-    <KeyboardAvoidingView 
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       style={{ flex: 1 }}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}
     >
-      <ScrollView 
+      <ScrollView
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
         bounces={false}
       >
-      <EditUserModal modalVisible={modalVisible} closeModal={closeModal} />
-      <View style={styles.imageContainer}>
-        <TouchableOpacity onPress={pickImage}>
-          <Image source={{ uri: file }} style={styles.profilePicture} />
-        </TouchableOpacity>
-      </View>
-      <View style={styles.infoBlock}>
-        <Text style={styles.label}>Full Name</Text>
-        <Text style={styles.text}>
-          {(firstName || "")} {(lastName || "")}
-        </Text>
-      </View>
-      <View style={styles.infoBlock}>
-        <Text style={styles.label}>Email</Text>
-        <Text style={styles.text}>{email || ""}</Text>
-      </View>
-      <View style={styles.infoBlock}>
-        <Text style={styles.label}>Status</Text>
-        <Text style={styles.text}>{actualStatus || ""}</Text>
-      </View>
-      <View style={styles.buttonContainer}>
-        <Button
-          onPress={openModal}
-          bg="#0e806a"
-          _hover={{
-            bg: "green.700",
-          }}
-        >
-          Edit Profile
-        </Button>
-      </View>
+        <EditUserModal modalVisible={modalVisible} closeModal={closeModal} />
+        <View style={styles.imageContainer}>
+          <TouchableOpacity onPress={pickImage}>
+            <Image source={{ uri: file }} style={styles.profilePicture} />
+          </TouchableOpacity>
+        </View>
+        <View style={styles.infoBlock}>
+          <Text style={styles.label}>Full Name</Text>
+          <Text style={styles.text}>
+            {firstName || ''} {lastName || ''}
+          </Text>
+        </View>
+        <View style={styles.infoBlock}>
+          <Text style={styles.label}>Email</Text>
+          <Text style={styles.text}>{email || ''}</Text>
+        </View>
+        <View style={styles.infoBlock}>
+          <Text style={styles.label}>Status</Text>
+          <Text style={styles.text}>{actualStatus || ''}</Text>
+        </View>
+        <View style={styles.buttonContainer}>
+          <Button
+            onPress={openModal}
+            bg="#0e806a"
+            _hover={{
+              bg: 'green.700',
+            }}
+          >
+            Edit Profile
+          </Button>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
-};
+}
 
 const styles = StyleSheet.create({
   scrollContent: {
@@ -139,7 +152,7 @@ const styles = StyleSheet.create({
     paddingTop: 50,
   },
   imageContainer: {
-    alignItems: "center",
+    alignItems: 'center',
   },
   profilePicture: {
     width: 150,
@@ -152,11 +165,11 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    color: "#444",
+    color: '#444',
   },
   text: {
     fontSize: 20,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginTop: 8,
   },
   buttonContainer: {

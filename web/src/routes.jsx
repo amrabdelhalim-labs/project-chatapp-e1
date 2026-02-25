@@ -1,14 +1,14 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Home from "./pages";
-import Login from "./pages/login";
-import Register from "./pages/register";
-import Chat from "./components/Chat";
-import NoUserSelected from "./components/Chat/NoUserSelected";
-import ProtectedRoute from "./components/ProtectedRoute";
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+import Home from './pages';
+import Login from './pages/login';
+import Register from './pages/register';
+import Chat from './components/Chat';
+import NoUserSelected from './components/Chat/NoUserSelected';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: '/',
     element: (
       <ProtectedRoute>
         <Home />
@@ -16,25 +16,25 @@ const router = createBrowserRouter([
     ),
     children: [
       {
-        path: "",
+        path: '',
         element: <NoUserSelected />,
       },
       {
-        path: ":receiverId",
+        path: ':receiverId',
         element: <Chat />,
       },
     ],
   },
   {
-    path: "/login",
+    path: '/login',
     element: <Login />,
   },
   {
-    path: "/register",
+    path: '/register',
     element: <Register />,
   },
 ]);
 
 export default function Router() {
   return <RouterProvider router={router} />;
-};
+}

@@ -1,7 +1,7 @@
-import { FlatList, StyleSheet, View } from "react-native";
-import React from "react";
-import ChatItem from "../../components/Chat/ChatItem";
-import { useStore } from "../../libs/globalState";
+import { FlatList, StyleSheet, View } from 'react-native';
+import React from 'react';
+import ChatItem from '../../components/Chat/ChatItem';
+import { useStore } from '../../libs/globalState';
 
 export default function Chat() {
   const { friends } = useStore();
@@ -14,7 +14,7 @@ export default function Chat() {
       />
     </View>
   );
-};
+}
 
 const styles = StyleSheet.create({
   container: {

@@ -25,9 +25,7 @@ class CloudinaryStorageStrategy {
       });
       console.log('✅ Cloudinary storage initialized');
     } catch (error) {
-      throw new Error(
-        'Failed to load cloudinary package. Install it with: npm install cloudinary'
-      );
+      throw new Error('Failed to load cloudinary package. Install it with: npm install cloudinary');
     }
   }
 
@@ -44,8 +42,7 @@ class CloudinaryStorageStrategy {
           ],
         },
         (error, result) => {
-          if (error)
-            return reject(new Error(`Cloudinary upload failed: ${error.message}`));
+          if (error) return reject(new Error(`Cloudinary upload failed: ${error.message}`));
           resolve({
             url: result.secure_url,
             filename: result.public_id,
