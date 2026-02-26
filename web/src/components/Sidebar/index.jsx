@@ -8,6 +8,7 @@ import Loading from '../Loading';
 import { useParams } from 'react-router-dom';
 import { getReceiverMessages } from '../../libs/filterMessages';
 import classNames from 'classnames';
+import { getAvatarSrc, handleAvatarError } from '../../utils/avatar';
 
 export default function Sidebar() {
   const { user, setCurrentReceiver, friends, messages } = useStore();
@@ -45,15 +46,10 @@ export default function Sidebar() {
         <div className="flex items-center justify-center">
           <img
             className="w-10 h-10 rounded-full cursor-pointer"
-            src={
-              user.profilePicture
-                ? user.profilePicture.startsWith('http')
-                  ? user.profilePicture
-                  : `${process.env.REACT_APP_API_URL}${user.profilePicture}`
-                : `${process.env.REACT_APP_API_URL}/uploads/default-picture.jpg`
-            }
+            src={getAvatarSrc(user.profilePicture)}
             alt="Avatar"
             onClick={() => setShowProfile(true)}
+            onError={handleAvatarError}
           />
           <div className="ml-4">
             <p className="text-white text-md">{`${user.firstName} ${user.lastName}`}</p>
@@ -97,8 +93,7 @@ export default function Sidebar() {
                   sender={`${friend.firstName} ${friend.lastName}`}
                   selected={friend._id === activeMessage}
                   profilePicture={
-                    friend.profilePicture ||
-                    `${process.env.REACT_APP_API_URL}/uploads/default-picture.jpg`
+                    friend.profilePicture
                   }
                   setActiveMessage={() => setActiveMessage(friend._id)}
                   setCurrentReceiver={() => {

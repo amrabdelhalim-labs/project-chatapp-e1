@@ -151,6 +151,7 @@ socket.emit("seen", receiverId)
 import { IoLogOutOutline } from "react-icons/io5";
 import { useStore } from "../../libs/globalState";
 import { useNavigate } from "react-router-dom";
+import { getAvatarSrc, handleAvatarError } from "../../utils/avatar";
 
 export default function ChatHeader({ receiver }) {
   const { typing, currentReceiver, logout } = useStore();
@@ -165,9 +166,10 @@ export default function ChatHeader({ receiver }) {
     <div className="flex items-center justify-between bg-[#222C32] h-16 p-3">
       <div className="flex items-center space-x-4">
         <img
-          src={receiver?.profilePicture}
+          src={getAvatarSrc(receiver?.profilePicture)}
           alt="avatar"
           className="rounded-full w-10 h-10 object-cover"
+          onError={handleAvatarError}
         />
         <div>
           <p className="text-white">{receiver?.firstName}</p>
@@ -183,6 +185,19 @@ export default function ChatHeader({ receiver }) {
     </div>
   );
 }
+```
+
+### مساعد الصور الافتراضية
+
+```jsx
+// utils/avatar.js
+export const getAvatarSrc = (profilePicture) => {
+  // يرجع URL صالح (مع fallback إلى صورة افتراضية)
+};
+
+export const handleAvatarError = (event) => {
+  // يحوّل الصورة إلى SVG افتراضي عند فشل التحميل
+};
 ```
 
 ### الشرح:

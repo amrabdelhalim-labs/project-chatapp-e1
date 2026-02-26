@@ -59,8 +59,12 @@ export const getUsers = async () => {
 ```javascript
 import axios from "axios";
 
+const apiBaseUrl =
+  process.env.REACT_APP_API_URL ||
+  (typeof window !== "undefined" ? window.location.origin : "");
+
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
+  baseURL: apiBaseUrl,
 });
 ```
 
@@ -68,6 +72,7 @@ const api = axios.create({
 - **`axios.create`**: ينشئ نسخة Axios مخصصة بإعدادات ثابتة
 - **`baseURL`**: عنوان الخادم (مثلاً `http://localhost:5000`)
 - **`process.env.REACT_APP_API_URL`**: يأتي من ملف `.env`
+- **Fallback**: لو المتغير غير موجود، نستخدم `window.location.origin`
 
 💡 **لماذا نسخة مخصصة؟**
 ```javascript

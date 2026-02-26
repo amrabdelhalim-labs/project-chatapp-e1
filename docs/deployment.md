@@ -12,7 +12,9 @@
 - [ ] جميع التبعيات موجودة في `package.json`
 - [ ] `.gitignore` يستثني الملفات الحساسة
 - [ ] معالجة الأخطاء شاملة
-- [ ] `npm run test:all` يمر بنجاح (282 اختبار)
+- [ ] `npm run test:all` يمر بنجاح (331 اختبار)
+- [ ] `REACT_APP_API_URL` مضبوط في الويب للإنتاج
+- [ ] `DEFAULT_PROFILE_PICTURE_URL` مضبوط عند استخدام Cloudinary/S3
 - [ ] SPA routing: `web/public/_redirects`, `web/public/404.html`, وسكريبت receiver في `web/public/index.html` موجودة (`node validate-workflow.mjs` يتحقق منها تلقائيًا)
 
 ---
@@ -85,6 +87,9 @@ POST https://preview.amrabdelhalim.me/api/user/register 405 (Method Not Allowed)
 
 ### السبب الرئيسي:
 الـ build يستخدم `REACT_APP_API_URL` من GitHub vars/secrets، وإذا كانت **فارغة أو تشير بشكل خاطئ**، الطلبات تذهب للـ endpoint الخطأ.
+
+> ملاحظة: الواجهة الآن تستخدم fallback إلى `window.location.origin` إذا كان المتغير غير موجود،
+> لكن يبقى تعيين `REACT_APP_API_URL` أفضل ممارسة لتفادي أي التباس بين بيئة الويب والخادم.
 
 ### الحل:
 

@@ -1,6 +1,7 @@
 import { IoLogOutOutline } from 'react-icons/io5';
 import { useStore } from '../../libs/globalState';
 import { useNavigate } from 'react-router-dom';
+import { getAvatarSrc, handleAvatarError } from '../../utils/avatar';
 
 const ChatHeader = () => {
   const navigate = useNavigate();
@@ -17,9 +18,10 @@ const ChatHeader = () => {
     <div className="flex items-center bg-[#222C32] justify-between h-16 p-3">
       <div className="flex items-center space-x-3">
         <img
-          src={currentReceiver.profilePicture}
+          src={getAvatarSrc(currentReceiver.profilePicture)}
           alt="Avatar"
           className="w-10 h-10 rounded-full object-cover"
+          onError={handleAvatarError}
         />
         <div>
           <p className="text-white text-md font-semibold">{`${currentReceiver.firstName} ${currentReceiver.lastName}`}</p>

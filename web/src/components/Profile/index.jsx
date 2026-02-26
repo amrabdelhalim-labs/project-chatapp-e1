@@ -4,19 +4,14 @@ import { IoMdReturnLeft } from 'react-icons/io';
 import EditableInput from './EditableInput';
 import { useStore } from '../../libs/globalState';
 import { updateProfilePicture } from '../../libs/requests';
+import { getAvatarSrc, handleAvatarError } from '../../utils/avatar';
 
 export default function Profile({ onClose }) {
   const { user } = useStore();
   const [firstName, setFirstName] = useState(user.firstName);
   const [lastName, setLastName] = useState(user.lastName);
   const [status, setStatus] = useState(user.status);
-  const [image, setImage] = useState(
-    user.profilePicture
-      ? user.profilePicture.startsWith('http')
-        ? user.profilePicture
-        : `${process.env.REACT_APP_API_URL}${user.profilePicture}`
-      : `${process.env.REACT_APP_API_URL}/uploads/default-picture.jpg`
-  );
+  const [image, setImage] = useState(getAvatarSrc(user.profilePicture));
 
   const handleProfilePictureChange = async (e) => {
     if (e.target.files && e.target.files[0]) {
@@ -53,6 +48,7 @@ export default function Profile({ onClose }) {
                 src={image}
                 alt="Avatar"
                 className="w-full h-full rounded-full transition-opacity duration-300"
+                onError={handleAvatarError}
               />
               <div className="absolute cursor-pointer inset-0 flex items-center justify-center bg-gray-600 bg-opacity-50 rounded-full opacity-0 hover:opacity-100 transition-opacity duration-300">
                 <div className="text-white flex flex-col items-center justify-center mx-2">

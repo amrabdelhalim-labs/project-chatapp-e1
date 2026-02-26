@@ -1,8 +1,12 @@
 import axios from 'axios';
 
+const fallbackBaseUrl =
+  typeof window !== 'undefined' && window.location?.origin ? window.location.origin : '';
+const apiBaseUrl = process.env.REACT_APP_API_URL || fallbackBaseUrl;
+
 // ─── إنشاء Axios Instance مع Interceptors ───────────────────────
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL,
+  baseURL: apiBaseUrl,
 });
 
 // Request Interceptor: إضافة التوكن تلقائياً لكل طلب

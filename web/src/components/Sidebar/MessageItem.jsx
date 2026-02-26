@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useStore } from '../../libs/globalState';
 import { getReceiverMessages } from '../../libs/filterMessages';
 import moment from 'moment';
+import { getAvatarSrc, handleAvatarError } from '../../utils/avatar';
 
 const MessageItem = ({
   sender,
@@ -47,9 +48,10 @@ const MessageItem = ({
       }`}
     >
       <img
-        src={profilePicture || `${process.env.REACT_APP_API_URL}/uploads/default-picture.jpg`}
+        src={getAvatarSrc(profilePicture)}
         alt="profilePicture"
         className="w-10 h-10 rounded-full mr-4"
+        onError={handleAvatarError}
       />
 
       <div>
