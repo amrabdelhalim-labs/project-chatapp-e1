@@ -115,3 +115,10 @@ export const getMessages = async () => {
   const response = await api.get('/api/message/');
   return response.data;
 };
+
+export const deleteAccount = async ({ password }) => {
+  const response = await api.delete('/api/user/account', {
+    data: { password },
+  });
+  return response.data;
+};

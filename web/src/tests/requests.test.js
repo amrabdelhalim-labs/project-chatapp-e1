@@ -11,6 +11,7 @@ jest.mock('axios', () => {
     get: jest.fn(),
     post: jest.fn(),
     put: jest.fn(),
+    delete: jest.fn(),
     interceptors: {
       request: { use: jest.fn() },
       response: { use: jest.fn() },
@@ -47,6 +48,7 @@ beforeEach(() => {
   mockApi.get.mockReset();
   mockApi.post.mockReset();
   mockApi.put.mockReset();
+  mockApi.delete.mockReset();
   localStorage.clear();
 });
 

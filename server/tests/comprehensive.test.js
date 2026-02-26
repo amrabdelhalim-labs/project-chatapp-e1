@@ -488,7 +488,10 @@ async function runComprehensiveTests() {
     assert(userBeforeDeletion !== null, 'User exists before deletion');
 
     logStep(56, 'Delete user account');
-    const deleteResult = await repos.user.delete(testUserForDeletion._id);
+    const deleteResult = await repos.user.deleteUserWithMessages(
+      testUserForDeletion._id,
+      repos.message
+    );
     assert(deleteResult !== null, 'Delete returns deleted user data');
 
     logStep(57, 'Verify user deleted successfully');

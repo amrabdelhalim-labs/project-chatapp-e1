@@ -92,9 +92,7 @@ export default function Sidebar() {
                   id={friend._id}
                   sender={`${friend.firstName} ${friend.lastName}`}
                   selected={friend._id === activeMessage}
-                  profilePicture={
-                    friend.profilePicture
-                  }
+                  profilePicture={friend.profilePicture}
                   setActiveMessage={() => setActiveMessage(friend._id)}
                   setCurrentReceiver={() => {
                     setCurrentReceiver(friend);

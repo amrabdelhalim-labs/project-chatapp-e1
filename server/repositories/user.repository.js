@@ -91,6 +91,22 @@ class UserRepository extends BaseRepository {
     user.password = undefined;
     return user;
   }
+
+  /**
+   * Delete a user and all their messages (for delete account feature).
+   * Uses cascade delete pattern: remove all user messages first, then user.
+   * @param {string} userId
+   * @returns {Promise<Object|null>}
+   */
+  async deleteUserWithMessages(userId, messageRepository) {
+    // Delete all messages where user is sender or recipient
+    if (messageRepository) {
+      await messageRepository.deleteByUser(userId);
+    }
+
+    // Then delete the user
+    return this.delete(userId);
+  }
 }
 
 // Singleton pattern
