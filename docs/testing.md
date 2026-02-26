@@ -77,7 +77,7 @@ server/tests/
 ├── integration.test.js      # اختبارات تكامل كاملة مع التخزين (45 اختبار)
 ├── api.test.js              # اختبارات نقاط النهاية E2E (63 اختبار)
 ├── image.test.js            # اختبارات رفع / استبدال / حذف صور الملف الشخصي (38 اختبار)
-└── storage.test.js          # اختبارات وحدة/تكامل خدمة التخزين (48 اختبار) — بدون شبكة
+└── storage.test.js          # اختبارات وحدة/تكامل خدمة التخزين (50 اختبار وحدة / 58 مع Cloudinary)
 ```
 
 ---
@@ -659,7 +659,7 @@ node validate-workflow.mjs
 
 #### 1. Deploy Server
 ```
-npm ci → npm run test:all (282 اختبار) → حذف devDeps → دفع إلى فرع server
+npm ci → npm run test:all (320 اختبار) → حذف devDeps → دفع إلى فرع server
 ```
 
 - يستخدم **MongoDB 7** كخدمة مرافقة (service container)
@@ -717,10 +717,11 @@ node validate-workflow.mjs
 - rsync excludes: `node_modules`, `tests`, `dist`, `coverage` جميعها مُستثناة
 - عدم وجود `cp` لملفات prettier أو node_modules
 - محاكاة كاملة لسكريبت `package.json` على الملف الحقيقي — يتأكد من بقاء `start` فقط وحذف `devDependencies`
+- **تحقق الاكتمال (completeness check)**: يكتشف أي script يطابق FORBIDDEN_PATTERNS في `package.json` لكنه غير محذوف من الورك فلو
 
 **ناتج ناجح:**
 ```
-  Passed: 15   Failed: 0
+  Passed: 16   Failed: 0
 [OK] Workflow is valid and ready to push.
 ```
 
@@ -766,7 +767,7 @@ NODE_ENV=test \
 JWT_SECRET=test_jwt_secret_key_for_ci_testing_only_32chars \
 MONGODB_URL=mongodb://localhost:27017/test_chatapp_db \
 npm run test:all
-# المتوقع: 282 اختبار ناجح
+# المتوقع: 320 اختبار ناجح
 ```
 
 > **ملاحظة**: إذا لم يكن MongoDB مثبتاً محلياً، هذه الخطوة ستفشل.
@@ -838,7 +839,7 @@ node -e "
 | هيكل YAML (مسافات، مفاتيح) | ✅ بدون tabs، جميع المفاتيح موجودة |
 | `package-lock.json` موجود | ✅ server + web |
 | السكربتات المذكورة موجودة | ✅ `test:all`, `test:ci`, `build` |
-| اختبارات الخادم (282) | ✅ تمر (تحتاج MongoDB) |
+| اختبارات الخادم (320) | ✅ تمر (تحتاج MongoDB) |
 | اختبارات الويب (99) | ✅ تمر |
 | بناء الويب | ✅ "Compiled successfully." |
 | سكربت التنظيف | ✅ يبقى `start` فقط |

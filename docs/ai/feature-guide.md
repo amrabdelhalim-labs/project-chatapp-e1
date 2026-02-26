@@ -49,15 +49,36 @@ socket.on("seen", ({ readerId, senderId }) => {
 
 ### Storage Layer (Server)
 
-All profile pictures are stored locally on the server in `server/public/uploads/`:
+Profile pictures are managed through the **Storage Strategy Pattern** (`services/storage/`). The active provider is selected via `STORAGE_TYPE` env var — no code changes needed to switch:
+
+| `STORAGE_TYPE` | Provider | Where files go |
+|---------------|----------|---------------|
+| `local` (default) | `LocalStorageStrategy` | `server/public/uploads/` — served via `express.static` |
+| `cloudinary` | `CloudinaryStorageStrategy` | Cloudinary CDN — returns `https://` URL |
+| `s3` | `S3StorageStrategy` | AWS S3 — returns `https://` URL |
+
+**Cloudinary setup (two options):**
+```env
+# Option A — Heroku Addon (sets CLOUDINARY_URL automatically):
+# heroku addons:create cloudinary:starter
+STORAGE_TYPE=cloudinary
+CLOUDINARY_URL=cloudinary://API_KEY:API_SECRET@CLOUD_NAME   # takes priority
+
+# Option B — manual:
+STORAGE_TYPE=cloudinary
+CLOUDINARY_CLOUD_NAME=your_cloud
+CLOUDINARY_API_KEY=your_key
+CLOUDINARY_API_SECRET=your_secret
+CLOUDINARY_FOLDER=mychat-profiles   # optional
+```
 
 | Flow | Details |
 |------|---------|
-| **Upload** | `POST /api/user/profile-picture` → multer → `LocalStorageStrategy.uploadFile()` |
-| **Returns** | `{ url: "/uploads/1234567890-abc123.jpg", filename: "1234567890-abc123.jpg" }` |
-| **Stored** | Relative path stored in `User.profilePicture` (DB) |
-| **Served** | `express.static('public')` makes `server/public/uploads/pic.jpg` available at `/uploads/pic.jpg` |
-| **Delete** | `LocalStorageStrategy.deleteFile()` removes file, skips `default-picture.jpg` |
+| **Upload** | `POST /api/user/profile-picture` → multer (memoryStorage) → `getStorageService().uploadFile(req.file)` |
+| **Returns** | `{ url, filename }` — relative path for local, absolute `https://` for cloud |
+| **Stored** | `url` stored in `User.profilePicture` (MongoDB) |
+| **Served** | Local: `express.static('public')`; Cloud: CDN URL returned directly |
+| **Delete** | `getStorageService().deleteFile(oldUrl)` — skips `default-picture.jpg` for local |
 
 ### Client-Side Image Resolution (Web)
 

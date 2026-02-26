@@ -74,7 +74,7 @@ server/
     ├── integration.test.js      # 45 full-stack tests (storage, JWT, temp workspace)
     ├── api.test.js              # 63 E2E HTTP tests (real Express server)
     ├── image.test.js            # 38 E2E tests — profile picture upload/replace/delete
-    └── storage.test.js          # 48 unit tests — storage layer, CLOUDINARY_URL parsing, no network
+    └── storage.test.js          # 50 unit tests (58 with live Cloudinary) — CLOUDINARY_URL parsing, no-hang triple-safety
 ```
 
 ## Web Client Architecture
@@ -231,11 +231,20 @@ messageSchema.index({ createdAt: -1 });
 | PORT | No | 5000 | Server port |
 | MONGODB_URL | Yes | — | MongoDB connection string |
 | JWT_SECRET | Yes | — | JWT signing secret |
-| STORAGE_TYPE | No | local | Storage backend (local/cloudinary/s3) |
+| STORAGE_TYPE | No | local | Storage backend (`local` / `cloudinary` / `s3`) |
+| CLOUDINARY_URL | No | — | Heroku Addon format: `cloudinary://KEY:SECRET@CLOUD` — takes priority over individual vars |
+| CLOUDINARY_CLOUD_NAME | No | — | Cloudinary cloud name (used if CLOUDINARY_URL absent) |
+| CLOUDINARY_API_KEY | No | — | Cloudinary API key |
+| CLOUDINARY_API_SECRET | No | — | Cloudinary API secret |
+| CLOUDINARY_FOLDER | No | mychat-profiles | Cloudinary upload folder |
+| AWS_S3_BUCKET | No | — | S3 bucket name (when STORAGE_TYPE=s3) |
+| AWS_REGION | No | — | AWS region |
+| AWS_ACCESS_KEY_ID | No | — | AWS access key |
+| AWS_SECRET_ACCESS_KEY | No | — | AWS secret key |
 
 ## Testing Architecture
 
-### Server Tests (232 tests — custom runner)
+### Server Tests (320 tests — custom runner)
 
 | File | Tests | Level | What It Tests |
 |------|-------|-------|---------------|
@@ -243,14 +252,18 @@ messageSchema.index({ createdAt: -1 });
 | `repositories.test.js` | 44 | Unit | CRUD operations per repository in isolation |
 | `integration.test.js` | 45 | Integration | Full-stack with temp workspace (storage + JWT + validators) |
 | `api.test.js` | 63 | E2E | Real HTTP requests against Express server on port 5001 |
+| `image.test.js` | 38 | E2E | Profile picture upload, replace, and delete via real HTTP |
+| `storage.test.js` | 50 | Unit | Storage layer: local disk, CLOUDINARY_URL parsing, factory, singleton; 58 total with live Cloudinary |
 
 ```bash
 cd server
-npm run test:all         # all 232 tests (4 files sequentially)
+npm run test:all         # all 320 tests (6 files sequentially)
 npm test                 # comprehensive.test.js (80 tests)
 npm run test:repos       # repositories.test.js (44 tests)
 npm run test:integration # integration.test.js (45 tests)
 npm run test:e2e         # api.test.js (63 tests — port 5001)
+npm run test:image       # image.test.js (38 tests — profile picture E2E)
+npm run test:storage     # storage.test.js (50 unit / 58 with live Cloudinary)
 ```
 
 ### Web Tests (99 tests — Jest + @testing-library/react)
@@ -361,7 +374,7 @@ Two parallel jobs triggered on `push` to `main`, `pull_request` to `main`, or ma
 
 | Job | Service | Steps | Deploy Target |
 |-----|---------|-------|---------------|
-| **Deploy Server** | MongoDB 7 (service container) | `npm ci` → `npm run test:all` (232 tests) → rsync (exclude `tests/` + `node_modules/`) → strip devDeps → push to `server` branch | Render / Railway / Heroku |
+| **Deploy Server** | MongoDB 7 (service container) | `npm ci` → `npm run test:all` (320 tests) → rsync (exclude `tests/` + `node_modules/`) → strip devDeps → push to `server` branch | Render / Railway / Heroku |
 | **Deploy Web** | — | `npm ci` → `npm run test:ci` (99 tests) → `npm run build` → push to `web` branch | GitHub Pages / Netlify / Vercel |
 
 ### CI Environment Variables
