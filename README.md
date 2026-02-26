@@ -85,7 +85,7 @@ project-chatapp-e1/
 │   ├── models/                 # مخططات Mongoose (User, Message)
 │   ├── utils/                  # JWT helpers + Socket.IO utility
 │   ├── routes/                 # /api/user/* + /api/message/*
-│   ├── tests/                  # 323 اختباراً (6 مجموعات)
+│   ├── tests/                  # 331 اختباراً (6 مجموعات)
 │   └── Procfile                # نشر Heroku
 │
 ├── web/                        # React CRA
@@ -93,6 +93,7 @@ project-chatapp-e1/
 │       ├── pages/              # Home, Login, Register
 │       ├── components/         # Chat, Sidebar, Profile, ProtectedRoute
 │       ├── libs/               # Zustand store, Axios interceptors
+│       ├── utils/              # Avatar helpers + fallbacks
 │       └── tests/              # 99 اختباراً (5 مجموعات)
 │
 ├── app/                        # Expo + React Native
@@ -170,15 +171,30 @@ npm start
 | المتغير | مطلوب | الوصف |
 |---------|-------|-------|
 | `PORT` | لا | منفذ الخادم (افتراضي: `5000`) |
+| `hostname` | لا | اسم المضيف للتطوير المحلي (افتراضي: `localhost`) |
 | `MONGODB_URL` | **نعم** | سلسلة اتصال MongoDB |
 | `JWT_SECRET` | **نعم** | سر توقيع JWT |
 | `STORAGE_TYPE` | لا | `local` \| `cloudinary` \| `s3` (افتراضي: `local`) |
+| `SERVER_URL` | لا | عنوان الخادم الكامل لإرجاع روابط مطلقة (مثال: `http://localhost:5000`) |
+| `LOCAL_UPLOADS_DIR` | لا | مسار مجلد الرفع المحلي (اختياري) |
+| `LOCAL_BASE_URL` | لا | بادئة روابط الملفات المحلية (افتراضي: `/uploads`) |
+| `DEFAULT_PROFILE_PICTURE_URL` | لا | رابط الصورة الافتراضية عند Cloudinary/S3 |
+| `CLOUDINARY_URL` | لا | رابط Cloudinary بصيغة Heroku (بديل عن المتغيرات المفصلة) |
+| `CLOUDINARY_CLOUD_NAME` | لا | اسم حساب Cloudinary (عند عدم استخدام `CLOUDINARY_URL`) |
+| `CLOUDINARY_API_KEY` | لا | مفتاح Cloudinary |
+| `CLOUDINARY_API_SECRET` | لا | سر Cloudinary |
+| `CLOUDINARY_FOLDER` | لا | مجلد Cloudinary (افتراضي: `mychat-profiles`) |
+| `AWS_S3_BUCKET` | لا | اسم الـ S3 bucket |
+| `AWS_REGION` | لا | منطقة AWS (مثال: `us-east-1`) |
+| `AWS_ACCESS_KEY_ID` | لا | مفتاح AWS |
+| `AWS_SECRET_ACCESS_KEY` | لا | سر AWS |
+| `AWS_S3_FOLDER` | لا | مجلد الرفع في S3 (افتراضي: `uploads/profiles`) |
 
 ### الويب (`web/.env`)
 
 | المتغير | مطلوب | الوصف |
 |---------|-------|-------|
-| `REACT_APP_API_URL` | لا | عنوان URL للخادم (مثال: `http://localhost:5000`) |
+| `REACT_APP_API_URL` | لا | عنوان URL للخادم (مثال: `http://localhost:5000`) — fallback إلى `window.location.origin` عند الغياب |
 
 ### الجوال (`app/.env`)
 

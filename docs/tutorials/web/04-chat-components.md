@@ -187,17 +187,134 @@ export default function ChatHeader({ receiver }) {
 }
 ```
 
-### مساعد الصور الافتراضية
+### مساعد الصور الافتراضية (Avatar Fallback System)
+
+**الملف:** `web/src/utils/avatar.js`
 
 ```jsx
-// utils/avatar.js
+// الصورة الافتراضية المدمجة (SVG Data URI)
+const DEFAULT_AVATAR_SVG = `data:image/svg+xml;utf8,...`;
+
+// تحويل URL الصورة إلى رابط كامل (مع معالجة API base URL)
 export const getAvatarSrc = (profilePicture) => {
-  // يرجع URL صالح (مع fallback إلى صورة افتراضية)
+  const normalized = normalizeProfilePicture(profilePicture);
+  if (!normalized || normalized.includes('/undefined')) {
+    return getDefaultAvatarUrl();
+  }
+  return normalized;
 };
 
+// معالجة فشل تحميل الصورة → استخدام SVG افتراضي
 export const handleAvatarError = (event) => {
-  // يحوّل الصورة إلى SVG افتراضي عند فشل التحميل
+  if (!event?.currentTarget) return;
+  if (event.currentTarget.dataset.fallbackApplied === 'true') return;
+  event.currentTarget.dataset.fallbackApplied = 'true';
+  event.currentTarget.src = DEFAULT_AVATAR_SVG;
 };
+```
+
+---
+
+#### 🎯 المشكلة التي تحل:
+
+```
+❌ قديماً:
+   ✗ صور 404 غير موجودة
+   ✗ رسائل "undefined" في الـ logs
+   ✗ أيقونات صور معطوبة في الواجهة
+   ✗ معالجة URL مختلفة في كل مكون
+
+✅ الحل:
+   ✓ SVG fallback مدمج (data URI)
+   ✓ معالجة موحدة في مكان واحد
+   ✓ منع "undefined" في الـ URLs
+   ✓ حماية من 404 الخارجية
+```
+
+---
+
+#### 📊 كيف يعمل:
+
+```
+1️⃣ getAvatarSrc(profilePicture)
+   ├─ profilePicture = "https://res.cloudinary.com/.../avatar.jpg?_a=..."
+   ├─ normalizeProfilePicture() → يتحقق من الـ URL
+   └─ يرجع: "https://res.cloudinary.com/.../avatar.jpg?_a=..."
+
+   أو
+
+   ├─ profilePicture = "/uploads/default-picture.jpg"
+   ├─ normalizeProfilePicture() → يضيف baseUrl
+   └─ يرجع: "http://localhost:5000/uploads/default-picture.jpg"
+
+   أو
+
+   ├─ profilePicture = "undefined" (خطأ من الخادم)
+   ├─ normalizeProfilePicture() → يكتشف الخطأ
+   └─ يرجع: getDefaultAvatarUrl() → SVG أو رابط افتراضي
+
+2️⃣ <img src={getAvatarSrc(pic)} onError={handleAvatarError} />
+   ├─ الصورة تحمل بنجاح → عرض الصورة ✅
+   └─ فشل التحميل (404) → handleAvatarError():
+       ├─ منع استدعاء متكرر (dataset.fallbackApplied)
+       └─ img.src = DEFAULT_AVATAR_SVG → عرض SVG افتراضي ✅
+```
+
+---
+
+#### 🔄 الاستخدام في المكونات:
+
+```jsx
+import { getAvatarSrc, handleAvatarError } from "../../utils/avatar";
+
+// في ChatHeader:
+<img
+  src={getAvatarSrc(receiver?.profilePicture)}
+  alt="avatar"
+  className="rounded-full w-10 h-10 object-cover"
+  onError={handleAvatarError}
+/>
+
+// في Sidebar:
+friend.friends.map((friend) => (
+  <img
+    key={friend._id}
+    src={getAvatarSrc(friend.profilePicture)}
+    onError={handleAvatarError}
+    className="w-12 h-12 rounded-full object-cover"
+  />
+))
+```
+
+---
+
+#### 🛡️ ميزات الأمان والموثوقية:
+
+| الميزة | الوصف |
+|--------|-------|
+| **SVG Data URI** | صورة افتراضية مدمجة (بدون طلب إلى الخادم) |
+| **معالجة undefined** | يكتشف "undefined" و "null" ويستخدم fallback |
+| **Safe Base URL** | استخدام `window.location.origin` إذا كانت `REACT_APP_API_URL` غير موجودة |
+| **منع Loops** | `dataset.fallbackApplied` يمنع استدعاء `onError` مراراً |
+| **URL Normalization** | معالجة موحدة: نسبية، مطلقة، Cloudinary، S3 |
+
+---
+
+#### 🎨 الصورة الافتراضية (SVG):
+
+```
+┌──────────────┐
+│              │
+│      ⭕       │ ← رأس دائري
+│      /\       │
+│     /  \      │ ← جسم (fallback avatar)
+│    /    \     │
+│   /      \    │
+│  /        \   │
+└──────────────┘
+
+ألوان متدرجة (Gradient): رمادي مظلم → رمادي فاتح
+```
 ```
 
 ### الشرح:

@@ -77,15 +77,56 @@ const api = axios.create({
 💡 **لماذا نسخة مخصصة؟**
 ```javascript
 // بدون Instance — نكرر URL في كل طلب
-axios.get("http://localhost:5000/api/user/friends");
+بالي(axios).get("http://localhost:5000/api/user/friends");
 
 // مع Instance — baseURL تلقائي
-api.get("/api/user/friends"); // يُكمل URL تلقائياً
+بالي(api).get("/api/user/friends"); // يُكمل URL تلقائياً
 ```
 
 ---
 
-## 📚 القسم الثالث: Request Interceptor (اعتراض الطلبات)
+## 📋 القسم الثالث: Safe Base URL Fallback
+
+### المشكلة:
+
+```javascript
+// ❌ إذا REACT_APP_API_URL غير موجود:
+بالي(const apiBaseUrl) = process.env.REACT_APP_API_URL; // "undefined"
+const api = axios.create({ baseURL: "undefined" }); // خطأ!
+```
+
+### الحل:
+
+```javascript
+const apiBaseUrl =
+  process.env.REACT_APP_API_URL ||
+  (typeof window !== "undefined" ? window.location.origin : "");
+
+// النتيجة:
+// ✅ في التطوير: "http://localhost:5000"
+// ✅ في الإنتاج: "https://example.com"
+// ✅ بدون .env: استخدام "https://example.com" (حيث يعمل التطبيق)
+```
+
+### الشرح:
+
+| الحالة | القيمة | النتيجة |
+|--------|--------|--------|
+| `.env` يحتوي `REACT_APP_API_URL=http://localhost:5000` | `"http://localhost:5000"` | ✅ استخدام قيمة `.env` |
+| `.env` غير موجود (CI/CD) | `undefined` | ✅ استخدام `window.location.origin` |
+| في المتصفح | - | ✅ يُستخدم دومين الموقع |
+
+```javascript
+// مثال في الإنتاج:
+// التطبيق مُنزل على: https://mychat-app.netlify.app
+// window.location.origin = "https://mychat-app.netlify.app"
+// api.get("/api/user/friends")
+// → GET https://mychat-app.netlify.app/api/user/friends ✅
+```
+
+---
+
+## 📋 القسم الرابع: Request Interceptor (اعتراض الطلبات)
 
 ```javascript
 api.interceptors.request.use((config) => {
