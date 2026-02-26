@@ -73,6 +73,23 @@ STORAGE_TYPE=local
 
 ### Cloudinary
 
+**الخيار A — Heroku addon** (الأسهل للنشر):
+
+```bash
+# addon يُعيّن CLOUDINARY_URL تلقائياً
+heroku addons:create cloudinary:starter
+heroku config:set STORAGE_TYPE=cloudinary
+```
+
+المتغير الناتج يكون بالصيغة:
+
+```env
+STORAGE_TYPE=cloudinary
+CLOUDINARY_URL=cloudinary://API_KEY:API_SECRET@CLOUD_NAME
+```
+
+**الخيار B — إعداد يدوي** (بدون Heroku أو استضافة أخرى):
+
 ```env
 STORAGE_TYPE=cloudinary
 CLOUDINARY_CLOUD_NAME=your_cloud_name
@@ -81,7 +98,9 @@ CLOUDINARY_API_SECRET=your_api_secret
 CLOUDINARY_FOLDER=mychat-profiles
 ```
 
-**تثبيت:** `npm install cloudinary`
+> `CLOUDINARY_URL` يأخذ الأولوية على المتغيرات المنفصلة عند تواجدهما معاً.
+
+**تثبيت:** `cloudinary` مضافة في `optionalDependencies` — يثبتها `npm install` تلقائياً
 
 ### AWS S3
 
