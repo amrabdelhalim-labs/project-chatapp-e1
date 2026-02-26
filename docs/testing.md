@@ -846,3 +846,4 @@ node -e "
 | شروط التشغيل | ✅ push + dispatch فقط، لا PR |
 | استثناء البناء (rsync) | ✅ بدون node_modules, dist, coverage |
 | ملفات الويب في الـ build | ✅ index.html, main.js, style.css موجودة |
+| ملفات SPA routing | ✅ `_redirects`, `404.html`, receiver script في `index.html` موجودة |

@@ -145,16 +145,16 @@ function makeFile(content = 'test-image-data', filename = 'photo.jpg') {
  * actually accepts the file as an image (rejects non-JPEG buffers).
  */
 const TINY_JPEG = Buffer.from([
-  0xff,0xd8,0xff,0xe0,0x00,0x10,0x4a,0x46,0x49,0x46,0x00,0x01,0x01,0x00,0x00,
-  0x01,0x00,0x01,0x00,0x00,0xff,0xdb,0x00,0x43,0x00,0x08,0x06,0x06,0x07,0x06,
-  0x05,0x08,0x07,0x07,0x07,0x09,0x09,0x08,0x0a,0x0c,0x14,0x0d,0x0c,0x0b,0x0b,
-  0x0c,0x19,0x12,0x13,0x0f,0x14,0x1d,0x1a,0x1f,0x1e,0x1d,0x1a,0x1c,0x1c,0x20,
-  0x24,0x2e,0x27,0x20,0x22,0x2c,0x23,0x1c,0x1c,0x28,0x37,0x29,0x2c,0x30,0x31,
-  0x34,0x34,0x34,0x1f,0x27,0x39,0x3d,0x38,0x32,0x3c,0x2e,0x33,0x34,0x32,0xff,
-  0xc0,0x00,0x0b,0x08,0x00,0x01,0x00,0x01,0x01,0x01,0x11,0x00,0xff,0xc4,0x00,
-  0x1f,0x00,0x00,0x01,0x05,0x01,0x01,0x01,0x01,0x01,0x01,0x00,0x00,0x00,0x00,
-  0x00,0x00,0x00,0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,
-  0xff,0xda,0x00,0x08,0x01,0x01,0x00,0x00,0x3f,0x00,0xf5,0x28,0xa2,0x80,0xff,0xd9,
+  0xff, 0xd8, 0xff, 0xe0, 0x00, 0x10, 0x4a, 0x46, 0x49, 0x46, 0x00, 0x01, 0x01, 0x00, 0x00, 0x01,
+  0x00, 0x01, 0x00, 0x00, 0xff, 0xdb, 0x00, 0x43, 0x00, 0x08, 0x06, 0x06, 0x07, 0x06, 0x05, 0x08,
+  0x07, 0x07, 0x07, 0x09, 0x09, 0x08, 0x0a, 0x0c, 0x14, 0x0d, 0x0c, 0x0b, 0x0b, 0x0c, 0x19, 0x12,
+  0x13, 0x0f, 0x14, 0x1d, 0x1a, 0x1f, 0x1e, 0x1d, 0x1a, 0x1c, 0x1c, 0x20, 0x24, 0x2e, 0x27, 0x20,
+  0x22, 0x2c, 0x23, 0x1c, 0x1c, 0x28, 0x37, 0x29, 0x2c, 0x30, 0x31, 0x34, 0x34, 0x34, 0x1f, 0x27,
+  0x39, 0x3d, 0x38, 0x32, 0x3c, 0x2e, 0x33, 0x34, 0x32, 0xff, 0xc0, 0x00, 0x0b, 0x08, 0x00, 0x01,
+  0x00, 0x01, 0x01, 0x01, 0x11, 0x00, 0xff, 0xc4, 0x00, 0x1f, 0x00, 0x00, 0x01, 0x05, 0x01, 0x01,
+  0x01, 0x01, 0x01, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x02, 0x03, 0x04,
+  0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0xff, 0xda, 0x00, 0x08, 0x01, 0x01, 0x00, 0x00, 0x3f,
+  0x00, 0xf5, 0x28, 0xa2, 0x80, 0xff, 0xd9,
 ]);
 
 /**
@@ -164,13 +164,16 @@ const TINY_JPEG = Buffer.from([
  */
 function withTimeout(promise, ms = 15000, label = 'operation') {
   return new Promise((resolve, reject) => {
-    const timer = setTimeout(
-      () => reject(new Error(`Timed out after ${ms}ms: ${label}`)),
-      ms
-    );
+    const timer = setTimeout(() => reject(new Error(`Timed out after ${ms}ms: ${label}`)), ms);
     promise.then(
-      (v) => { clearTimeout(timer); resolve(v); },
-      (e) => { clearTimeout(timer); reject(e); }
+      (v) => {
+        clearTimeout(timer);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(timer);
+        reject(e);
+      }
     );
   });
 }
@@ -223,13 +226,13 @@ const liveUploads = []; // Array<{ strategy, ref: string }>
 
 async function cleanupLiveUploads() {
   if (liveUploads.length === 0) return;
-  console.log(
-    `\n${colors.cyan}🧹 Cleaning up ${liveUploads.length} live file(s)…${colors.reset}`
-  );
+  console.log(`\n${colors.cyan}🧹 Cleaning up ${liveUploads.length} live file(s)…${colors.reset}`);
   for (const { strategy, ref } of liveUploads) {
     try {
       const ok = await withTimeout(strategy.deleteFile(ref), 12000, `cleanup ${ref}`);
-      console.log(`  ${ok ? colors.green + '\u2713' : colors.yellow + '\u26a0'} ${ref}${colors.reset}`);
+      console.log(
+        `  ${ok ? colors.green + '\u2713' : colors.yellow + '\u26a0'} ${ref}${colors.reset}`
+      );
     } catch (e) {
       console.log(`  ${colors.red}\u2717 ${ref} \u2014 ${e.message}${colors.reset}`);
     }
@@ -253,7 +256,10 @@ logStep(1, 'CLOUDINARY_URL (Heroku format) — parsed correctly');
   );
   assert(strategy.cloudName === 'hahlnhldz', 'cloudName parsed from URL hostname');
   assert(strategy.apiKey === '522879353668222', 'apiKey parsed from URL username');
-  assert(strategy.apiSecret === 'AtvmK6pxOwI4xTgBtz5zlZOzFVU', 'apiSecret parsed from URL password');
+  assert(
+    strategy.apiSecret === 'AtvmK6pxOwI4xTgBtz5zlZOzFVU',
+    'apiSecret parsed from URL password'
+  );
 }
 
 logStep(2, 'CLOUDINARY_URL — URL-encoded characters in secret are decoded');
@@ -335,7 +341,12 @@ logStep(7, 'Missing credentials — constructor throws descriptive error');
   let errorMsg = '';
   try {
     withEnv(
-      { CLOUDINARY_URL: undefined, CLOUDINARY_CLOUD_NAME: undefined, CLOUDINARY_API_KEY: undefined, CLOUDINARY_API_SECRET: undefined },
+      {
+        CLOUDINARY_URL: undefined,
+        CLOUDINARY_CLOUD_NAME: undefined,
+        CLOUDINARY_API_KEY: undefined,
+        CLOUDINARY_API_SECRET: undefined,
+      },
       () => new CloudinaryStorageStrategy({})
     );
   } catch (e) {
@@ -343,7 +354,10 @@ logStep(7, 'Missing credentials — constructor throws descriptive error');
     errorMsg = e.message;
   }
   assert(threw, 'constructor throws when no credentials provided');
-  assert(errorMsg.includes('CLOUDINARY_URL') || errorMsg.includes('CLOUDINARY_CLOUD_NAME'), 'error message names the missing vars');
+  assert(
+    errorMsg.includes('CLOUDINARY_URL') || errorMsg.includes('CLOUDINARY_CLOUD_NAME'),
+    'error message names the missing vars'
+  );
 }
 
 logStep(8, 'Malformed CLOUDINARY_URL — constructor throws descriptive error');
@@ -351,16 +365,16 @@ logStep(8, 'Malformed CLOUDINARY_URL — constructor throws descriptive error');
   let threw = false;
   let errorMsg = '';
   try {
-    withEnv(
-      { CLOUDINARY_URL: 'not-a-valid-url!!!' },
-      () => new CloudinaryStorageStrategy({})
-    );
+    withEnv({ CLOUDINARY_URL: 'not-a-valid-url!!!' }, () => new CloudinaryStorageStrategy({}));
   } catch (e) {
     threw = true;
     errorMsg = e.message;
   }
   assert(threw, 'constructor throws for malformed CLOUDINARY_URL');
-  assert(errorMsg.includes('malformed') || errorMsg.includes('Expected'), 'error message explains the correct format');
+  assert(
+    errorMsg.includes('malformed') || errorMsg.includes('Expected'),
+    'error message explains the correct format'
+  );
 }
 
 logStep(9, '_initPromise — constructor eagerly caches initialization Promise');
@@ -398,7 +412,8 @@ const extract = (v) => cloudStrat._extractPublicId(v);
 
 logStep(1, '_extractPublicId — from CDN URL with version segment');
 {
-  const url = 'https://res.cloudinary.com/mycloud/image/upload/v1234567890/mychat-profiles/photo.jpg';
+  const url =
+    'https://res.cloudinary.com/mycloud/image/upload/v1234567890/mychat-profiles/photo.jpg';
   const id = extract(url);
   assert(id === 'mychat-profiles/photo', 'extracts public_id and strips extension');
 }
@@ -407,7 +422,10 @@ logStep(2, '_extractPublicId — from CDN URL without version');
 {
   const url = 'https://res.cloudinary.com/mycloud/image/upload/mychat-profiles/avatar.png';
   const id = extract(url);
-  assert(typeof id === 'string' && id.length > 0, 'returns non-empty string for URL without version');
+  assert(
+    typeof id === 'string' && id.length > 0,
+    'returns non-empty string for URL without version'
+  );
 }
 
 logStep(3, '_extractPublicId — plain public ID returned as-is');
@@ -455,14 +473,20 @@ logStep(1, 'STORAGE_TYPE=local → LocalStorageStrategy');
 {
   StorageService.reset();
   const instance = withEnv({ STORAGE_TYPE: 'local' }, () => StorageService.getInstance());
-  assert(instance instanceof LocalStorageStrategy, 'factory returns LocalStorageStrategy for local');
+  assert(
+    instance instanceof LocalStorageStrategy,
+    'factory returns LocalStorageStrategy for local'
+  );
 }
 
 logStep(2, 'STORAGE_TYPE unset → defaults to local');
 {
   StorageService.reset();
   const instance = withEnv({ STORAGE_TYPE: undefined }, () => StorageService.getInstance());
-  assert(instance instanceof LocalStorageStrategy, 'defaults to LocalStorageStrategy when STORAGE_TYPE unset');
+  assert(
+    instance instanceof LocalStorageStrategy,
+    'defaults to LocalStorageStrategy when STORAGE_TYPE unset'
+  );
 }
 
 logStep(3, 'STORAGE_TYPE=cloudinary → CloudinaryStorageStrategy');
@@ -476,7 +500,10 @@ logStep(3, 'STORAGE_TYPE=cloudinary → CloudinaryStorageStrategy');
     },
     () => StorageService.getInstance()
   );
-  assert(instance instanceof CloudinaryStorageStrategy, 'factory returns CloudinaryStorageStrategy');
+  assert(
+    instance instanceof CloudinaryStorageStrategy,
+    'factory returns CloudinaryStorageStrategy'
+  );
 }
 
 logStep(4, 'Singleton — same instance on repeated calls');
@@ -582,21 +609,15 @@ StorageService.reset();
 
 // ─── Phase 5 — Live Storage Provider Integration ──────────────────────────────
 if (!LIVE_PROVIDER) {
-  console.log(
-    `\n${colors.yellow}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`
-  );
+  console.log(`\n${colors.yellow}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
   console.log(`${colors.yellow}⚡ Phase 5 SKIPPED — no live credentials detected.${colors.reset}`);
   console.log(`${colors.yellow}   Pass credentials to enable live tests:${colors.reset}`);
-  console.log(
-    `${colors.yellow}   node tests/storage.test.js \\${colors.reset}`
-  );
+  console.log(`${colors.yellow}   node tests/storage.test.js \\${colors.reset}`);
   console.log(
     `${colors.yellow}     --CLOUDINARY_URL=cloudinary://KEY:SECRET@CLOUD \\${colors.reset}`
   );
   console.log(`${colors.yellow}     --STORAGE_TYPE=cloudinary${colors.reset}`);
-  console.log(
-    `${colors.yellow}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`
-  );
+  console.log(`${colors.yellow}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${colors.reset}`);
 } else {
   logSection(`Phase 5 — Live ${LIVE_PROVIDER.toUpperCase()} Integration (real network)`);
 
@@ -605,9 +626,7 @@ if (!LIVE_PROVIDER) {
   try {
     liveStrategy = StorageService.getInstance();
     const folder = liveStrategy.folder ?? '(default)';
-    console.log(
-      `${colors.cyan}   Provider: ${LIVE_PROVIDER} | Folder: ${folder}${colors.reset}`
-    );
+    console.log(`${colors.cyan}   Provider: ${LIVE_PROVIDER} | Folder: ${folder}${colors.reset}`);
   } catch (e) {
     console.log(`${colors.red}✗ Could not create live strategy: ${e.message}${colors.reset}`);
   }
@@ -644,7 +663,11 @@ if (!LIVE_PROVIDER) {
       let uploaded1 = null;
       {
         try {
-          const file = { originalname: 'test-upload.jpg', mimetype: 'image/jpeg', buffer: TINY_JPEG };
+          const file = {
+            originalname: 'test-upload.jpg',
+            mimetype: 'image/jpeg',
+            buffer: TINY_JPEG,
+          };
           uploaded1 = await withTimeout(liveStrategy.uploadFile(file), 20000, 'uploadFile');
           liveUploads.push({ strategy: liveStrategy, ref: uploaded1.publicId ?? uploaded1.url });
           assert(
@@ -688,7 +711,9 @@ if (!LIVE_PROVIDER) {
             { originalname: 'batch-2.jpg', mimetype: 'image/jpeg', buffer: TINY_JPEG },
           ];
           const results = await withTimeout(
-            liveStrategy.uploadFiles(files), 30000, 'uploadFiles batch'
+            liveStrategy.uploadFiles(files),
+            30000,
+            'uploadFiles batch'
           );
           for (const r of results) {
             liveUploads.push({ strategy: liveStrategy, ref: r.publicId ?? r.url });
@@ -710,14 +735,14 @@ if (!LIVE_PROVIDER) {
         try {
           const gone = await withTimeout(
             liveStrategy.deleteFile('storage-test/__non_existent_99999'),
-            10000, 'deleteFile non-existent'
+            10000,
+            'deleteFile non-existent'
           );
           assert(gone === false, 'returns false for non-existent');
         } catch {
           assert(true, 'throws for non-existent (acceptable)');
         }
       }
-
     } finally {
       // ─ Guaranteed cleanup ─────────────────────────────────────────────────
       logStep('cleanup', `Cleaning up all live-uploaded files…`);

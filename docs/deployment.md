@@ -13,6 +13,7 @@
 - [ ] `.gitignore` يستثني الملفات الحساسة
 - [ ] معالجة الأخطاء شاملة
 - [ ] `npm run test:all` يمر بنجاح (282 اختبار)
+- [ ] SPA routing: `web/public/_redirects`, `web/public/404.html`, وسكريبت receiver في `web/public/index.html` موجودة (`node validate-workflow.mjs` يتحقق منها تلقائيًا)
 
 ---
 
@@ -311,6 +312,51 @@ const io = new Server(server, {
   pingInterval: 25000,
 });
 ```
+
+---
+
+## 🔄 توجيه SPA على GitHub Pages
+
+تطبيق محادثتي (web) يعمل كـ **SPA — Single Page Application**: كل تنقل يخدم `index.html` ويترك React Router يتولى عرض الصفحة الصحيحة. لكن خوادم الاستضافة الثابتة (GitHub Pages, Nginx...) تحاول إيجاد **ملف حقيقي** لكل مسار — فيرجع 404.
+
+### الحل: ثلاثة ملفات
+
+| الملف | الغرض | منصة |
+|------|------|-------|
+| `web/public/_redirects` | يعيد توجيه كل الطلبات إلى `index.html` | Netlify / Render |
+| `web/public/404.html` | يحوّل المسار إلى query string ثم يعيد التوجيه لـ root | GitHub Pages |
+| script in `web/public/index.html` | يفك التشفير ويرمم المسار باستخدام `history.replaceState` | GitHub Pages |
+
+### كيف يعمل بروتوكول GitHub Pages
+
+```
+1. المستخدم يفتح /project-chatapp-e1/chat/room-123
+2. GitHub Pages: لا يوجد ملف باسم "chat" → يخدم 404.html
+3. 404.html: يحوّل المسار إلى query string:
+   /project-chatapp-e1/?/chat/room-123
+4. index.html يستقبل: يرمم history API إلى المسار الحقيقي
+5. React Router يعرض شاشة المحادثة
+```
+
+### فحص الملفات تلقائيًا
+
+يتحقق `validate-workflow.mjs` (فحص رقم 5) من وجود هذه الملفات قبل كل `git push`:
+
+```bash
+node validate-workflow.mjs
+# 5. Static assets (SPA routing)
+# ✅ _redirects: قاعدة catch-all لـ SPA موجودة
+# ✅ 404.html: سكريبت إعادة التوجيه لـ GitHub Pages SPA موجود
+# ✅ web/public/index.html: سكريبت استقبال SPA موجود
+```
+
+### محيطة مخصصة `_redirects` لـ Netlify/Render
+
+```
+/* /index.html 200
+```
+
+> تحذير: إذا حذفت `_redirects` أو `404.html` ستعود مشكلة 404 عند التحديث مجدديًا.
 
 ---
 

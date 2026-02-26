@@ -2,13 +2,15 @@
 /**
  * validate-workflow.mjs — Local workflow validator for project-chatapp-e1 (محادثتي)
  *
- * Catches CI deploy issues before pushing to GitHub by running four checks:
+ * Catches CI deploy issues before pushing to GitHub by running five checks:
  *   1. YAML structure       — no tabs, required top-level keys present
  *   2. rsync excludes       — critical directories are excluded from server deploy
  *   3. package.json sim.    — extracts deletions from the workflow itself,
  *      applies them to server/package.json, and verifies the result is clean
  *   4. Completeness check   — proactively verifies every forbidden-pattern script
  *      in package.json has a matching delete statement in the workflow
+ *   5. Static assets        — _redirects, 404.html, web/public/index.html SPA receiver
+ *      (prevents SPA 404 on direct navigation / page refresh)
  *
  * Usage:
  *   node validate-workflow.mjs        # run all checks, exit 1 on failure
@@ -209,6 +211,48 @@ if (missingFromWorkflow.length === 0) {
       `Script "${name}" matches a forbidden pattern but is NOT deleted by the workflow` +
       ` — add: delete p.scripts['${name}'];`
     );
+  }
+}
+
+// ── 5. Static assets (SPA routing) ─────────────────────────────────────────
+section('5. Static assets (SPA routing)');
+
+// ── 5a. _redirects (Netlify / Render catch-all) ──────────────────────────
+const REDIRECTS_PATH = path.join(ROOT, 'web/public/_redirects');
+if (!existsSync(REDIRECTS_PATH)) {
+  fail('web/public/_redirects مفقود — مسارات SPA ستعطي 404 على Netlify/Render');
+} else {
+  const redirectsContent = readFileSync(REDIRECTS_PATH, 'utf8');
+  if (!redirectsContent.includes('/* /index.html 200')) {
+    fail('_redirects: قاعدة catch-all "/* /index.html 200" غير موجودة');
+  } else {
+    ok('_redirects: قاعدة catch-all لـ SPA موجودة');
+  }
+}
+
+// ── 5b. 404.html (GitHub Pages SPA redirect) ─────────────────────────────
+const NOT_FOUND_PATH = path.join(ROOT, 'web/public/404.html');
+if (!existsSync(NOT_FOUND_PATH)) {
+  fail('web/public/404.html مفقود — مسارات SPA ستعطي 404 عند التصفح المباشر على GitHub Pages');
+} else {
+  const notFoundContent = readFileSync(NOT_FOUND_PATH, 'utf8');
+  if (!notFoundContent.includes('pathSegmentsToKeep')) {
+    fail('404.html: سكريبت إعادة التوجيه لـ SPA غير موجود (pathSegmentsToKeep مفقود)');
+  } else {
+    ok('404.html: سكريبت إعادة التوجيه لـ GitHub Pages SPA موجود');
+  }
+}
+
+// ── 5c. index.html receiver script ───────────────────────────────────────
+const WEB_INDEX_PATH = path.join(ROOT, 'web/public/index.html');
+if (!existsSync(WEB_INDEX_PATH)) {
+  fail('web/public/index.html مفقود');
+} else {
+  const indexContent = readFileSync(WEB_INDEX_PATH, 'utf8');
+  if (!indexContent.includes("l.search[1] === '/'")) {
+    fail('web/public/index.html: سكريبت استقبال إعادة التوجيه مفقود (مطلوب مع 404.html)');
+  } else {
+    ok('web/public/index.html: سكريبت استقبال SPA موجود');
   }
 }
 

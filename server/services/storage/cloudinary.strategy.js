@@ -13,7 +13,9 @@ class CloudinaryStorageStrategy {
         this.apiKey = config.apiKey || url.username;
         this.apiSecret = config.apiSecret || decodeURIComponent(url.password);
       } catch {
-        throw new Error('CLOUDINARY_URL is malformed. Expected: cloudinary://API_KEY:API_SECRET@CLOUD_NAME');
+        throw new Error(
+          'CLOUDINARY_URL is malformed. Expected: cloudinary://API_KEY:API_SECRET@CLOUD_NAME'
+        );
       }
     } else {
       // Fallback: individual environment variables
@@ -25,7 +27,7 @@ class CloudinaryStorageStrategy {
     if (!this.cloudName || !this.apiKey || !this.apiSecret) {
       throw new Error(
         'Cloudinary credentials missing. Set CLOUDINARY_URL (Heroku) or ' +
-        'CLOUDINARY_CLOUD_NAME + CLOUDINARY_API_KEY + CLOUDINARY_API_SECRET'
+          'CLOUDINARY_CLOUD_NAME + CLOUDINARY_API_KEY + CLOUDINARY_API_SECRET'
       );
     }
     // Start async SDK initialization eagerly. Caching the promise prevents:
