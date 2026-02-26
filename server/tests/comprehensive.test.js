@@ -461,11 +461,50 @@ async function runComprehensiveTests() {
     assert(storageType === 'local', 'Storage type is local');
 
     // ============================================================
-    // PHASE 8: CLEANUP
+    // PHASE 8: DELETE ACCOUNT FEATURE
     // ============================================================
-    logSection('PHASE 8: CLEANUP');
+    logSection('PHASE 8: DELETE ACCOUNT FEATURE');
 
-    logStep(54, 'Delete test messages');
+    // Create a dedicated test user for delete account testing
+    const testUserForDeletion = await repos.user.createUser({
+      firstName: 'حذف',
+      lastName: 'اختبار',
+      email: `delete-test-${Date.now()}@chatapp.com`,
+      password: 'hashed_delete_password_123',
+      profilePicture: null,
+    });
+    testData.users.push(testUserForDeletion._id);
+
+    logStep(54, 'Create messages for user to verify deletion');
+    const deleteTestMsg = await repos.message.create({
+      sender: testUserForDeletion._id,
+      recipient: user1._id,
+      content: 'رسالة للحذف',
+    });
+    testData.messages.push(deleteTestMsg._id);
+
+    logStep(55, 'Verify user exists before deletion');
+    const userBeforeDeletion = await repos.user.findById(testUserForDeletion._id);
+    assert(userBeforeDeletion !== null, 'User exists before deletion');
+
+    logStep(56, 'Delete user account');
+    const deleteResult = await repos.user.delete(testUserForDeletion._id);
+    assert(deleteResult !== null, 'Delete returns deleted user data');
+
+    logStep(57, 'Verify user deleted successfully');
+    const userAfterDeletion = await repos.user.findById(testUserForDeletion._id);
+    assert(userAfterDeletion === null, 'User no longer exists after deletion');
+
+    logStep(58, 'Verify user messages deleted with user');
+    const userMessages = await repos.message.findAllForUser(testUserForDeletion._id);
+    assert(userMessages.length === 0, 'All user messages deleted');
+
+    // ============================================================
+    // PHASE 9: CLEANUP
+    // ============================================================
+    logSection('PHASE 9: CLEANUP');
+
+    logStep(59, 'Delete test messages');
     for (const msgId of testData.messages) {
       await repos.message.delete(msgId);
     }
@@ -474,7 +513,7 @@ async function runComprehensiveTests() {
     const testMsgsRemaining = remainingMsgs.filter((m) => testMsgIds.includes(m._id.toString()));
     assert(testMsgsRemaining.length === 0, 'All test messages deleted');
 
-    logStep(55, 'Delete test users');
+    logStep(60, 'Delete test users');
     for (const userId of testData.users) {
       await repos.user.delete(userId);
     }

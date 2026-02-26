@@ -1,14 +1,16 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import moment from 'moment';
+import { useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { getReceiverMessages } from '../../libs/filterMessages';
 import { useStore } from '../../libs/globalState';
-import { normalizeImageUrl } from '../../libs/imageUtils';
+import { getAvatarUrl, getAvatarFallback } from '../../libs/avatar';
 
 export default function ChatItem(props) {
   const { _id, firstName, lastName, profilePicture } = props;
   const navigation = useNavigation();
   const { messages, socket, user } = useStore();
+  const [avatarError, setAvatarError] = useState(false);
 
   const contactMessages = getReceiverMessages(messages, _id, user?._id);
   const lastMessage = contactMessages[contactMessages.length - 1];
@@ -18,7 +20,7 @@ export default function ChatItem(props) {
     (message) => message.sender === _id && message.recipient === user?._id && !message.seen
   ).length;
 
-  const avatarUri = normalizeImageUrl(profilePicture);
+  const avatarUri = avatarError ? getAvatarFallback() : getAvatarUrl(profilePicture);
   // Use the last message timestamp for the chat row; fall back to nothing if no messages yet
   const lastMessageTime = lastMessage?.createdAt;
 
@@ -36,7 +38,11 @@ export default function ChatItem(props) {
     >
       <View style={styles.container}>
         <View style={styles.chatContainer}>
-          <Image source={{ uri: avatarUri }} style={styles.image} />
+          <Image
+            source={{ uri: avatarUri }}
+            style={styles.image}
+            onError={() => setAvatarError(true)}
+          />
           <View style={styles.chatContent}>
             <Text>
               {firstName} {lastName}

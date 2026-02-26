@@ -32,6 +32,7 @@ import {
   updateProfilePicture,
   createMessage,
   getMessages,
+  deleteAccount,
 } from '../libs/requests';
 
 // ─── مرجع Mock Instance ────────────────────────────────────────
@@ -391,6 +392,18 @@ describe('دوال API المحمية — Protected Endpoints', () => {
 
     expect(mockApi.get).toHaveBeenCalledWith('/api/message/');
     expect(result).toHaveLength(3);
+  });
+
+  it('deleteAccount → DELETE /api/user/account مع كلمة المرور', async () => {
+    const response = { message: 'تم حذف الحساب بنجاح', deletedUserId: 'u1' };
+    mockApi.delete.mockResolvedValueOnce({ data: response });
+
+    const result = await deleteAccount({ password: 'user-password' });
+
+    expect(mockApi.delete).toHaveBeenCalledWith('/api/user/account', {
+      data: { password: 'user-password' },
+    });
+    expect(result.message).toContain('حذف');
   });
 });
 

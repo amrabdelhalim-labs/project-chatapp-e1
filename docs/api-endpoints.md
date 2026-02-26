@@ -135,7 +135,39 @@ Content-Type: multipart/form-data
 ```
 
 **الحقول:** `file` (صورة JPEG/PNG، حد أقصى 1MB)
+### حذف الحساب (يتطلب توثيق)
 
+```
+DELETE /api/user/account
+Authorization: Bearer <token>
+```
+
+**الجسم:**
+
+```json
+{
+  "password": "123456"
+}
+```
+
+**الاستجابة (200):**
+
+```json
+{
+  "message": "تم حذف حسابك بنجاح",
+  "data": {
+    "deletedAt": "2026-02-27T00:00:00Z",
+    "messagesDeleted": 42,
+    "userDeleted": true
+  }
+}
+```
+
+**الأخطاء المحتملة:**
+
+- **400 Bad Request:** كلمة مرور مفقودة أو صاغيغة غير صحيحة
+- **401 Unauthorized:** كلمة مرور غير صحيحة أو توكن منتهي الصلاحية
+- **500 Internal Server Error:** خطأ في الخادم
 ---
 
 ## الرسائل (`/api/message`) — يتطلب توثيق

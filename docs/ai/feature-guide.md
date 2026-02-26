@@ -119,6 +119,42 @@ server/public/uploads/*      # Ignore user-uploaded files
 
 ## Adding a New Feature Checklist
 
+### Delete Account Feature
+
+This feature demonstrates a **destructive operation** with password verification and atomic cleanup across multiple collections:
+
+**Server Implementation:**
+1. Add `deleteUserAccount(userId, password)` to `repositories/user.repository.js`
+   - Validate password via `bcrypt.compare(password, user.hashedPassword)`
+   - Use MongoDB session for atomicity: delete all messages + user in transaction
+   - Delete profile picture via `getStorageService().deleteFile(user.profilePicture)`
+2. Add validator in `validators/user.validator.js`: `validateDeleteAccount({ password })`
+3. Add controller `deleteAccount(req, res)` in `controllers/user.controller.js`
+4. Add route `DELETE /api/user/account` in `routes/user.routes.js` (protected by `isAuthenticated`)
+5. Add comprehensive tests covering: password verification, atomicity, file cleanup
+6. Update `docs/api-endpoints.md` with DELETE endpoint schema
+
+**Web Implementation:**
+1. Add API function in `libs/requests.js`: `deleteAccount(password)`
+2. Add Zustand action: `logout()` (already exists, no changes)
+3. Create delete modal in `components/EditUserModal.js`:
+   - Password confirmation input
+   - Warning about permanent deletion
+   - API call on confirm → then `logout()`
+4. Update `AuthPage.jsx` or settings component to show delete button
+5. Add tests in `requests.test.js` (API shape) + `globalState.test.js` (logout flow)
+
+**Mobile Implementation:**
+1. Add API function in `libs/requests.js`: `deleteAccount(password)`
+2. Add `logout()` Zustand action call (already exists)
+3. Create delete confirmation in `screens/EditUserModal.js`:
+   - Native `Alert.prompt()` for password
+   - `Alert.alert()` with yes/no confirmation
+   - API call → `logout()` on success
+4. Add tests in `requests.test.js` + `integration.test.js` (AsyncStorage cleanup)
+
+**See Also:** [`docs/features/delete-account.md`](../../features/delete-account.md) for complete specification with code examples.
+
 ### New API Endpoint
 
 1. Add model fields to `models/` if needed

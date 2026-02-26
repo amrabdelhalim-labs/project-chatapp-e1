@@ -41,6 +41,7 @@ const {
   updateProfilePicture,
   createMessage,
   getMessages,
+  deleteAccount,
 } = require('../libs/requests');
 
 // ═══════════════════════════════════════════════════════════════
@@ -385,5 +386,20 @@ describe('سيناريوهات تكاملية — Interceptor + API', () => {
 
     // لم يُستدعى logout لأنه ليس 401
     expect(mockLogout).not.toHaveBeenCalled();
+  });
+
+  it('سيناريو: حذف الحساب بنجاح', async () => {
+    const deleteResponse = {
+      message: 'تم حذف الحساب بنجاح',
+      deletedUserId: 'u1',
+    };
+    mockApi.delete = jest.fn().mockResolvedValueOnce({ data: deleteResponse });
+
+    const result = await deleteAccount({ password: 'user-password' });
+
+    expect(mockApi.delete).toHaveBeenCalledWith('/api/user/account', {
+      data: { password: 'user-password' },
+    });
+    expect(result.message).toContain('حذف');
   });
 });
