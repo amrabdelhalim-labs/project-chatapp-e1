@@ -21,9 +21,9 @@ import S3StorageStrategy from './s3.strategy.js';
  *   - Files stored in server/public/uploads
  *
  * Cloudinary:
- *   - CLOUDINARY_CLOUD_NAME
- *   - CLOUDINARY_API_KEY
- *   - CLOUDINARY_API_SECRET
+ *   Option A (Heroku addon): CLOUDINARY_URL=cloudinary://API_KEY:API_SECRET@CLOUD_NAME
+ *   Option B (manual):       CLOUDINARY_CLOUD_NAME + CLOUDINARY_API_KEY + CLOUDINARY_API_SECRET
+ *   Optional:                CLOUDINARY_FOLDER (default: mychat-profiles)
  *
  * AWS S3:
  *   - AWS_S3_BUCKET

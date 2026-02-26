@@ -1,14 +1,31 @@
 class CloudinaryStorageStrategy {
   constructor(config = {}) {
     this.cloudinary = null;
-    this.cloudName = config.cloudName || process.env.CLOUDINARY_CLOUD_NAME;
-    this.apiKey = config.apiKey || process.env.CLOUDINARY_API_KEY;
-    this.apiSecret = config.apiSecret || process.env.CLOUDINARY_API_SECRET;
-    this.folder = config.folder || 'mychat-profiles';
+    this.folder = config.folder || process.env.CLOUDINARY_FOLDER || 'mychat-profiles';
+
+    // Support CLOUDINARY_URL (Heroku addon format: cloudinary://API_KEY:API_SECRET@CLOUD_NAME)
+    // Takes precedence over individual vars — individual vars act as fallback
+    const cloudinaryUrl = process.env.CLOUDINARY_URL;
+    if (cloudinaryUrl) {
+      try {
+        const url = new URL(cloudinaryUrl);
+        this.cloudName = config.cloudName || url.hostname;
+        this.apiKey = config.apiKey || url.username;
+        this.apiSecret = config.apiSecret || decodeURIComponent(url.password);
+      } catch {
+        throw new Error('CLOUDINARY_URL is malformed. Expected: cloudinary://API_KEY:API_SECRET@CLOUD_NAME');
+      }
+    } else {
+      // Fallback: individual environment variables
+      this.cloudName = config.cloudName || process.env.CLOUDINARY_CLOUD_NAME;
+      this.apiKey = config.apiKey || process.env.CLOUDINARY_API_KEY;
+      this.apiSecret = config.apiSecret || process.env.CLOUDINARY_API_SECRET;
+    }
 
     if (!this.cloudName || !this.apiKey || !this.apiSecret) {
       throw new Error(
-        'Cloudinary credentials are required: CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET'
+        'Cloudinary credentials missing. Set CLOUDINARY_URL (Heroku) or ' +
+        'CLOUDINARY_CLOUD_NAME + CLOUDINARY_API_KEY + CLOUDINARY_API_SECRET'
       );
     }
     this._initializeCloudinary();
