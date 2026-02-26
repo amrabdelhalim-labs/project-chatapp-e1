@@ -178,15 +178,15 @@ async function runApiTests() {
     logStep(5, 'POST /api/user/register — missing fields');
     const emptyRes = await makeRequest('POST', '/api/user/register', {});
     assert(emptyRes.status === 400, `Missing fields returns 400 (got ${emptyRes.status})`);
-+    assert(typeof emptyRes.data.message === 'string', 'Missing fields returns message');
-+    assert(
-+      emptyRes.data.message.includes('الاسم الأول'),
-+      'Missing fields message mentions first name'
-+    );
-+    assert(
-+      emptyRes.data.message.includes('البريد الإلكتروني'),
-+      'Missing fields message mentions email'
-+    );
+    assert(typeof emptyRes.data.message === 'string', 'Missing fields returns message');
+    assert(
+      emptyRes.data.message.includes('الاسم الأول'),
+      'Missing fields message mentions first name'
+    );
+    assert(
+      emptyRes.data.message.includes('البريد الإلكتروني'),
+      'Missing fields message mentions email'
+    );
 
     logStep(6, 'POST /api/user/register — password mismatch');
     const mismatchRes = await makeRequest('POST', '/api/user/register', {
@@ -243,15 +243,15 @@ async function runApiTests() {
     logStep(11, 'POST /api/user/login — missing fields');
     const emptyLoginRes = await makeRequest('POST', '/api/user/login', {});
     assert(emptyLoginRes.status === 400, `Empty login returns 400 (got ${emptyLoginRes.status})`);
-+    assert(typeof emptyLoginRes.data.message === 'string', 'Empty login returns message');
-+    assert(
-+      emptyLoginRes.data.message.includes('البريد الإلكتروني'),
-+      'Empty login message mentions email'
-+    );
-+    assert(
-+      emptyLoginRes.data.message.includes('كلمة المرور'),
-+      'Empty login message mentions password'
-+    );
+    assert(typeof emptyLoginRes.data.message === 'string', 'Empty login returns message');
+    assert(
+      emptyLoginRes.data.message.includes('البريد الإلكتروني'),
+      'Empty login message mentions email'
+    );
+    assert(
+      emptyLoginRes.data.message.includes('كلمة المرور'),
+      'Empty login message mentions password'
+    );
 
     // ============================================================
     // PHASE 4: AUTH PROTECTION
