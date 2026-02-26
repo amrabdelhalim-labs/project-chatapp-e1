@@ -21,10 +21,10 @@ This directory contains machine-facing documentation for AI assistants working o
 - **Real-time:** Socket.IO for messaging, typing indicators (scoped), bidirectional read receipts
 - **Storage:** Strategy Pattern (local/Cloudinary/S3) via `STORAGE_TYPE` env var
 - **Web Client:** React 19 + Zustand + Axios interceptors + Formik/Yup + Tailwind CSS
-- **Server Testing:** Custom runner, 323 server tests (6 test suites)
+- **Server Testing:** Custom runner, 331 server tests (6 test suites)
 - **Web Testing:** Jest + Testing Library, 99 web tests (5 test suites)
 - **Mobile Testing:** Jest 29 + jest-expo 54, 83 mobile tests (4 test suites)
-- **Total Tests:** 505 (323 server + 99 web + 83 mobile)
+- **Total Tests:** 513 (331 server + 99 web + 83 mobile)
 - **Deployment:** Heroku-ready with Procfile
 - **CI/CD:** GitHub Actions — server tests (MongoDB service) + web tests/build → deploy to orphan branches
 - **Formatting:** Prettier with LF normalization (`.prettierrc.json` in each package, `format.mjs` at root)
@@ -36,13 +36,13 @@ This directory contains machine-facing documentation for AI assistants working o
 ### Server (custom test runner — requires MongoDB)
 ```bash
 cd server
-npm run test:all         # all 323 tests (6 files sequentially)
+npm run test:all         # all 331 tests (6 files sequentially)
 npm test                 # comprehensive.test.js (80 tests)
 npm run test:repos       # repositories.test.js (44 tests)
 npm run test:integration # integration.test.js (46 tests)
-npm run test:e2e         # api.test.js (65 tests — port 5001)
+npm run test:e2e         # api.test.js (69 tests — port 5001)
 npm run test:image       # image.test.js (38 tests — upload/replace/delete lifecycle)
-npm run test:storage     # storage.test.js (50 tests — unit tests for storage strategies)
+npm run test:storage     # storage.test.js (54 tests — unit tests for storage strategies)
 npm run check-default-picture  # verify/upload default profile picture (setup tool)
 ```
 

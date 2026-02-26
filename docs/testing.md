@@ -3,11 +3,11 @@
 ## نظرة عامة
 
 يستخدم المشروع ثلاثة أنظمة للاختبار:
-- **الخادم:** نظام اختبارات مخصص بدون مكتبات خارجية — 6 ملفات اختبار (323 اختبار)
+- **الخادم:** نظام اختبارات مخصص بدون مكتبات خارجية — 6 ملفات اختبار (331 اختبار)
 - **الويب:** Jest + @testing-library/react — 5 ملفات اختبار (99 اختبار)
 - **الموبايل:** Jest + jest-expo + @testing-library/react-native — 4 ملفات اختبار (83 اختبار)
 
-**إجمالي الاختبارات:** 505 اختبار (323 خادم + 99 ويب + 83 موبايل)
+**إجمالي الاختبارات:** 513 اختبار (331 خادم + 99 ويب + 83 موبايل)
 
 ---
 
@@ -25,9 +25,9 @@ npm run test:all
 npm test                 # comprehensive.test.js (80 اختبار)
 npm run test:repos       # repositories.test.js (44 اختبار)
 npm run test:integration # integration.test.js (46 اختبار)
-npm run test:e2e         # api.test.js (65 اختبار)
+npm run test:e2e         # api.test.js (69 اختبار)
 npm run test:image       # image.test.js (38 اختبار — رفع / استبدال / حذف صور الملف الشخصي)
-npm run test:storage     # storage.test.js (50 اختبار وحدة — بدون شبكة، أو 58 مع Cloudinary)
+npm run test:storage     # storage.test.js (54 اختبار وحدة — بدون شبكة، أو 58 مع Cloudinary)
 ```
 
 **المتطلبات:** اتصال MongoDB نشط (يستخدم نفس قاعدة البيانات من `.env`)
@@ -75,9 +75,9 @@ server/tests/
 ├── comprehensive.test.js    # اختبارات تكاملية شاملة (80 اختبار)
 ├── repositories.test.js     # اختبارات المستودعات المركزة (44 اختبار)
 ├── integration.test.js      # اختبارات تكامل كاملة مع التخزين (46 اختبار)
-├── api.test.js              # اختبارات نقاط النهاية E2E (65 اختبار)
-├── image.test.js            # اختبارات رفع / استبدال / حذف صور الملف الشخصي (38 اختبار)
-└── storage.test.js          # اختبارات وحدة/تكامل خدمة التخزين (50 اختبار وحدة / 58 مع Cloudinary)
+├── api.test.js              # اختبارات نقاط النهاية E2E (69 اختبار)
+├── image.test.js            # رفع/استبدال/حذف صور الملف الشخصي (38 اختبار)
+└── storage.test.js          # اختبارات وحدة/تكامل خدمة التخزين (54 اختبار وحدة / 58 مع Cloudinary)
 ```
 
 ---
