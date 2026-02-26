@@ -13,68 +13,83 @@ import {
 const repos = getRepositoryManager();
 
 export const register = async (req, res) => {
-  const { firstName, lastName, email, password, confirmPassword } = req.body;
+  try {
+    const { firstName, lastName, email, password, confirmPassword } = req.body;
 
-  // Validate input before any DB or crypto operations
-  validateRegisterInput({ firstName, lastName, email, password, confirmPassword });
+    // Validate input before any DB or crypto operations
+    validateRegisterInput({ firstName, lastName, email, password, confirmPassword });
 
-  // Check email uniqueness before hashing
-  const emailTaken = await repos.user.emailExists(email);
-  if (emailTaken) {
-    return res
-      .status(StatusCodes.BAD_REQUEST)
-      .json({ message: 'هذا البريد الإلكتروني مسجل بالفعل' });
+    // Check email uniqueness before hashing
+    const emailTaken = await repos.user.emailExists(email);
+    if (emailTaken) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ message: 'هذا البريد الإلكتروني مسجل بالفعل' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const storage = getStorageService();
+    // DEFAULT_PROFILE_PICTURE_URL should be set when using cloud providers (Cloudinary/S3)
+    // to a pre-uploaded asset URL. Falls back to the locally-served default for local storage.
+    const defaultPicture =
+      process.env.DEFAULT_PROFILE_PICTURE_URL || storage.getFileUrl('default-picture.jpg');
+
+    const newUser = await repos.user.createUser({
+      firstName,
+      lastName,
+      email,
+      password: hashedPassword,
+      profilePicture: defaultPicture,
+    });
+
+    getIO().emit('user_created', newUser);
+
+    const token = createToken(newUser._id);
+
+    res.status(StatusCodes.CREATED).json({
+      message: 'User registered successfully',
+      user: newUser,
+      accessToken: token,
+    });
+  } catch (error) {
+    console.error('❌ Registration error:', error);
+    // Return validation errors or generic error
+    const statusCode = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+    const message = error.message || 'فشل التسجيل. يرجى المحاولة مرة أخرى';
+    res.status(statusCode).json({ message });
   }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const storage = getStorageService();
-  // DEFAULT_PROFILE_PICTURE_URL should be set when using cloud providers (Cloudinary/S3)
-  // to a pre-uploaded asset URL. Falls back to the locally-served default for local storage.
-  const defaultPicture =
-    process.env.DEFAULT_PROFILE_PICTURE_URL || storage.getFileUrl('default-picture.jpg');
-
-  const newUser = await repos.user.createUser({
-    firstName,
-    lastName,
-    email,
-    password: hashedPassword,
-    profilePicture: defaultPicture,
-  });
-
-  getIO().emit('user_created', newUser);
-
-  const token = createToken(newUser._id);
-
-  res.status(StatusCodes.CREATED).json({
-    message: 'User registered successfully',
-    user: newUser,
-    accessToken: token,
-  });
 };
 
 export const login = async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  validateLoginInput({ email, password });
+    validateLoginInput({ email, password });
 
-  const user = await repos.user.findByEmail(email);
-  if (!user) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'المستخدم غير موجود' });
+    const user = await repos.user.findByEmail(email);
+    if (!user) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'المستخدم غير موجود' });
+    }
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(StatusCodes.BAD_REQUEST).json({ message: 'بيانات الدخول غير صحيحة' });
+    }
+
+    user.password = undefined;
+    const token = createToken(user._id);
+
+    res.status(StatusCodes.OK).json({
+      message: 'Login successful',
+      user,
+      accessToken: token,
+    });
+  } catch (error) {
+    console.error('❌ Login error:', error);
+    const statusCode = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
+    const message = error.message || 'فشل تسجيل الدخول. يرجى المحاولة مرة أخرى';
+    res.status(statusCode).json({ message });
   }
-
-  const isPasswordCorrect = await bcrypt.compare(password, user.password);
-  if (!isPasswordCorrect) {
-    return res.status(StatusCodes.BAD_REQUEST).json({ message: 'بيانات الدخول غير صحيحة' });
-  }
-
-  user.password = undefined;
-  const token = createToken(user._id);
-
-  res.status(StatusCodes.OK).json({
-    message: 'Login successful',
-    user,
-    accessToken: token,
-  });
 };
 
 export const getProfile = async (req, res) => {

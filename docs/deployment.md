@@ -209,7 +209,45 @@ heroku config:set CLOUDINARY_FOLDER=mychat-profiles
 # heroku config:set CLOUDINARY_CLOUD_NAME=your_name
 # heroku config:set CLOUDINARY_API_KEY=your_key
 # heroku config:set CLOUDINARY_API_SECRET=your_secret
+
+# رفع صورة المستخدم الافتراضية لـ Cloudinary
+# يجب رفعها مرة واحدة قبل النشر — السكريبت يتحقق/يرفع تلقائياً:
+cd server && node scripts/check-default-picture.js
+# السكريبت يطبع DEFAULT_PROFILE_PICTURE_URL للنسخ
+heroku config:set DEFAULT_PROFILE_PICTURE_URL="https://res.cloudinary.com/..."
 ```
+
+### 📷 رفع الصورة الافتراضية لـ Cloudinary
+
+**⚠️ مهم:** قبل النشر على Heroku مع `STORAGE_TYPE=cloudinary`، يجب رفع صورة افتراضية للبروفايل.
+
+**السكريبت التلقائي:**
+```bash
+cd server
+node scripts/check-default-picture.js
+```
+
+**ماذا يفعل:**
+1. يتصل بـ Cloudinary باستخدام `CLOUDINARY_URL` (أو المتغيرات الفردية)
+2. يتحقق من وجود صورة `mychat-profiles/default-picture` في السحابة
+3. إذا لم تكن موجودة، يرفع `public/uploads/default-picture.jpg` تلقائياً
+4. يطبع الـ URL الآمن للاستخدام
+
+**الإخراج:**
+```
+✅ Upload successful!
+📷 URL: https://res.cloudinary.com/YOUR_CLOUD/image/upload/v.../default-picture.jpg
+
+📝 Add this to your .env file:
+DEFAULT_PROFILE_PICTURE_URL=https://res.cloudinary.com/...
+
+📝 For Heroku, set Config Var:
+heroku config:set DEFAULT_PROFILE_PICTURE_URL="https://..."
+```
+
+**لماذا هذا ضروري؟**
+- المستخدمون الجدد يحصلون على هذه الصورة كصورة بروفايل افتراضية
+- بدونها، السيرفر قد يُرجع `undefined` أو يفشل في التسجيل
 
 ### Procfile
 
