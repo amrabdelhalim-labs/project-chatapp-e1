@@ -100,7 +100,14 @@ CLOUDINARY_FOLDER=mychat-profiles
 
 > `CLOUDINARY_URL` يأخذ الأولوية على المتغيرات المنفصلة عند تواجدهما معاً.
 
-**تثبيت:** `cloudinary` مضافة في `optionalDependencies` — يثبتها `npm install` تلقائياً
+**تثبيت:** `cloudinary` مضافة في `dependencies` (وليس `optionalDependencies`) — يثبتها `npm install` تلقائياً بشكل موثوق على Heroku
+
+> **ملاحظة مهمة — صورة الملف الشخصي الافتراضية:**
+> اضبط `DEFAULT_PROFILE_PICTURE_URL` برابط Cloudinary للصورة الافتراضية حتى تخزن في قاعدة البيانات رابطاً صحيحاً:
+> ```bash
+> heroku config:set DEFAULT_PROFILE_PICTURE_URL=https://res.cloudinary.com/YOUR_CLOUD/image/upload/v1/mychat-profiles/default-picture.jpg
+> ```
+> بدونه، يُولد رابط `getFileUrl('default-picture.jpg')` لكن هذا قد يعيد رابط `/images/...` محلياً عند استخدام التخزين المحلي.
 
 ### AWS S3
 

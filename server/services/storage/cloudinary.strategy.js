@@ -28,7 +28,12 @@ class CloudinaryStorageStrategy {
         'CLOUDINARY_CLOUD_NAME + CLOUDINARY_API_KEY + CLOUDINARY_API_SECRET'
       );
     }
-    this._initializeCloudinary();
+    // Start async SDK initialization eagerly. Caching the promise prevents:
+    //  • Duplicate imports when concurrent requests arrive before init completes
+    //  • Unhandled-rejection crashes (the reject path is re-thrown when methods
+    //    await _initPromise, not here in the constructor)
+    this._initPromise = this._initializeCloudinary();
+    this._initPromise.catch(() => {}); // prevent unhandledRejection at construction time
   }
 
   async _initializeCloudinary() {
@@ -46,8 +51,13 @@ class CloudinaryStorageStrategy {
     }
   }
 
+  /** Await the cached init promise — all callers share the same promise. */
+  async _ensureInitialized() {
+    await this._initPromise;
+  }
+
   async uploadFile(file) {
-    if (!this.cloudinary) await this._initializeCloudinary();
+    await this._ensureInitialized();
     return new Promise((resolve, reject) => {
       const uploadStream = this.cloudinary.uploader.upload_stream(
         {
@@ -76,7 +86,7 @@ class CloudinaryStorageStrategy {
   }
 
   async deleteFile(publicIdOrUrl) {
-    if (!this.cloudinary) await this._initializeCloudinary();
+    await this._ensureInitialized();
     try {
       const publicId = this._extractPublicId(publicIdOrUrl);
       if (!publicId) return false;
@@ -121,14 +131,8 @@ class CloudinaryStorageStrategy {
   }
 
   async healthCheck() {
-    if (!this.cloudinary) {
-      try {
-        await this._initializeCloudinary();
-      } catch {
-        return false;
-      }
-    }
     try {
+      await this._ensureInitialized();
       await this.cloudinary.api.ping();
       return true;
     } catch {

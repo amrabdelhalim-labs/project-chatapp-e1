@@ -28,6 +28,8 @@
  *   • config object takes priority over env vars
  *   • Missing credentials throw descriptive error
  *   • Malformed CLOUDINARY_URL throws descriptive error
+ *   • _initPromise is a Promise (init eagerly cached after construction)
+ *   • _ensureInitialized() returns the cached Promise
  *
  * Phase 2 — CloudinaryStorageStrategy: URL utilities
  *   • _extractPublicId() from CDN URL with version segment
@@ -36,6 +38,7 @@
  *   • _extractPublicId() handles null/empty/undefined → null
  *   • getFileUrl() returns absolute URLs unchanged
  *   • getFileUrl() returns publicId as-is when not yet initialized
+ *   • getFileUrl() returns null/undefined as-is for falsy input
  *
  * Phase 3 — StorageService: factory + singleton
  *   • STORAGE_TYPE=local  → LocalStorageStrategy
@@ -360,6 +363,28 @@ logStep(8, 'Malformed CLOUDINARY_URL — constructor throws descriptive error');
   assert(errorMsg.includes('malformed') || errorMsg.includes('Expected'), 'error message explains the correct format');
 }
 
+logStep(9, '_initPromise — constructor eagerly caches initialization Promise');
+{
+  const strategy = withEnv(
+    { CLOUDINARY_URL: 'cloudinary://key:secret@cloud' },
+    () => new CloudinaryStorageStrategy({})
+  );
+  assert(
+    strategy._initPromise instanceof Promise,
+    '_initPromise is a Promise immediately after construction (init cached eagerly)'
+  );
+}
+
+logStep(10, '_ensureInitialized — returns the cached Promise');
+{
+  const strategy = withEnv(
+    { CLOUDINARY_URL: 'cloudinary://key:secret@cloud' },
+    () => new CloudinaryStorageStrategy({})
+  );
+  const result = strategy._ensureInitialized();
+  assert(result instanceof Promise, '_ensureInitialized() returns a Promise');
+}
+
 // ─── Phase 2 — CloudinaryStorageStrategy: URL utilities ──────────────────────
 logSection('Phase 2 — CloudinaryStorageStrategy: URL Utilities');
 
@@ -411,6 +436,16 @@ logStep(6, 'getFileUrl — before initialization returns publicId as-is (safe fa
   assert(cloudStrat.cloudinary === null, 'cloudinary is null before async init resolves');
   const result = cloudStrat.getFileUrl('mychat-profiles/test-id');
   assert(result === 'mychat-profiles/test-id', 'returns publicId as-is before init');
+}
+
+logStep(7, 'getFileUrl — returns null/undefined as-is for falsy input (null guard)');
+{
+  const strategy = withEnv(
+    { CLOUDINARY_URL: 'cloudinary://key:secret@cloud' },
+    () => new CloudinaryStorageStrategy({})
+  );
+  assert(strategy.getFileUrl(null) === null, 'null input returns null');
+  assert(strategy.getFileUrl(undefined) === undefined, 'undefined input returns undefined');
 }
 
 // ─── Phase 3 — StorageService: factory + singleton ───────────────────────────
