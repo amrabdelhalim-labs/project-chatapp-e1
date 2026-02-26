@@ -2,11 +2,13 @@
 /**
  * validate-workflow.mjs — Local workflow validator for project-chatapp-e1 (محادثتي)
  *
- * Catches CI deploy issues before pushing to GitHub by running three checks:
- *   1. YAML structure  — no tabs, required top-level keys present
- *   2. rsync excludes  — critical directories are excluded from server deploy
- *   3. package.json simulation — extracts deletions from the workflow itself,
+ * Catches CI deploy issues before pushing to GitHub by running four checks:
+ *   1. YAML structure       — no tabs, required top-level keys present
+ *   2. rsync excludes       — critical directories are excluded from server deploy
+ *   3. package.json sim.    — extracts deletions from the workflow itself,
  *      applies them to server/package.json, and verifies the result is clean
+ *   4. Completeness check   — proactively verifies every forbidden-pattern script
+ *      in package.json has a matching delete statement in the workflow
  *
  * Usage:
  *   node validate-workflow.mjs        # run all checks, exit 1 on failure
@@ -183,6 +185,30 @@ for (const [name, cmd] of Object.entries(prod.scripts ?? {})) {
     if (cmd.includes(bin)) {
       fail(`Script "${name}" uses "${bin}" which is in devDependencies (will be absent in production)`);
     }
+  }
+}
+
+// ── 4. Completeness check (scripts → workflow sync) ─────────────────────
+section('4. Completeness check (scripts \u2192 workflow sync)');
+
+// Proactively find any script in package.json that matches FORBIDDEN_PATTERNS
+// but is NOT in the workflow's deletion list — catches the "I added test:foo
+// but forgot to update the workflow" class of failure before it hits CI.
+const allScriptNames = Object.keys(pkg.scripts ?? {});
+const missingFromWorkflow = allScriptNames.filter(name => {
+  const isForbidden = FORBIDDEN_PATTERNS.some(re => re.test(name));
+  const isRequired  = REQUIRED_SCRIPTS.includes(name);
+  return isForbidden && !isRequired && !deletedByWorkflow.has(name);
+});
+
+if (missingFromWorkflow.length === 0) {
+  ok('All forbidden-pattern scripts are accounted for in workflow deletions');
+} else {
+  for (const name of missingFromWorkflow) {
+    fail(
+      `Script "${name}" matches a forbidden pattern but is NOT deleted by the workflow` +
+      ` — add: delete p.scripts['${name}'];`
+    );
   }
 }
 

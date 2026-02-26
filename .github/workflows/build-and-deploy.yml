@@ -107,10 +107,13 @@ jobs:
             delete p.scripts['test'];
             delete p.scripts['test:repos'];
             delete p.scripts['test:integration'];
-            delete p.scripts['test:e2e'];            delete p.scripts['test:image'];            delete p.scripts['format'];
+            delete p.scripts['test:e2e'];
+            delete p.scripts['test:image'];
+            delete p.scripts['test:storage'];
+            delete p.scripts['format'];
             delete p.scripts['format:check'];
-            delete p.devDependencies;
             delete p.scripts.dev;
+            delete p.devDependencies;
             fs.writeFileSync('/tmp/server-deploy/package.json', JSON.stringify(p, null, 2));
           "
 
