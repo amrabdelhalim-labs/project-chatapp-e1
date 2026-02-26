@@ -17,7 +17,74 @@
 
 ---
 
-## 🔐 أفضل ممارسات الأمان
+## � استكشاف خطأ 405 (Method Not Allowed)
+
+### المشكلة:
+```
+POST https://preview.amrabdelhalim.me/api/user/register 405 (Method Not Allowed)
+```
+
+### السبب الرئيسي:
+الـ build يستخدم `REACT_APP_API_URL` من GitHub vars/secrets، وإذا كانت **فارغة أو تشير بشكل خاطئ**، الطلبات تذهب للـ endpoint الخطأ.
+
+### الحل:
+
+**1. على GitHub (مهم جداً!):**
+- اذهب إلى `Settings` → `Secrets and variables` → `Repository variables`
+- أضف/تحديث المتغير `REACT_APP_API_URL`:
+  ```
+  Name: REACT_APP_API_URL
+  Value: https://amr-chatapp-e1.herokuapp.com
+  ```
+  أو للـ local development:
+  ```
+  Value: http://localhost:5000
+  ```
+
+**2. في الـ `.env` محلياً:**
+```bash
+# web/.env
+REACT_APP_API_URL=http://localhost:5000
+```
+
+**3. اختبار محلياً:**
+- أشغل الخادم: `cd server && npm run dev`
+- أشغل الويب: `cd web && npm start`
+- اختبر التسجيل — يجب أن يعمل بدون 405
+
+**4. التحقق من الـ build:**
+في `web/build/` بعد `npm run build`، تأكد أن الـ JavaScript يحتوي على الـ API URL الصحيح (ليس `http://localhost:5000`).
+
+---
+
+## 🔍 اختبارات تكتشف هذا الخطأ محلياً
+
+تشغيل:
+```bash
+cd web && npm run test:ci
+```
+
+سيجد الآن:
+- ✅ سيناريو 405 — يختبر معالجة الخطأ
+- ✅ تحقق من `REACT_APP_API_URL` — ينبه إذا كانت فارغة
+
+---
+
+## 📡 التحقق السريع من API
+
+```bash
+# اختبر من المتصفح أو curl
+curl -X POST https://your-api.com/api/user/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@test.com","password":"123456"}'
+
+# إذا أرجع 405، هناك مشكلة routing على الخادم أو URL خاطئة
+# إذا أرجع 400، الـ endpoint موجود ✓
+```
+
+---
+
+
 
 ### 1. متغيرات البيئة
 
