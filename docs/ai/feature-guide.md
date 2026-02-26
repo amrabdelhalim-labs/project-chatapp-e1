@@ -124,6 +124,8 @@ server/public/uploads/*      # Ignore user-uploaded files
 3. Add case to `StorageService.createStrategy()` in `storage.service.js`
 4. Add env vars to `.env.example`
 5. Update `docs/storage.md`
+6. Run `npm run test:storage` — 50 unit tests (no network required)
+   - Live integration: `node tests/storage.test.js --CLOUDINARY_URL=… --STORAGE_TYPE=cloudinary`
 
 ## File Upload Guidelines
 
