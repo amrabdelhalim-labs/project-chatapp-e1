@@ -72,7 +72,9 @@ server/
     ├── comprehensive.test.js    # 80 integration tests (8 phases)
     ├── repositories.test.js     # 44 focused CRUD tests per repository
     ├── integration.test.js      # 45 full-stack tests (storage, JWT, temp workspace)
-    └── api.test.js              # 63 E2E HTTP tests (real Express server)
+    ├── api.test.js              # 63 E2E HTTP tests (real Express server)
+    ├── image.test.js            # 38 E2E tests — profile picture upload/replace/delete
+    └── storage.test.js          # 48 unit tests — storage layer, CLOUDINARY_URL parsing, no network
 ```
 
 ## Web Client Architecture

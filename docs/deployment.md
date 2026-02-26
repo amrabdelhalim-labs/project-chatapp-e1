@@ -12,7 +12,7 @@
 - [ ] جميع التبعيات موجودة في `package.json`
 - [ ] `.gitignore` يستثني الملفات الحساسة
 - [ ] معالجة الأخطاء شاملة
-- [ ] `npm run test:all` يمر بنجاح (232 اختبار)
+- [ ] `npm run test:all` يمر بنجاح (282 اختبار)
 
 ---
 
@@ -32,9 +32,15 @@ JWT_SECRET=your_secure_random_secret_here
 
 # اختر نوع تخزين واحد
 STORAGE_TYPE=cloudinary  # أو 's3'
+
+# Cloudinary - الخيار أ: Heroku Addon (يُضبط CLOUDINARY_URL تلقائياً)
+# CLOUDINARY_URL=cloudinary://API_KEY:API_SECRET@CLOUD_NAME
+
+# Cloudinary - الخيار ب: يدوياً (إذا لم تستخدم Addon)
 CLOUDINARY_CLOUD_NAME=xxx
 CLOUDINARY_API_KEY=xxx
 CLOUDINARY_API_SECRET=xxx
+CLOUDINARY_FOLDER=mychat-profiles  # اختياري
 ```
 
 ### 2. توليد JWT Secret قوي
@@ -124,10 +130,17 @@ heroku config:set JWT_SECRET="$(openssl rand -base64 32)"
 heroku config:set NODE_ENV=production
 
 # التخزين (اختر واحد)
+# الخيار أ: Cloudinary Addon (موصى به على Heroku — CLOUDINARY_URL يُضبط تلقائياً)
+heroku addons:create cloudinary:starter
 heroku config:set STORAGE_TYPE=cloudinary
-heroku config:set CLOUDINARY_CLOUD_NAME=your_name
-heroku config:set CLOUDINARY_API_KEY=your_key
-heroku config:set CLOUDINARY_API_SECRET=your_secret
+# CLOUDINARY_FOLDER اختياري (default: mychat-profiles)
+heroku config:set CLOUDINARY_FOLDER=mychat-profiles
+
+# الخيار ب: Cloudinary يدوياً (إذا لم تستخدم Addon)
+# heroku config:set STORAGE_TYPE=cloudinary
+# heroku config:set CLOUDINARY_CLOUD_NAME=your_name
+# heroku config:set CLOUDINARY_API_KEY=your_key
+# heroku config:set CLOUDINARY_API_SECRET=your_secret
 ```
 
 ### Procfile
