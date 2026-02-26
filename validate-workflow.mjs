@@ -59,6 +59,7 @@ const FORBIDDEN_PATTERNS = [
   /^dev$/,
   /^test/,      // test, test:all, test:*, etc.
   /^format/,    // format, format:check
+  /check/,      // check-default-picture, check-*, etc. (setup/validation scripts)
 ];
 
 // rsync excludes that MUST appear in the workflow

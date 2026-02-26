@@ -10,12 +10,12 @@ tests/
 ├── test.helpers.js          ← إطار الاختبار المشترك
 ├── comprehensive.test.js    ← 80 اختبار — سير عمل كامل
 ├── repositories.test.js     ← 44 اختبار — عمليات CRUD المستودعات
-├── integration.test.js      ← 45 اختبار — تكامل كامل مع التخزين
-├── api.test.js              ← 63 اختبار — طلبات HTTP حقيقية (E2E)
+├── integration.test.js      ← 46 اختبار — تكامل كامل مع التخزين
+├── api.test.js              ← 65 اختبار — طلبات HTTP حقيقية (E2E)
 └── storage.test.js          ← 50 اختبار — طبقة التخزين (بدون شبكة)
 ```
 
-**الإجمالي: 282 اختبار**
+**الإجمالي: 323 اختبار**
 
 ---
 
@@ -121,23 +121,33 @@ export function printSummary() {
 
 ```javascript
 // اختبار التسجيل بمدخلات صحيحة
-const validResult = validateRegisterInput({
-  firstName: 'أحمد',
-  lastName: 'محمد',
-  email: 'test@example.com',
-  password: 'Test123!',
-});
-assert(validResult.isValid, 'Valid registration passes validation');
-assert(validResult.errors.length === 0, 'No errors for valid input');
+try {
+  validateRegisterInput({
+    firstName: 'أحمد',
+    lastName: 'محمد',
+    email: 'test@example.com',
+    password: 'Test123!',
+    confirmPassword: 'Test123!',
+  });
+  assert(true, 'Valid registration passes validation');
+} catch (error) {
+  assert(false, 'Valid registration passes validation');
+}
 
 // اختبار بإيميل خاطئ
-const invalidEmail = validateRegisterInput({
-  firstName: 'أحمد',
-  lastName: 'محمد',
-  email: 'not-an-email',
-  password: 'Test123!',
-});
-assert(!invalidEmail.isValid, 'Invalid email fails validation');
+try {
+  validateRegisterInput({
+    firstName: 'أحمد',
+    lastName: 'محمد',
+    email: 'not-an-email',
+    password: 'Test123!',
+    confirmPassword: 'Test123!',
+  });
+  assert(false, 'Invalid email should throw');
+} catch (error) {
+  assert(error.statusCode === 400, 'Throws 400 for invalid email');
+  assert(error.message.includes('البريد الإلكتروني'), 'Error mentions email format');
+}
 ```
 
 ### كيف يعمل الـ Cleanup:
@@ -203,7 +213,7 @@ assert(user.password === undefined, 'Password excluded from response');
 
 ---
 
-## 📋 ملف 3: integration.test.js — 45 اختبار
+## 📋 ملف 3: integration.test.js — 46 اختبار
 
 **الغرض:** اختبار تكامل كامل يشمل التخزين المحلي مع نظام ملفات حقيقي.
 
@@ -259,7 +269,7 @@ async function createTestImage(filename) {
 
 ---
 
-## 📋 ملف 4: api.test.js — 63 اختبار
+## 📋 ملف 4: api.test.js — 65 اختبار
 
 **الغرض:** اختبارات E2E (End-to-End) — طلبات HTTP حقيقية ضد خادم Express شغّال.
 
@@ -320,40 +330,45 @@ function makeRequest(method, path, body = null, token = null) {
 
 ```
 1. Registration:
-    ├── تسجيل مستخدم 1 ← 201
-    ├── تسجيل مستخدم 2 ← 201
-    ├── تسجيل بنفس الإيميل ← 409
-    ├── بدون بيانات ← 400
-    ├── إيميل غير صحيح ← 400
-    └── التحقق من هيكل الرد (user + token)
+    ├── POST /api/user/register ← 201
+    ├── Duplicate email ← 400
+    ├── Missing fields ← 400
+    └── Password mismatch ← 400
 
 2. Login:
-    ├── تسجيل الدخول ← 200
-    ├── كلمة مرور خاطئة ← 401
-    └── إيميل غير موجود ← 401
+    ├── POST /api/user/login ← 200
+    ├── Wrong password ← 400
+    ├── Email not found ← 400
+    └── Missing fields ← 400
 
 3. Auth Protection:
-    ├── بدون توكن ← 401
-    └── توكن منتهي ← 401
+    ├── GET /api/user/profile بدون توكن ← 401
+    ├── GET /api/user/profile توكن غير صالح ← 401
+    └── GET /api/message بدون توكن ← 401
 
 4. Profile:
-    ├── GET /users/me ← 200
-    ├── PUT /users/me ← 200
-    └── التحقق من عدم وجود password في الرد
+    ├── GET /api/user/profile ← 200
+    ├── GET /api/user/friends ← 200
+    └── PUT /api/user/profile ← 200
 
-5. Users:
-    ├── GET /users ← 200 (قائمة بدون المستخدم الحالي)
-    └── التحقق من العدد
+5. Messages:
+    ├── POST /api/message ← 201 (مرتين)
+    ├── رد من مستخدم آخر ← 201
+    ├── GET /api/message ← 200
+    ├── GET /api/message?page=1&limit=2 ← 200
+    ├── GET /api/message/conversation/:contactId ← 200
+    └── PATCH /api/message/seen/:senderId ← 200
 
-6. Messages:
-    ├── POST /messages ← 201
-    ├── GET /messages ← 200
-    ├── GET /messages/conversation/:userId ← 200
-    ├── PUT /messages/seen/:senderId ← 200
-    └── بيانات ناقصة ← 400
+6. Error Handling:
+    ├── POST /api/message محتوى فارغ ← 400
+    ├── POST /api/message بدون receiverId ← 400
+    └── GET /api/nonexistent ← 404
 
-7. Health:
-    └── GET /health ← 200 (database: connected)
+7. Response Structure:
+    ├── registration token + user
+    ├── login token + message
+    ├── message fields (_id/content/sender/recipient)
+    └── health structure
 
 8. Cleanup:
     └── حذف بيانات الاختبار من قاعدة البيانات
@@ -378,7 +393,7 @@ npm run test:integration
 # اختبارات E2E (طلبات HTTP حقيقية)
 npm run test:e2e
 
-# تشغيل الكل (232 اختبار)
+# تشغيل الكل (323 اختبار)
 npm run test:all
 ```
 
@@ -470,8 +485,8 @@ runTests();
 |-------|-------|-------|-----------|--------|
 | **شامل** | comprehensive | 80 | كل شيء معاً | ⚡ سريع |
 | **مستودعات** | repositories | 44 | CRUD فقط | ⚡ سريع |
-| **تكامل** | integration | 45 | + تخزين + ملفات | 🕐 متوسط |
-| **E2E** | api | 63 | HTTP حقيقي | 🕐 متوسط |
+| **تكامل** | integration | 46 | + تخزين + ملفات | 🕐 متوسط |
+| **E2E** | api | 65 | HTTP حقيقي | 🕐 متوسط |
 | **تخزين** | storage | 50 | نهج + خدمة التخزين | ⚡ سريع (بدون شبكة) |
 
 ### متى تستخدم أي نوع؟
@@ -493,4 +508,4 @@ runTests();
 ✅ **Process exit codes** — `0` = نجاح، `1` = فشل (مهم لـ CI/CD)
 ✅ **`withTimeout()`** — تمنع توقف البرنامج بسبب اتصالات شبكة مفتوحة (Cloudinary SDK)
 ✅ **تمرير متغيرات عبر CLI** — `--KEY=VALUE` بدلاً من تعديل `.env`
-✅ **282 اختبار** بنسبة نجاح **100%**
+✅ **323 اختبار** بنسبة نجاح **100%**

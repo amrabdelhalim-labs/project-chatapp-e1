@@ -124,6 +124,58 @@ AWS_S3_FOLDER=uploads/profiles
 
 ---
 
+## التحقق من إعداد الصورة الافتراضية
+
+يوفر المشروع سكريبتاً تلقائياً للتحقق من وجود الصورة الافتراضية في بيئة التخزين المختارة:
+
+```bash
+cd server
+npm run check-default-picture
+```
+
+**ماذا يفعل:**
+
+- **Local:** يتحقق من `public/uploads/default-picture.jpg`
+- **Cloudinary:** يتحقق من وجود الصورة في السحابة، يرفعها إذا لم تكن موجودة
+- **S3:** يتحقق من وجود الصورة في الـ bucket، يرفعها إذا لم تكن موجودة
+
+**الإخراج النموذجي (Cloudinary):**
+
+```
+🔍 Checking default profile picture setup...
+
+☁️  Storage Type: CLOUDINARY
+✅ Cloudinary connection successful
+
+🔎 Searching for: mychat-profiles/default-picture...
+⚠️  Default picture not found on Cloudinary
+
+📤 Uploading default-picture.jpg to Cloudinary...
+✅ Upload successful!
+
+📷 URL: https://res.cloudinary.com/YOUR_CLOUD/image/upload/v.../default-picture.jpg
+
+✅ Setup Complete!
+
+📝 Add to your .env file:
+DEFAULT_PROFILE_PICTURE_URL=https://res.cloudinary.com/...
+
+📝 For Heroku, set Config Var:
+heroku config:set DEFAULT_PROFILE_PICTURE_URL="https://..."
+```
+
+**متى تستخدمه:**
+
+- قبل النشر على Heroku/Render مع `STORAGE_TYPE=cloudinary` أو `s3`
+- بعد تغيير مزود التخزين
+- للتأكد من إعداد الصورة الافتراضية بشكل صحيح
+
+**التكامل مع Strategies:**
+
+السكريبت يستخدم مباشرة `getStorageService()` من `services/storage/storage.service.js`، مما يضمن التوافق التام مع جميع استراتيجيات التخزين.
+
+---
+
 ## ملاحظات مهمة
 
 - ملف `default-picture.jpg` محمي من الحذف تلقائياً في التخزين المحلي

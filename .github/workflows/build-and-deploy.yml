@@ -110,6 +110,7 @@ jobs:
             delete p.scripts['test:e2e'];
             delete p.scripts['test:image'];
             delete p.scripts['test:storage'];
+            delete p.scripts['check-default-picture'];
             delete p.scripts['format'];
             delete p.scripts['format:check'];
             delete p.scripts.dev;

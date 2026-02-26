@@ -17,7 +17,66 @@
 
 ---
 
-## � استكشاف خطأ 405 (Method Not Allowed)
+## 🔐 استكشاف خطأ JWT_SECRET
+
+### المشكلة:
+```
+Error: secretOrPrivateKey must have a value
+```
+
+### السبب:
+`JWT_SECRET` غير مُعرّف في متغيرات البيئة (Heroku Config Vars أو ملف `.env` محلياً).
+
+### الحل:
+
+**1. التحقق محلياً:**
+```bash
+# تحقق من وجوده في .env
+cd server
+cat .env | grep JWT_SECRET
+
+# يجب أن يُظهر شيئاً مثل:
+# JWT_SECRET=Yfg7HkLz9JvX2Q8
+```
+
+**2. على Heroku:**
+```bash
+# تحقق من Config Vars
+heroku config:get JWT_SECRET
+
+# إذا كان فارغاً، أضفه:
+heroku config:set JWT_SECRET="$(node -e 'console.log(require(\"crypto\").randomBytes(32).toString(\"base64\"))')"
+
+# أو يدوياً من Dashboard:
+# Settings → Config Vars → Add
+# Key: JWT_SECRET
+# Value: your-secure-random-string-here
+```
+
+**3. توليد JWT_SECRET قوي:**
+```bash
+# Linux/Mac
+openssl rand -base64 32
+
+# Windows PowerShell
+[Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Minimum 0 -Maximum 256 }))
+
+# Node.js
+node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
+```
+
+**4. التحقق من Logs:**
+```bash
+heroku logs --tail
+
+# إذا رأيت:
+# Error: JWT_SECRET is not defined in environment variables
+# يعني المتغير مفقود على Heroku
+```
+
+---
+
+## 🚨 استكشاف خطأ 405 (Method Not Allowed)
 
 ### المشكلة:
 ```
@@ -217,37 +276,60 @@ cd server && node scripts/check-default-picture.js
 heroku config:set DEFAULT_PROFILE_PICTURE_URL="https://res.cloudinary.com/..."
 ```
 
-### 📷 رفع الصورة الافتراضية لـ Cloudinary
+### 📷 التحقق والتحضير - الصورة الافتراضية للبروفايل
 
-**⚠️ مهم:** قبل النشر على Heroku مع `STORAGE_TYPE=cloudinary`، يجب رفع صورة افتراضية للبروفايل.
+**مهم:** قبل النشر، يجب التحقق من توفر صورة افتراضية للبروفايل حسب نوع التخزين.
 
-**السكريبت التلقائي:**
+**السكريبت التلقائي (يدعم جميع أنواع التخزين):**
 ```bash
 cd server
 node scripts/check-default-picture.js
 ```
 
-**ماذا يفعل:**
-1. يتصل بـ Cloudinary باستخدام `CLOUDINARY_URL` (أو المتغيرات الفردية)
-2. يتحقق من وجود صورة `mychat-profiles/default-picture` في السحابة
-3. إذا لم تكن موجودة، يرفع `public/uploads/default-picture.jpg` تلقائياً
-4. يطبع الـ URL الآمن للاستخدام
+**ماذا يفعل السكريبت:**
 
-**الإخراج:**
-```
+| التخزين | الإجراء |
+|---------|--------|
+| **local** | ✅ يتحقق من `public/uploads/default-picture.jpg` (موجود بالفعل) |
+| **cloudinary** | ✅ يتحقق من وجود الصورة بـ Cloudinary، يرفع إذا لم تكن موجودة |
+| **s3** | ✅ يتحقق من وجود الصورة في S3، يرفع إذا لم تكن موجودة |
+
+**مثال التشغيل (Cloudinary):**
+```bash
+🔍 Checking default profile picture setup...
+
+☁️  Storage Type: CLOUDINARY
+☁️  Cloud Name: hahlnhldz
+🔑 API Key: 522879353668222
+
+✅ Cloudinary SDK initialized
+✅ Cloudinary connection successful
+
+🔎 Searching for: mychat-profiles/default-picture...
+⚠️  Default picture not found on Cloudinary
+
+📤 Uploading default-picture.jpg to Cloudinary...
 ✅ Upload successful!
-📷 URL: https://res.cloudinary.com/YOUR_CLOUD/image/upload/v.../default-picture.jpg
 
-📝 Add this to your .env file:
+📷 URL: https://res.cloudinary.com/hahlnhldz/image/upload/v.../default-picture.jpg
+
+✅ Setup Complete!
+
+📝 Add to your .env file:
 DEFAULT_PROFILE_PICTURE_URL=https://res.cloudinary.com/...
-
-📝 For Heroku, set Config Var:
-heroku config:set DEFAULT_PROFILE_PICTURE_URL="https://..."
 ```
+
+**ماذا بعد؟**
+
+| التخزين | الخطوة التالية |
+|---------|--------|
+| **local** | لا شيء! يتم استخدام `/uploads/default-picture.jpg` تلقائياً |
+| **cloudinary** | `heroku config:set DEFAULT_PROFILE_PICTURE_URL="https://..."` |
+| **s3** | `heroku config:set DEFAULT_PROFILE_PICTURE_URL="https://..."` |
 
 **لماذا هذا ضروري؟**
 - المستخدمون الجدد يحصلون على هذه الصورة كصورة بروفايل افتراضية
-- بدونها، السيرفر قد يُرجع `undefined` أو يفشل في التسجيل
+- بدونها، التسجيل قد يفشل على التخزين السحابي
 
 ### Procfile
 

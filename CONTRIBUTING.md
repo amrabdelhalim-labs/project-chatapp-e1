@@ -213,7 +213,7 @@ cd web && npm run format
 شغّل هذا قبل كل `git commit`:
 
 ```bash
-# 1. جميع اختبارات الخادم (270 اختباراً)
+# 1. جميع اختبارات الخادم (323 اختباراً)
 cd server && npm run test:all
 
 # 2. جميع اختبارات الويب (99 اختباراً)
@@ -258,11 +258,12 @@ node validate-workflow.mjs
 |----------------|-------|-------|----------------|
 | الخادم الشامل | `cd server && npm test` | 80 | أي إيداع على الخادم |
 | repositories الخادم | `cd server && npm run test:repos` | 44 | أي إيداع على الخادم |
-| التكامل | `cd server && npm run test:integration` | 45 | أي إيداع على الخادم |
-| E2E API | `cd server && npm run test:e2e` | 63 | أي إيداع على الخادم |
+| التكامل | `cd server && npm run test:integration` | 46 | أي إيداع على الخادم |
+| E2E API | `cd server && npm run test:e2e` | 65 | أي إيداع على الخادم |
 | الصور | `cd server && npm run test:image` | 38 | أي إيداع للتخزين |
+| التخزين | `cd server && npm run test:storage` | 50 | أي إيداع للتخزين |
 | اختبارات الويب | `cd web && npm run test:ci` | 99 | أي إيداع على الويب |
 | اختبارات الجوال | `cd app && npm run test:ci` | 83 | أي إيداع على الجوال |
-| **الإجمالي** | — | **452** | أي تاج إصدار |
+| **الإجمالي** | — | **505** | أي تاج إصدار |
 
 راجع [`docs/testing.md`](docs/testing.md) للتوثيق الكامل للاختبارات.

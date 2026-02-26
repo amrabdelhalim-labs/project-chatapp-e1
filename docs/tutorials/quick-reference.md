@@ -181,8 +181,8 @@
 - نظام الاختبار المخصص (بدون Jest)
 - `comprehensive.test.js` — 80 اختبار شامل
 - `repositories.test.js` — 44 اختبار للمستودعات
-- `integration.test.js` — 45 اختبار تكامل (مع ملفات)
-- `api.test.js` — 63 اختبار E2E (طلبات HTTP حقيقية)
+- `integration.test.js` — 46 اختبار تكامل (مع ملفات)
+- `api.test.js` — 65 اختبار E2E (طلبات HTTP حقيقية)
 
 **المفاهيم**: Testing, E2E, Integration, Unit Tests
 **الوقت المتوقع**: 30 دقيقة

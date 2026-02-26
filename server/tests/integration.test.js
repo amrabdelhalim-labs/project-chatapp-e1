@@ -417,6 +417,27 @@ async function runFullStackTests() {
     logStep(36, 'Clean up temp workspace');
     const cleanedUp = cleanupTempWorkspace();
     assert(cleanedUp || !fs.existsSync(tempDir), 'Temp workspace cleaned');
++
++    // ============================================================
++    // PHASE 9: ENV GUARDS
++    // ============================================================
++    logSection('PHASE 9: ENV GUARDS');
++
++    logStep(37, 'JWT_SECRET missing throws on module load');
++    const previousSecret = process.env.JWT_SECRET;
++    delete process.env.JWT_SECRET;
++    let missingSecretThrown = false;
++    try {
++      await import(`../utils/jwt.js?noenv=${Date.now()}`);
++    } catch (error) {
++      missingSecretThrown =
++        typeof error?.message === 'string' && error.message.includes('JWT_SECRET');
++    } finally {
++      if (previousSecret) {
++        process.env.JWT_SECRET = previousSecret;
++      }
++    }
++    assert(missingSecretThrown, 'Missing JWT_SECRET throws at module load');
 
     // ============================================================
     // TEST SUMMARY

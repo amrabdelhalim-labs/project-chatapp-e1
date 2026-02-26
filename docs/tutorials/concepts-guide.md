@@ -613,7 +613,7 @@ git tag -a v1.4.0 -m "v1.4.0 - Add code quality toolchain
 - Prettier formatting across all 3 packages
 - .gitattributes for LF line endings
 - CONTRIBUTING.md with commit/tag/formatting standards
-- 414 tests passing (232 server + 99 web + 83 mobile)"
+- 505 tests passing (323 server + 99 web + 83 mobile)"
 ```
 
 **قواعد رسالة التوسيم**:
@@ -639,7 +639,7 @@ git tag -a v1.4.0 -m "v1.4.0 - Add code quality toolchain
     ↓                             ↓
   تثبيت التبعيات               تثبيت التبعيات
     ↓                             ↓
-  232 اختبار                   99 اختبار
+  323 اختبار                   99 اختبار
     ↓                             ↓
   نشر لفرع server             بناء React
                                   ↓

@@ -14,6 +14,7 @@
     "test:image": "node tests/image.test.js",
     "test:storage": "node tests/storage.test.js",
     "test:all": "node tests/comprehensive.test.js && node tests/repositories.test.js && node tests/integration.test.js && node tests/api.test.js && node tests/image.test.js && node tests/storage.test.js",
+    "check-default-picture": "node scripts/check-default-picture.js",
     "format": "prettier --write \"**/*.js\"",
     "format:check": "prettier --check \"**/*.js\""
   },

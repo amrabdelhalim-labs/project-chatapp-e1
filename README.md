@@ -17,7 +17,7 @@
 | الملف الشخصي | تحديث الاسم والحالة، رفع/تغيير الصورة الشخصية |
 | متعدد المنصات | ويب (React) + جوال (Expo/React Native) + خادم مشترك |
 | تخزين مرن | بنية قابلة للتوصيل: Local أو Cloudinary أو AWS S3 |
-| اختبارات شاملة | 452 اختباراً: 270 خادم + 99 ويب + 83 جوال |
+| اختبارات شاملة | 505 اختباراً: 323 خادم + 99 ويب + 83 جوال |
 | جودة الكود | Prettier + فرض نهايات LF + معايير المساهمة |
 
 ---
@@ -85,7 +85,7 @@ project-chatapp-e1/
 │   ├── models/                 # مخططات Mongoose (User, Message)
 │   ├── utils/                  # JWT helpers + Socket.IO utility
 │   ├── routes/                 # /api/user/* + /api/message/*
-│   ├── tests/                  # 270 اختباراً (5 مجموعات)
+│   ├── tests/                  # 323 اختباراً (6 مجموعات)
 │   └── Procfile                # نشر Heroku
 │
 ├── web/                        # React CRA
@@ -319,10 +319,12 @@ cd web && npm run format
 | `npm run dev` | التطوير مع إعادة التشغيل التلقائي |
 | `npm test` | 80 اختباراً شاملاً |
 | `npm run test:repos` | 44 اختباراً للـ repositories |
-| `npm run test:integration` | 45 اختباراً متكاملاً |
-| `npm run test:e2e` | 63 اختباراً E2E |
+| `npm run test:integration` | 46 اختباراً متكاملاً |
+| `npm run test:e2e` | 65 اختباراً E2E |
 | `npm run test:image` | 38 اختباراً للصور |
-| `npm run test:all` | جميع 270 اختباراً تسلسلياً |
+| `npm run test:storage` | 50 اختباراً لخدمات التخزين |
+| `npm run test:all` | جميع 323 اختباراً تسلسلياً |
+| `npm run check-default-picture` | تحقق/رفع الصورة الافتراضية للسحابة |
 | `npm run format` | تنسيق الملفات |
 | `npm run format:check` | التحقق من التنسيق |
 
@@ -355,7 +357,7 @@ cd web && npm run format
 
 | الوظيفة | ما تفعله |
 |---------|---------|
-| **نشر الخادم** | تثبيت → 270 اختباراً (MongoDB service) → دفع إلى فرع `server` → Heroku |
+| **نشر الخادم** | تثبيت → 323 اختباراً (MongoDB service) → دفع إلى فرع `server` → Heroku |
 | **نشر الويب** | تثبيت → 99 اختباراً → بناء React → دفع إلى فرع `web` → GitHub Pages |
 
 كلا الوظيفتين تعملان **بالتوازي**. إيداعات النشر تستخدم `[skip ci]` لمنع التشغيل المتكرر.
@@ -379,6 +381,10 @@ cd web && npm run format
 | `v1.4.0` | جودة الكود ومعايير المساهمة | Prettier، .gitattributes، CONTRIBUTING.md |
 | `v1.5.0` | خط CI/CD | GitHub Actions: اختبارات الخادم + بناء ونشر الويب |
 | `v1.6.0` | اختبارات الصور | image.test.js — إجمالي 452 اختباراً، تحسينات التوثيق |
+| `v1.7.0` | Cloudinary وتحسينات Storage | CLOUDINARY_URL، حل race condition، اختبارات storage |
+| `v1.7.1` | إصلاح Cloudinary init | نقل cloudinary للـ dependencies، إصلاح race condition |
+| `v1.7.2` | إصلاح SPA routing و405 errors | _redirects، 404.html، receiver script، 405 tests |
+| **الحالي** | **تحسينات error handling وأدوات setup** | JWT validation، try-catch، check-default-picture script |
 
 ```bash
 git log --oneline --decorate
