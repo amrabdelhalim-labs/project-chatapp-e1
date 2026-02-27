@@ -7,8 +7,10 @@ This directory contains machine-facing documentation for AI assistants working o
 | File | Purpose |
 |------|---------|
 | [CONTRIBUTING.md](../../CONTRIBUTING.md) | Branch naming, commit format, tagging, formatting, pre-commit checklist |
-| [architecture.md](architecture.md) | System architecture (server + web), tech stack, data flow |
+| [architecture.md](architecture.md) | System architecture (server + web + mobile), tech stack, data flow |
 | [feature-guide.md](feature-guide.md) | Feature implementation patterns, Socket.IO events, storage, state management |
+| [features/delete-account.md](../features/delete-account.md) | Complete delete-account implementation with password verification + MongoDB transaction |
+| [features/avatar-fallback-resilience.md](../features/avatar-fallback-resilience.md) | 3-layer profile picture resilience system (URL normalization, safe base URL, SVG fallback) |
 
 ## Quick Context
 
@@ -29,7 +31,7 @@ This directory contains machine-facing documentation for AI assistants working o
 - **CI/CD:** GitHub Actions — server tests (MongoDB service) + web tests/build → deploy to orphan branches
 - **Formatting:** Prettier with LF normalization (`.prettierrc.json` in each package, `format.mjs` at root)
 - **Contributing:** `CONTRIBUTING.md` at project root — commit format, tagging, pre-commit checklist
-- **Tutorials:** 9 server tutorials + 5 web tutorials + 5 mobile tutorials (Arabic) in `docs/tutorials/`
+- **Tutorials:** 15 server tutorials + 7 web tutorials + 7 mobile tutorials (Arabic) in `docs/tutorials/`
 
 ## Test Commands
 

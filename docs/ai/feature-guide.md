@@ -265,15 +265,17 @@ Both web and mobile use Zustand with persistence:
 
 ## Testing
 
-### Server Tests (232 tests — custom runner, requires MongoDB)
+### Server Tests (339 tests — custom runner, requires MongoDB)
 
 ```bash
 cd server
-npm run test:all    # Run all 232 tests
-npm test            # comprehensive.test.js (80)
+npm run test:all    # Run all 339 tests (6 files sequentially)
+npm test            # comprehensive.test.js (84)
 npm run test:repos  # repositories.test.js (44)
-npm run test:integration  # integration.test.js (45)
-npm run test:e2e    # api.test.js (63) — starts server on port 5001
+npm run test:integration  # integration.test.js (46)
+npm run test:e2e    # api.test.js (69) — starts server on port 5001
+npm run test:image  # image.test.js (38) — profile picture upload/replace/delete
+npm run test:storage # storage.test.js (54 unit / 58 with live Cloudinary)
 ```
 
 - Tests validators, JWT, socket utility, both repositories, storage service, API endpoints
@@ -350,7 +352,7 @@ npx jest --watchAll=false --verbose  # verbose output
 Before every commit, verify:
 
 ```bash
-# 1. Server tests (270)
+# 1. Server tests (339)
 cd server && npm run test:all
 
 # 2. Web tests (99)
@@ -416,9 +418,9 @@ git tag -a v1.5.0 -m "v1.5.0 - Add Group Chat System
 - Socket.IO: group_message, group_typing events
 - Web: GroupList + GroupChat components
 - Mobile: GroupListScreen + GroupChatScreen
-- Server tests: 232 → 280 passing
-- Web tests: 99 → 115 passing
-- Mobile tests: 83 → 96 passing"
+- Server tests: 339 → <new total> passing
+- Web tests: 99 → <new total> passing
+- Mobile tests: 83 → <new total> passing"
 ```
 
 See `CONTRIBUTING.md` §3 (Commit Messages) and §4 (Tagging Strategy) for full rules.  
