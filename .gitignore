@@ -1,0 +1,11 @@
+src/
+public/
+node_modules/
+.git/
+package.json
+package-lock.json
+tsconfig.json
+vite.config.ts
+.eslintcache
+*.log
+.env*
