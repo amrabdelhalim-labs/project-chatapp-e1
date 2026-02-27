@@ -20,7 +20,7 @@
   },
   "keywords": [],
   "author": "Amr Abdelhalim",
-  "license": "ISC",
+  "license": "MIT",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cloudinary": "^2.9.0",
