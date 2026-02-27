@@ -43,7 +43,13 @@
 
 #### **بنية البيانات والأنماط**
 8. [نمط المستودع](./server/08-repository-pattern.md) - شرح Repository Pattern كامل
-9. [اختبارات الخادم](./server/09-testing.md) - 339 اختبار (6 ملفات)
+9. [المتحكمات](./server/09-controllers.md) - شرح `user.js` (7 دوال) و `message.js` (4 دوال)
+10. [النماذج](./server/10-models.md) - شرح User.js و Message.js (Mongoose Schemas)
+11. [المسارات](./server/11-routes.md) - شرح جميع مسارات API (خريطة كاملة)
+12. [الاتصال اللحظي — Socket.IO](./server/12-socket.md) - شرح نمط Singleton, الأحداث, الغرف
+13. [المدققات](./server/13-validators.md) - شرح نمط تجميع الأخطاء, error.statusCode
+14. [اختبارات الخادم](./server/14-testing.md) - 339 اختبار (6 ملفات)
+15. [استراتيجيات التخزين السحابي](./server/15-cloud-storage.md) - شرح `cloudinary.strategy.js`, `s3.strategy.js`, `storage.interface.js`, `scripts/check-default-picture.js`
 
 ---
 
@@ -59,6 +65,8 @@
 #### **المكونات والاختبارات**
 4. [مكونات المحادثة](./web/04-chat-components.md) - شرح Chat, ChatHeader, ChatFooter, ChatMessage
 5. [اختبارات الويب](./web/05-web-testing.md) - 99 اختبار (5 ملفات)
+6. [صفحات الدخول والتسجيل](./web/06-pages-auth.md) - شرح `login.jsx`, `register.jsx`, `utils/avatar.js` (Formik, Yup, getAvatarSrc)
+7. [الشريط الجانبي والملف الشخصي](./web/07-sidebar-profile.md) - شرح `Sidebar`, `MessageItem`, `Profile`, `EditableInput`, `Loading`, `DeleteAccountButton`
 
 ---
 
@@ -74,6 +82,8 @@
 #### **المكونات والاختبارات**
 4. [مكونات المحادثة والشاشات](./mobile/04-chat-components.md) - شرح الشاشات + المكونات
 5. [اختبارات الموبايل](./mobile/05-mobile-testing.md) - 83 اختبار (4 ملفات)
+6. [مكوّنات Chat التفصيلية](./mobile/06-chat-subcomponents.md) - شرح `TypingIndicator` (Animated), `MessageItem`, `MessageFooter` (Optimistic), `ChatItem`, `DeleteAccountButton`
+7. [أدوات الصور](./mobile/07-image-utils.md) - شرح `libs/avatar.js` (SVG fallback, localhost rewrite) و`libs/imageUtils.js` (normalizeImageUrl)
 
 ---
 
