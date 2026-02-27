@@ -24,6 +24,7 @@ jest.mock('axios', () => {
 });
 
 import axios from 'axios';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import {
   login,
   register,
@@ -416,7 +417,9 @@ describe('دوال API المحمية — Protected Endpoints', () => {
         response: { status: 401, data: errorResponse },
       });
 
-      await expect(deleteAccount({ password: 'wrong-password' })).rejects.toThrow();
+      await expect(deleteAccount({ password: 'wrong-password' })).rejects.toMatchObject({
+        response: { status: 401, data: errorResponse },
+      });
 
       expect(mockApi.delete).toHaveBeenCalledWith('/api/user/account', {
         data: { password: 'wrong-password' },
@@ -429,7 +432,9 @@ describe('دوال API المحمية — Protected Endpoints', () => {
         response: { status: 400, data: errorResponse },
       });
 
-      await expect(deleteAccount({ password: '' })).rejects.toThrow();
+      await expect(deleteAccount({ password: '' })).rejects.toMatchObject({
+        response: { status: 400, data: errorResponse },
+      });
     });
 
     it('deleteAccount → رفع الخطأ عند مستخدم غير موجود', async () => {
@@ -438,7 +443,9 @@ describe('دوال API المحمية — Protected Endpoints', () => {
         response: { status: 404, data: errorResponse },
       });
 
-      await expect(deleteAccount({ password: 'any-password' })).rejects.toThrow();
+      await expect(deleteAccount({ password: 'any-password' })).rejects.toMatchObject({
+        response: { status: 404, data: errorResponse },
+      });
     });
 
     it('deleteAccount → رفع الخطأ عند عدم المصادقة (401)', async () => {
@@ -447,7 +454,9 @@ describe('دوال API المحمية — Protected Endpoints', () => {
         response: { status: 401, data: errorResponse },
       });
 
-      await expect(deleteAccount({ password: 'any-password' })).rejects.toThrow();
+      await expect(deleteAccount({ password: 'any-password' })).rejects.toMatchObject({
+        response: { status: 401, data: errorResponse },
+      });
     });
 
     it('deleteAccount → رفع الخطأ عند خطأ السيرفر (500)', async () => {
@@ -456,7 +465,9 @@ describe('دوال API المحمية — Protected Endpoints', () => {
         response: { status: 500, data: errorResponse },
       });
 
-      await expect(deleteAccount({ password: 'any-password' })).rejects.toThrow();
+      await expect(deleteAccount({ password: 'any-password' })).rejects.toMatchObject({
+        response: { status: 500, data: errorResponse },
+      });
     });
 
     it('deleteAccount → التعامل مع الخطأ عند عدم توفر رسالة خطأ', async () => {
@@ -464,7 +475,9 @@ describe('دوال API المحمية — Protected Endpoints', () => {
         response: { status: 400, data: {} },
       });
 
-      await expect(deleteAccount({ password: 'any-password' })).rejects.toThrow();
+      await expect(deleteAccount({ password: 'any-password' })).rejects.toMatchObject({
+        response: { status: 400, data: {} },
+      });
     });
   });
 });
@@ -491,41 +504,39 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
       require('../components/DeleteAccountButton').default;
     render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
 
-    const deleteButton = screen.getByRole('button', { name: /حذف الحساب/i });
+    const deleteButton = screen.getByRole('button', { name: /Delete Account/i });
     expect(deleteButton).toBeInTheDocument();
     expect(deleteButton).toHaveClass('bg-red-600');
   });
 
   it('يجب فتح Modal عند الضغط على الزر', async () => {
-    const user = userEvent.setup();
     const DeleteAccountButton =
       require('../components/DeleteAccountButton').default;
-    render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
+    const { container } = render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
 
-    const deleteButton = screen.getByRole('button', { name: /حذف الحساب/i });
-    await user.click(deleteButton);
+    const deleteButton = screen.getByRole('button', { name: /Delete Account/i });
+    await fireEvent.click(deleteButton);
 
     expect(screen.getByText(/تأكيد حذف الحساب/i)).toBeInTheDocument();
-    expect(screen.getByText(/هذا الإجراء لا يمكن التراجع عنه/i)).toBeInTheDocument();
+    // Text is split across elements due to span with formatting
+    expect(container.textContent).toMatch(/هذا الإجراء.*لا يمكن التراجع عنه/i);
   });
 
   it('يجب إغلاق Modal عند الضغط على "إلغاء"', async () => {
-    const user = userEvent.setup();
     const DeleteAccountButton =
       require('../components/DeleteAccountButton').default;
     render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
 
-    const deleteButton = screen.getByRole('button', { name: /حذف الحساب/i });
-    await user.click(deleteButton);
+    const deleteButton = screen.getByRole('button', { name: /Delete Account/i });
+    await fireEvent.click(deleteButton);
 
     const cancelButton = screen.getByRole('button', { name: /إلغاء/i });
-    await user.click(cancelButton);
+    await fireEvent.click(cancelButton);
 
     expect(screen.queryByText(/تأكيد حذف الحساب/i)).not.toBeInTheDocument();
   });
 
   it('يجب عرض خطأ عند ترك حقل كلمة المرور فارغاً', async () => {
-    const user = userEvent.setup();
     const DeleteAccountButton =
       require('../components/DeleteAccountButton').default;
     jest.spyOn(require('../libs/requests'), 'deleteAccount');
@@ -533,12 +544,12 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
     render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
 
     // Open modal
-    const deleteButton = screen.getByRole('button', { name: /حذف الحساب/i });
-    await user.click(deleteButton);
+    const deleteButton = screen.getByRole('button', { name: /Delete Account/i });
+    await fireEvent.click(deleteButton);
 
     // Click delete without entering password
     const submitButton = screen.getByRole('button', { name: /حذف الحساب نهائياً/i });
-    await user.click(submitButton);
+    await fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(screen.getByText(/يرجى إدخال كلمة المرور/i)).toBeInTheDocument();
@@ -546,7 +557,6 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
   });
 
   it('يجب استدعاء API عند إدخال كلمة مرور صحيحة', async () => {
-    const user = userEvent.setup();
     const mockDeleteAccount = jest.spyOn(
       require('../libs/requests'),
       'deleteAccount'
@@ -558,16 +568,16 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
     render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
 
     // Open modal
-    const deleteButton = screen.getByRole('button', { name: /حذف الحساب/i });
-    await user.click(deleteButton);
+    const deleteButton = screen.getByRole('button', { name: /Delete Account/i });
+    await fireEvent.click(deleteButton);
 
     // Enter password
     const passwordInput = screen.getByPlaceholderText(/كلمة المرور/i);
-    await user.type(passwordInput, 'correct-password');
+    fireEvent.change(passwordInput, { target: { value: 'correct-password' } });
 
     // Submit
     const submitButton = screen.getByRole('button', { name: /حذف الحساب نهائياً/i });
-    await user.click(submitButton);
+    await fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(mockDeleteAccount).toHaveBeenCalledWith({ password: 'correct-password' });
@@ -577,7 +587,6 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
   });
 
   it('يجب عرض خطأ عند رفع كلمة المرور من قبل السيرفر', async () => {
-    const user = userEvent.setup();
     const mockDeleteAccount = jest.spyOn(
       require('../libs/requests'),
       'deleteAccount'
@@ -592,16 +601,16 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
     render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
 
     // Open modal
-    const deleteButton = screen.getByRole('button', { name: /حذف الحساب/i });
-    await user.click(deleteButton);
+    const deleteButton = screen.getByRole('button', { name: /Delete Account/i });
+    await fireEvent.click(deleteButton);
 
     // Enter wrong password
     const passwordInput = screen.getByPlaceholderText(/كلمة المرور/i);
-    await user.type(passwordInput, 'wrong-password');
+    fireEvent.change(passwordInput, { target: { value: 'wrong-password' } });
 
     // Submit
     const submitButton = screen.getByRole('button', { name: /حذف الحساب نهائياً/i });
-    await user.click(submitButton);
+    await fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(screen.getByText(errorMessage)).toBeInTheDocument();
@@ -611,7 +620,6 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
   });
 
   it('يجب استدعاء onDeleteSuccess بعد الحذف الناجح', async () => {
-    const user = userEvent.setup();
     const mockDeleteSuccess = jest.fn();
     const mockDeleteAccount = jest.spyOn(
       require('../libs/requests'),
@@ -624,16 +632,16 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
     render(<DeleteAccountButton onDeleteSuccess={mockDeleteSuccess} />);
 
     // Open modal
-    const deleteButton = screen.getByRole('button', { name: /حذف الحساب/i });
-    await user.click(deleteButton);
+    const deleteButton = screen.getByRole('button', { name: /Delete Account/i });
+    await fireEvent.click(deleteButton);
 
     // Enter password
     const passwordInput = screen.getByPlaceholderText(/كلمة المرور/i);
-    await user.type(passwordInput, 'correct-password');
+    fireEvent.change(passwordInput, { target: { value: 'correct-password' } });
 
     // Submit
     const submitButton = screen.getByRole('button', { name: /حذف الحساب نهائياً/i });
-    await user.click(submitButton);
+    await fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(mockDeleteSuccess).toHaveBeenCalled();
@@ -643,7 +651,6 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
   });
 
   it('يجب إعادة تعيين isDeleting بعد الحذف الناجح', async () => {
-    const user = userEvent.setup();
     const mockDeleteAccount = jest.spyOn(
       require('../libs/requests'),
       'deleteAccount'
@@ -655,19 +662,19 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
     render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
 
     // Open modal
-    const deleteButton = screen.getByRole('button', { name: /حذف الحساب/i });
-    await user.click(deleteButton);
+    const deleteButton = screen.getByRole('button', { name: /Delete Account/i });
+    await fireEvent.click(deleteButton);
 
     // Enter password
     const passwordInput = screen.getByPlaceholderText(/كلمة المرور/i);
-    await user.type(passwordInput, 'correct-password');
+    fireEvent.change(passwordInput, { target: { value: 'correct-password' } });
 
     // Submit
     const submitButton = screen.getByRole('button', { name: /حذف الحساب نهائياً/i });
 
     expect(submitButton).not.toBeDisabled();
 
-    await user.click(submitButton);
+    await fireEvent.click(submitButton);
 
     // Modal should close
     await waitFor(() => {
@@ -678,7 +685,6 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
   });
 
   it('يجب إعادة تعيين isDeleting عند فشل الحذف', async () => {
-    const user = userEvent.setup();
     const mockDeleteAccount = jest.spyOn(
       require('../libs/requests'),
       'deleteAccount'
@@ -692,16 +698,16 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
     render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
 
     // Open modal
-    const deleteButton = screen.getByRole('button', { name: /حذف الحساب/i });
-    await user.click(deleteButton);
+    const deleteButton = screen.getByRole('button', { name: /Delete Account/i });
+    await fireEvent.click(deleteButton);
 
     // Enter wrong password
     const passwordInput = screen.getByPlaceholderText(/كلمة المرور/i);
-    await user.type(passwordInput, 'wrong-password');
+    fireEvent.change(passwordInput, { target: { value: 'wrong-password' } });
 
     // Submit
     const submitButton = screen.getByRole('button', { name: /حذف الحساب نهائياً/i });
-    await user.click(submitButton);
+    await fireEvent.click(submitButton);
 
     await waitFor(() => {
       expect(screen.getByText(/كلمة المرور غير صحيحة/i)).toBeInTheDocument();
@@ -714,27 +720,26 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
   });
 
   it('يجب مسح حقل كلمة المرور عند فتح Modal جديد', async () => {
-    const user = userEvent.setup();
     const DeleteAccountButton =
       require('../components/DeleteAccountButton').default;
     render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
 
     // First open
-    const deleteButton = screen.getByRole('button', { name: /حذف الحساب/i });
-    await user.click(deleteButton);
+    const deleteButton = screen.getByRole('button', { name: /Delete Account/i });
+    await fireEvent.click(deleteButton);
 
     // Type something
     const passwordInput = screen.getByPlaceholderText(/كلمة المرور/i);
-    await user.type(passwordInput, 'test-password');
+    fireEvent.change(passwordInput, { target: { value: 'test-password' } });
 
     expect(passwordInput).toHaveValue('test-password');
 
     // Close modal
     const cancelButton = screen.getByRole('button', { name: /إلغاء/i });
-    await user.click(cancelButton);
+    await fireEvent.click(cancelButton);
 
     // Reopen
-    await user.click(deleteButton);
+    await fireEvent.click(deleteButton);
 
     // Password should be cleared
     const newPasswordInput = screen.getByPlaceholderText(/كلمة المرور/i);

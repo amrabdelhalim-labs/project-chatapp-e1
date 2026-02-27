@@ -424,7 +424,9 @@ describe('سيناريوهات تكاملية — Interceptor + API', () => {
         response: { status: 401, data: errorResponse },
       });
 
-    await expect(deleteAccount({ password: 'wrong-password' })).rejects.toThrow();
+    await expect(deleteAccount({ password: 'wrong-password' })).rejects.toMatchObject({
+      response: { status: 401, data: errorResponse },
+    });
 
     expect(mockApi.delete).toHaveBeenCalledWith('/api/user/account', {
       data: { password: 'wrong-password' },
@@ -437,7 +439,9 @@ describe('سيناريوهات تكاملية — Interceptor + API', () => {
       response: { status: 400, data: errorResponse },
     });
 
-    await expect(deleteAccount({ password: '' })).rejects.toThrow();
+    await expect(deleteAccount({ password: '' })).rejects.toMatchObject({
+      response: { status: 400, data: errorResponse },
+    });
   });
 
   it('deleteAccount مع مستخدم غير موجود — يجب رفع خطأ 404', async () => {
@@ -446,7 +450,9 @@ describe('سيناريوهات تكاملية — Interceptor + API', () => {
       response: { status: 404, data: errorResponse },
     });
 
-    await expect(deleteAccount({ password: 'any-password' })).rejects.toThrow();
+    await expect(deleteAccount({ password: 'any-password' })).rejects.toMatchObject({
+      response: { status: 404, data: errorResponse },
+    });
   });
 
   it('deleteAccount بدون مصادقة — يجب رفع خطأ 401', async () => {
@@ -455,7 +461,9 @@ describe('سيناريوهات تكاملية — Interceptor + API', () => {
       response: { status: 401, data: errorResponse },
     });
 
-    await expect(deleteAccount({ password: 'any-password' })).rejects.toThrow();
+    await expect(deleteAccount({ password: 'any-password' })).rejects.toMatchObject({
+      response: { status: 401, data: errorResponse },
+    });
   });
 
   it('deleteAccount مع خطأ السيرفر — يجب رفع خطأ 500', async () => {
@@ -464,6 +472,8 @@ describe('سيناريوهات تكاملية — Interceptor + API', () => {
       response: { status: 500, data: errorResponse },
     });
 
-    await expect(deleteAccount({ password: 'any-password' })).rejects.toThrow();
+    await expect(deleteAccount({ password: 'any-password' })).rejects.toMatchObject({
+      response: { status: 500, data: errorResponse },
+    });
   });
 });
