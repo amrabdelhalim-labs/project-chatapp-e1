@@ -125,7 +125,7 @@ export default function DeleteAccountButton({ onDeleteSuccess, className = '' })
             </div>
 
             {/* Action Buttons */}
-            <div className="flex space-x-3 space-x-reverse">
+            <div className="flex gap-3 flex-row-reverse">
               <button
                 onClick={closeModal}
                 disabled={isDeleting}
