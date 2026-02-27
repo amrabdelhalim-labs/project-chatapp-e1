@@ -1,12 +1,13 @@
 import { Button, FormControl, Input, Modal } from 'native-base';
 import { useFormik } from 'formik';
 import * as Yup from 'yup';
+import DeleteAccountButton from './DeleteAccountButton';
 import { updateUser } from '../libs/requests';
 import { useStore } from '../libs/globalState';
 
 export default function EditUserModal({ modalVisible, closeModal }) {
   // Get current user data from the global store
-  const { user, setUser } = useStore();
+  const { user, setUser, logout } = useStore();
 
   // Set up formik for form state management and validation
   const formik = useFormik({
@@ -33,6 +34,12 @@ export default function EditUserModal({ modalVisible, closeModal }) {
   const handleClose = () => {
     formik.resetForm();
     closeModal();
+  };
+
+  // Handle account deletion success
+  const handleDeleteSuccess = async () => {
+    closeModal();
+    await logout();
   };
 
   return (
@@ -67,25 +74,33 @@ export default function EditUserModal({ modalVisible, closeModal }) {
           </FormControl>
         </Modal.Body>
         <Modal.Footer>
-          <Button.Group space={2}>
-            <Button
-              onPress={handleClose}
-              bg="#0e806a"
-              _hover={{
-                bg: 'green.700',
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onPress={formik.submitForm}
-              bg="#0e806a"
-              _hover={{
-                bg: 'green.700',
-              }}
-            >
-              Save
-            </Button>
+          <Button.Group space={2} direction="column" width="100%">
+            {/* Delete Account Button */}
+            <DeleteAccountButton onDeleteSuccess={handleDeleteSuccess} buttonProps={{ mb: 3 }} />
+
+            {/* Save/Cancel Buttons */}
+            <Button.Group space={2} width="100%">
+              <Button
+                flex={1}
+                onPress={handleClose}
+                bg="#0e806a"
+                _hover={{
+                  bg: 'green.700',
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                flex={1}
+                onPress={formik.submitForm}
+                bg="#0e806a"
+                _hover={{
+                  bg: 'green.700',
+                }}
+              >
+                Save
+              </Button>
+            </Button.Group>
           </Button.Group>
         </Modal.Footer>
       </Modal.Content>

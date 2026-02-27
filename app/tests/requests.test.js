@@ -403,4 +403,67 @@ describe('سيناريوهات تكاملية — Interceptor + API', () => {
     });
     expect(result.message).toContain('حذف');
   });
+
+  it('deleteAccount مع كلمة مرور صحيحة — يجب الحذف بنجاح', async () => {
+    const response = { message: 'تم حذف الحساب بنجاح', deletedUserId: 'u1' };
+    mockApi.delete = jest.fn().mockResolvedValueOnce({ data: response });
+
+    const result = await deleteAccount({ password: 'correct-password' });
+
+    expect(mockApi.delete).toHaveBeenCalledWith('/api/user/account', {
+      data: { password: 'correct-password' },
+    });
+    expect(result.deletedUserId).toBe('u1');
+  });
+
+  it('deleteAccount مع كلمة مرور خاطئة — يجب رفع خطأ', async () => {
+    const errorResponse = { message: 'كلمة المرور غير صحيحة' };
+    mockApi.delete = jest
+      .fn()
+      .mockRejectedValueOnce({
+        response: { status: 401, data: errorResponse },
+      });
+
+    await expect(deleteAccount({ password: 'wrong-password' })).rejects.toThrow();
+
+    expect(mockApi.delete).toHaveBeenCalledWith('/api/user/account', {
+      data: { password: 'wrong-password' },
+    });
+  });
+
+  it('deleteAccount بدون كلمة مرور — يجب رفع خطأ', async () => {
+    const errorResponse = { message: 'كلمة المرور مطلوبة' };
+    mockApi.delete = jest.fn().mockRejectedValueOnce({
+      response: { status: 400, data: errorResponse },
+    });
+
+    await expect(deleteAccount({ password: '' })).rejects.toThrow();
+  });
+
+  it('deleteAccount مع مستخدم غير موجود — يجب رفع خطأ 404', async () => {
+    const errorResponse = { message: 'المستخدم غير موجود' };
+    mockApi.delete = jest.fn().mockRejectedValueOnce({
+      response: { status: 404, data: errorResponse },
+    });
+
+    await expect(deleteAccount({ password: 'any-password' })).rejects.toThrow();
+  });
+
+  it('deleteAccount بدون مصادقة — يجب رفع خطأ 401', async () => {
+    const errorResponse = { message: 'يجب تسجيل الدخول أولاً' };
+    mockApi.delete = jest.fn().mockRejectedValueOnce({
+      response: { status: 401, data: errorResponse },
+    });
+
+    await expect(deleteAccount({ password: 'any-password' })).rejects.toThrow();
+  });
+
+  it('deleteAccount مع خطأ السيرفر — يجب رفع خطأ 500', async () => {
+    const errorResponse = { message: 'خطأ داخلي في السيرفر' };
+    mockApi.delete = jest.fn().mockRejectedValueOnce({
+      response: { status: 500, data: errorResponse },
+    });
+
+    await expect(deleteAccount({ password: 'any-password' })).rejects.toThrow();
+  });
 });

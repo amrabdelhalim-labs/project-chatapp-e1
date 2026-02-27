@@ -103,3 +103,24 @@ export function validateUpdateUserInput(input) {
     throw error;
   }
 }
+
+/**
+ * Validate delete account input.
+ * @param {{ password?: string }} input
+ * @throws {Error}
+ */
+export function validateDeleteAccountInput(input) {
+  const errors = [];
+
+  if (!input.password) {
+    errors.push('كلمة المرور مطلوبة لتأكيد حذف الحساب');
+  } else if (input.password.length < 6) {
+    errors.push('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+  }
+
+  if (errors.length > 0) {
+    const error = new Error(errors.join('، '));
+    error.statusCode = 400;
+    throw error;
+  }
+}

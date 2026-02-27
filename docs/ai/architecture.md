@@ -258,7 +258,7 @@ messageSchema.index({ createdAt: -1 });
 ```bash
 cd server
 npm run test:all         # all 320 tests (6 files sequentially)
-npm test                 # comprehensive.test.js (80 tests)
+npm test                 # comprehensive.test.js (84 tests)
 npm run test:repos       # repositories.test.js (44 tests)
 npm run test:integration # integration.test.js (45 tests)
 npm run test:e2e         # api.test.js (63 tests — port 5001)

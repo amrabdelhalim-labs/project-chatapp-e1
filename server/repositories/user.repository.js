@@ -38,6 +38,16 @@ class UserRepository extends BaseRepository {
   }
 
   /**
+   * Find a user by ID, including the password field.
+   * Use only when password verification is needed (e.g., account deletion, password change).
+   * @param {string} id
+   * @returns {Promise<Object|null>}
+   */
+  async findByIdWithPassword(id) {
+    return this.model.findById(id);
+  }
+
+  /**
    * Get all users except the given user (for contact/friend list).
    * Excludes password field.
    * @param {string} excludeUserId

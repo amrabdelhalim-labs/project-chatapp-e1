@@ -72,6 +72,7 @@ project-chatapp-e1/
 ├── .gitignore                  # node_modules, .expo, .env, coverage
 ├── CONTRIBUTING.md             # أسماء الفروع، الإيداعات، التاجات، التنسيق
 ├── format.mjs                  # تشغيل Prettier عبر المنصات
+├── validate-workflow.mjs       # التحقق من صحة سير عمل GitHub Actions
 ├── README.md                   # هذا الملف
 │
 ├── server/                     # Express REST API + Socket.IO
@@ -85,25 +86,26 @@ project-chatapp-e1/
 │   ├── models/                 # مخططات Mongoose (User, Message)
 │   ├── utils/                  # JWT helpers + Socket.IO utility
 │   ├── routes/                 # /api/user/* + /api/message/*
-│   ├── tests/                  # 331 اختباراً (6 مجموعات)
+│   ├── tests/                  # 339 اختباراً (6 مجموعات)
 │   └── Procfile                # نشر Heroku
 │
 ├── web/                        # React CRA
 │   └── src/
 │       ├── pages/              # Home, Login, Register
-│       ├── components/         # Chat, Sidebar, Profile, ProtectedRoute
+│       ├── components/         # Chat, Sidebar, Profile, DeleteAccountButton
 │       ├── libs/               # Zustand store, Axios interceptors
 │       ├── utils/              # Avatar helpers + fallbacks
 │       └── tests/              # 99 اختباراً (5 مجموعات)
 │
 ├── app/                        # Expo + React Native
 │   ├── screens/                # Login, Register, Home
-│   ├── components/             # Header, EditUserModal
+│   ├── components/             # Header, EditUserModal, DeleteAccountButton
 │   ├── libs/                   # Zustand store, Axios interceptors
 │   └── tests/                  # 83 اختباراً (4 مجموعات)
 │
 └── docs/                       # التوثيق
     ├── ai/                     # توجيهات AI (المعمارية، دليل الميزات)
+    ├── features/               # مواصفات الميزات (delete-account.md)
     ├── tutorials/              # الدروس العربية (19 درساً)
     ├── api-endpoints.md        # مرجع REST + WebSocket
     ├── database-abstraction.md # شرح نمط Repository

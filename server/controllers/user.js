@@ -8,6 +8,7 @@ import {
   validateRegisterInput,
   validateLoginInput,
   validateUpdateUserInput,
+  validateDeleteAccountInput,
 } from '../validators/user.validator.js';
 
 const repos = getRepositoryManager();
@@ -144,4 +145,52 @@ export const updateProfilePicture = async (req, res) => {
   }
 
   res.status(StatusCodes.OK).json(user);
+};
+
+/**
+ * Delete user account (requires password confirmation).
+ */
+export const deleteAccount = async (req, res) => {
+  try {
+    const { password } = req.body;
+
+    // Validate input
+    validateDeleteAccountInput({ password });
+
+    // Get user with password field (not the safe version)
+    const user = await repos.user.findByIdWithPassword(req.userId);
+
+    if (!user) {
+      return res.status(StatusCodes.NOT_FOUND).json({ message: 'المستخدم غير موجود' });
+    }
+
+    // Verify password
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(StatusCodes.UNAUTHORIZED).json({ message: 'كلمة المرور غير صحيحة' });
+    }
+
+    // Store profile picture for deletion after account removal
+    const { profilePicture } = user;
+
+    // Delete user and all their messages (cascade delete)
+    await repos.user.deleteUserWithMessages(req.userId, repos.message);
+
+    // Delete profile picture from storage if exists
+    if (profilePicture) {
+      const storage = getStorageService();
+      await storage.deleteFile(profilePicture);
+    }
+
+    // Emit user deletion event
+    getIO().emit('user_deleted', { userId: req.userId });
+
+    res.status(StatusCodes.OK).json({ message: 'تم حذف الحساب بنجاح' });
+  } catch (error) {
+    if (error.statusCode) {
+      return res.status(error.statusCode).json({ message: error.message });
+    }
+    console.error('Error deleting account:', error);
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ message: 'حدث خطأ أثناء حذف الحساب' });
+  }
 };

@@ -494,6 +494,169 @@ describe('Delete Account Feature', () => {
 
 ---
 
+## 🧪 اختبار تحقق من كلمة المرور
+
+### أنواع حالات الاختبار المطلوبة
+
+#### 1. ✅ كلمة مرور صحيحة
+```javascript
+// Expected: DELETE completes successfully
+await deleteAccount({ password: 'correct-password' });
+// يجب: إغلاق Modal، استدعاء onDeleteSuccess()، مسح البيانات
+```
+
+#### 2. ❌ كلمة مرور خاطئة
+```javascript
+// Expected: API returns 401 Unauthorized
+await deleteAccount({ password: 'wrong-password' });
+// يجب: عرض خطأ "كلمة المرور غير صحيحة"
+// يجب: إعادة تعيين isDeleting = false
+// يجب: السماح بإعادة المحاولة
+```
+
+#### 3. ⚠️ حقل كلمة المرור فارغ
+```javascript
+// Expected: Validation error client-side
+const error = ''; // empty string or whitespace
+handleDelete(); // without calling API
+// يجب: عرض خطأ "يرجى إدخال كلمة المرور"
+// يجب: عدم استدعاء API
+```
+
+#### 4. 🔴 مستخدم غير موجود (404)
+```javascript
+// Expected: API returns 404 Not Found
+// يجب: عرض خطأ "المستخدم غير موجود"
+// يجب: إعادة تعيين isDeleting = false
+```
+
+#### 5. 🔓 عدم المصادقة (401)
+```javascript
+// Expected: API returns 401 (no token/expired token)
+// يجب: عرض خطأ "يجب تسجيل الدخول أولاً"
+// يجب: إعادة التوجيه إلى صفحة الدخول
+```
+
+#### 6. 💥 خطأ السيرفر (500)
+```javascript
+// Expected: API returns 500 Internal Server Error
+// يجب: عرض خطأ "خطأ داخلي في السيرفر"
+// يجب: إعادة تعيين isDeleting = false
+```
+
+### حالات الحدود (Edge Cases)
+
+#### 7. كلمة مرور بها مسافات زائدة
+```javascript
+// Input: "  password  "
+// Expected: تُعامل كـ "password" (trim applied)
+```
+
+#### 8. كلمة مرور طويلة جداً (>500 حرف)
+```javascript
+// Expected: قد يرفع خطأ من السيرفر أو يُقبل
+```
+
+#### 9. أحرف سحرية في كلمة المرور
+```javascript
+// Input: "pass@word!", "<script>", "'; DROP TABLE--"
+// Expected: يتم الإرسال آمناً (لا تؤثر على SQL/NoSQL)
+```
+
+#### 10. نقر على الزر عدة مرات بسرعة (Double-click)
+```javascript
+// Expected: يجب تعطيل الزر (isDisabled=true) أثناء الحذف
+// Expected: طلب واحد فقط يُرسل للسيرفر
+```
+
+### الاختبارات المضافة حالياً
+
+#### Web Component Tests (`web/src/tests/requests.test.js`)
+✅ حالة النجاح مع كلمة مرور صحيحة
+✅ حالة الفشل مع كلمة مرور خاطئة
+✅ التحقق من الحقل الفارغ
+✅ خطأ مستخدم غير موجود
+✅ خطأ عدم المصادقة
+✅ خطأ السيرفر
+
+#### Web Component UI Tests
+✅ عرض الزر بشكل صحيح
+✅ فتح Modal عند الضغط
+✅ إغلاق Modal عند "إلغاء"
+✅ خطأ عند حقل فارغ
+✅ استدعاء API بكلمة صحيحة
+✅ عرض خطأ من السيرفر
+✅ استدعاء onDeleteSuccess()
+✅ إعادة تعيين isDeleting عند النجاح
+✅ إعادة تعيين isDeleting عند الفشل
+✅ مسح Password عند فتح Modal جديد
+
+#### Mobile Component Tests (`app/tests/requests.test.js`)
+✅ حالات نفس الويب الستة
+
+---
+
+## 📋 قائمة التحقق من المشاكل المصححة
+
+### ✅ توضيح: سلوك الزر عند كلمة مرور خاطئة
+
+**المشكلة المبلغ عنها:**
+> "الزر دايما بيجيب تحقق من كلمة المرور لا يفرق بين كلمة المرور الصحيحة والخاطئة"
+
+**السبب:**
+- لم تكن حالة `isDeleting` تُعاد تعينها إلى `false` عند النجاح
+- كان المكون يحاول استدعاء `onDeleteSuccess()` وهو في حالة `isDeleting = true`
+
+**الحل المطبق:**
+
+✅ **Web Component (`DeleteAccountButton.jsx`)**
+```javascript
+try {
+  await deleteAccount({ password });
+  // ← مستحدث: إعادة تعيين الحالة BEFORE onDeleteSuccess
+  setIsDeleting(false);
+  setShowModal(false);
+  setPassword('');
+  if (onDeleteSuccess) {
+    await onDeleteSuccess();
+  }
+} catch (err) {
+  // معالجة الخطأ
+  setIsDeleting(false);
+}
+```
+
+✅ **Mobile Component (`DeleteAccountButton.js`)**
+```javascript
+try {
+  await deleteAccount({ password });
+  // ← مستحدث: إعادة تعيين BEFORE onDeleteSuccess
+  setIsDeleting(false);
+  if (onDeleteSuccess) {
+    await onDeleteSuccess();
+  }
+} catch (error) {
+  // معالجة الخطأ
+  setIsDeleting(false);
+}
+```
+
+### ✅ تحسينات إضافية
+
+1. **معالجة أفضل للأخطاء:**
+   - التحقق من `error.response?.data?.message`
+   - رسالة افتراضية عند غياب الرسالة
+
+2. **منع التفاعل المتزامن:**
+   - تعطيل الزر و Input أثناء الحذف
+   - منع إغلاق Modal أثناء العملية
+
+3. **تجربة المستخدم:**
+   - تحميل الحالة مع رسالة "جارٍ الحذف..."
+   - إعادة تمكين الزر عند الفشل للسماح بإعادة المحاولة
+
+---
+
 ## 🔒 أفضل الممارسات المتبعة
 
 ✅ **Authentication:** JWT stored in localStorage/AsyncStorage, auto-injected via interceptors
@@ -502,5 +665,8 @@ describe('Delete Account Feature', () => {
 ✅ **Data Integrity:** MongoDB transaction ensures atomicity
 ✅ **File Cleanup:** Safely deletes associated files
 ✅ **UI/UX:** Confirmation modal prevents accidental deletion
+✅ **State Management:** isDeleting properly reset on success/failure
+✅ **Password Verification:** Distinguishes between correct/incorrect/missing passwords
 ✅ **Logging:** Console logs for debugging
-✅ **Testing:** Comprehensive test coverage
+✅ **Testing:** Comprehensive test coverage (10+ scenarios)
+

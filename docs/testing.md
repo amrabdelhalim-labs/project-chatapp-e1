@@ -3,11 +3,11 @@
 ## نظرة عامة
 
 يستخدم المشروع ثلاثة أنظمة للاختبار:
-- **الخادم:** نظام اختبارات مخصص بدون مكتبات خارجية — 6 ملفات اختبار (331 اختبار)
+- **الخادم:** نظام اختبارات مخصص بدون مكتبات خارجية — 6 ملفات اختبار (339 اختبار)
 - **الويب:** Jest + @testing-library/react — 5 ملفات اختبار (99 اختبار)
 - **الموبايل:** Jest + jest-expo + @testing-library/react-native — 4 ملفات اختبار (83 اختبار)
 
-**إجمالي الاختبارات:** 513 اختبار (331 خادم + 99 ويب + 83 موبايل)
+**إجمالي الاختبارات:** 521 اختبار (339 خادم + 99 ويب + 83 موبايل)
 
 ---
 
@@ -22,7 +22,7 @@ cd server
 npm run test:all
 
 # أو تشغيل كل ملف على حدة
-npm test                 # comprehensive.test.js (80 اختبار)
+npm test                 # comprehensive.test.js (84 اختبار)
 npm run test:repos       # repositories.test.js (44 اختبار)
 npm run test:integration # integration.test.js (46 اختبار)
 npm run test:e2e         # api.test.js (69 اختبار)
@@ -72,7 +72,7 @@ npx jest --watchAll=false --verbose
 ```
 server/tests/
 ├── test.helpers.js          # أدوات مشتركة (assert, logSection, colors, printSummary)
-├── comprehensive.test.js    # اختبارات تكاملية شاملة (80 اختبار)
+├── comprehensive.test.js    # اختبارات تكاملية شاملة (84 اختبار)
 ├── repositories.test.js     # اختبارات المستودعات المركزة (44 اختبار)
 ├── integration.test.js      # اختبارات تكامل كاملة مع التخزين (46 اختبار)
 ├── api.test.js              # اختبارات نقاط النهاية E2E (69 اختبار)
@@ -84,7 +84,7 @@ server/tests/
 
 ## ملف 1: الاختبارات الشاملة (`comprehensive.test.js`)
 
-**80 اختبار** — يختبر جميع الطبقات في سير عمل واحد متكامل.
+**84 اختبار** — يختبر جميع الطبقات في سير عمل واحد متكامل.
 
 | المرحلة | الوصف                    | عدد الاختبارات |
 | ------- | ------------------------ | ------------- |

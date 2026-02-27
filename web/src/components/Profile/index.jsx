@@ -2,12 +2,13 @@ import { useState } from 'react';
 import { FaCamera } from 'react-icons/fa';
 import { IoMdReturnLeft } from 'react-icons/io';
 import EditableInput from './EditableInput';
+import DeleteAccountButton from '../DeleteAccountButton';
 import { useStore } from '../../libs/globalState';
 import { updateProfilePicture } from '../../libs/requests';
 import { getAvatarSrc, handleAvatarError } from '../../utils/avatar';
 
 export default function Profile({ onClose }) {
-  const { user } = useStore();
+  const { user, logout } = useStore();
   const [firstName, setFirstName] = useState(user.firstName);
   const [lastName, setLastName] = useState(user.lastName);
   const [status, setStatus] = useState(user.status);
@@ -27,6 +28,11 @@ export default function Profile({ onClose }) {
 
       await updateProfilePicture(formData); // إرسال الطلب إلى الخادم
     }
+  };
+
+  const handleDeleteSuccess = async () => {
+    // Called after successful account deletion
+    await logout();
   };
 
   return (
@@ -85,6 +91,11 @@ export default function Profile({ onClose }) {
             placeholder="Set a status..."
           />
         </form>
+
+        {/* Delete Account Section */}
+        <div className="mt-6 pt-6 border-t border-gray-700">
+          <DeleteAccountButton onDeleteSuccess={handleDeleteSuccess} className="w-full" />
+        </div>
       </div>
     </div>
   );

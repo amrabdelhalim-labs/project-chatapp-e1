@@ -8,6 +8,7 @@ import {
   getUsers,
   updateUser,
   updateProfilePicture,
+  deleteAccount,
 } from '../controllers/user.js';
 
 const userRouter = express.Router();
@@ -18,5 +19,6 @@ userRouter.get('/profile', isAuthenticated, getProfile);
 userRouter.get('/friends', isAuthenticated, getUsers);
 userRouter.put('/profile', isAuthenticated, updateUser);
 userRouter.put('/profile/picture', [isAuthenticated, upload.single('file')], updateProfilePicture);
+userRouter.delete('/account', isAuthenticated, deleteAccount);
 
 export default userRouter;

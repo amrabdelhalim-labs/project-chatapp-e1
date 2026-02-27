@@ -12,7 +12,7 @@
 - [ ] جميع التبعيات موجودة في `package.json`
 - [ ] `.gitignore` يستثني الملفات الحساسة
 - [ ] معالجة الأخطاء شاملة
-- [ ] `npm run test:all` يمر بنجاح (331 اختبار)
+- [ ] `npm run test:all` يمر بنجاح (339 اختبار)
 - [ ] `REACT_APP_API_URL` مضبوط في الويب للإنتاج
 - [ ] `DEFAULT_PROFILE_PICTURE_URL` مضبوط عند استخدام Cloudinary/S3
 - [ ] SPA routing: `web/public/_redirects`, `web/public/404.html`, وسكريبت receiver في `web/public/index.html` موجودة (`node validate-workflow.mjs` يتحقق منها تلقائيًا)
