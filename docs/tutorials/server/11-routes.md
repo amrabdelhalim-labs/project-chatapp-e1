@@ -8,14 +8,14 @@
 
 عندما يصل طلب HTTP إلى الخادم:
 
-```
-طلب: GET /api/user/profile
-         ↓
+```text
 index.js يرى: app.use('/api/user', userRouter)
-    → يُحيل الطلب لـ userRouter
+         ↓
+طلب: GET /api/user/profile
+  // يُحيل الطلب لـ userRouter
          ↓
 userRouter يرى: userRouter.get('/profile', isAuthenticated, getProfile)
-    → يُنفِّذ: isAuthenticated → ثم getProfile
+  // يُنفِّذ: isAuthenticated  // ثم getProfile
 ```
 
 كل `app.use('/prefix', router)` = **مجمِّع** يُعيد توجيه الطلبات لـ Router محدد.
@@ -84,14 +84,14 @@ userRouter.put('/profile', isAuthenticated, updateUser);
 - سلسلة: `isAuthenticated` **ثم** المتحكم
 - إذا لم يكن المستخدم مسجلاً دخوله → `isAuthenticated` يُوقف الطلب ويُرسل 401
 
-```
+```http
 GET /api/user/profile بدون JWT:
-    isAuthenticated → يكتشف: لا يوجد token → 401 Unauthorized
-    getProfile  ← لا تُستدعى أبداً
+    isAuthenticated  // يكتشف: لا يوجد token → 401 Unauthorized
+    getProfile  // لا تُستدعى أبداً
 
 GET /api/user/profile مع JWT صحيح:
-    isAuthenticated → يتحقق → يُضيف req.user → يستدعي next()
-    getProfile → يُرسل بيانات المستخدم
+    isAuthenticated  // يتحقق  // يُضيف req.user  // يستدعي next()
+    getProfile  // يُرسل بيانات المستخدم
 ```
 
 ### 3.3 المسار بالمصفوفة
@@ -103,8 +103,8 @@ userRouter.put('/profile/picture', [isAuthenticated, upload.single('file')], upd
 هنا الـ middlewares في **مصفوفة** `[isAuthenticated, upload.single('file')]` — هذا بديل للفصل بالفاصلة ويعطي نفس النتيجة:
 
 ```javascript
-// هذان الشكلان متكافئان تماماً:
 router.put('/path', [mw1, mw2], controller);
+// هذان الشكلان متكافئان تماماً:
 router.put('/path', mw1, mw2, controller);
 ```
 
@@ -126,7 +126,7 @@ userRouter.delete('/account', isAuthenticated, deleteAccount);
 
 ### 3.5 خريطة مسارات المستخدمين
 
-```
+```http
 POST   /api/user/register          → register
 POST   /api/user/login             → login
 GET    /api/user/profile           → isAuthenticated → getProfile
@@ -176,7 +176,7 @@ messageRouter.patch('/seen/:senderId', markAsSeen);
 
 ### 4.1 خريطة مسارات الرسائل
 
-```
+```http
 POST  /api/message/                         → createMessage
 GET   /api/message/                         → getMessages
 GET   /api/message/conversation/:contactId  → getConversation
@@ -189,9 +189,9 @@ PATCH /api/message/seen/:senderId           → markAsSeen
 
 ## 5. `PUT` مقابل `PATCH`
 
-```
-PUT /profile      → يُرسَل الكيان كاملاً جديداً
-PATCH /seen/:id   → تحديث حقل واحد فقط (seen = true)
+```http
+PUT /profile  // يُرسَل الكيان كاملاً جديداً
+PATCH /seen/:id  // تحديث حقل واحد فقط (seen = true)
 ```
 
 في محادثتي استُخدم `PATCH` لتحديث الرسائل لأننا نُغيِّر `seen` فقط دون إعادة إرسال كل بيانات الرسالة.
@@ -202,14 +202,14 @@ PATCH /seen/:id   → تحديث حقل واحد فقط (seen = true)
 
 في **وصفاتي** الـ validators تظهر في المسارات:
 ```javascript
-// وصفاتي
 router.post('/register', validator.register, validateRequest, controller.register);
+// وصفاتي
 ```
 
 في **محادثتي** الـ validators تُستدعى **داخل المتحكم** مباشرة:
 ```javascript
-// محادثتي (routes/message.js)
 messageRouter.post('/', createMessage);  // ← لا validator هنا
+// محادثتي (routes/message.js)
 
 // controllers/message.js
 export const createMessage = async (req, res) => {
@@ -224,7 +224,7 @@ export const createMessage = async (req, res) => {
 
 ## 7. خريطة عامة لكل مسارات الخادم
 
-```
+```text
 /api/user/
    POST   /register          → register
    POST   /login             → login

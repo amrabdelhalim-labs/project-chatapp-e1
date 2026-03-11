@@ -1,16 +1,16 @@
-# شرح نمط المستودع (Repository Pattern)
+﻿# شرح نمط المستودع (Repository Pattern)
 
 ## 📋 نظرة عامة
 
 نمط المستودع يفصل بين **منطق التطبيق** و**الوصول لقاعدة البيانات**. بدلاً من كتابة استعلامات Mongoose مباشرة في Controllers، نضع كل العمليات في طبقة مستقلة.
 
 ### هيكل الملفات:
-```
+```text
 repositories/
-├── repository.interface.js   ← تعريفات الأنواع (JSDoc)
-├── base.repository.js        ← العمليات العامة (CRUD)
-├── user.repository.js        ← عمليات خاصة بالمستخدمين
-├── message.repository.js     ← عمليات خاصة بالرسائل
+├── repository.interface.js  // تعريفات الأنواع (JSDoc)
+├── base.repository.js  // العمليات العامة (CRUD)
+├── user.repository.js  // عمليات خاصة بالمستخدمين
+├── message.repository.js  // عمليات خاصة بالرسائل
 └── index.js                  ← RepositoryManager (نقطة الوصول)
 ```
 
@@ -21,8 +21,8 @@ repositories/
 ### ❌ بدون Repository — كود مكرر ومتشابك:
 
 ```javascript
-// في controller التسجيل:
 const existing = await User.findOne({ email });
+// في controller التسجيل:
 const user = await User.create({ firstName, lastName, email, password });
 
 // في controller تحديث البروفايل:
@@ -41,8 +41,8 @@ await User.findByIdAndDelete(id);
 ### ✅ مع Repository — كود نظيف ومنظم:
 
 ```javascript
-// في Controller:
 const existing = await userRepo.emailExists(email);
+// في Controller:
 const user = await userRepo.createUser({ firstName, lastName, email, password });
 const updated = await userRepo.updateProfile(id, data);
 await messageRepo.deleteByUser(id);
@@ -141,8 +141,8 @@ async findPaginated(page = 1, limit = 20, filter = {}, options = {}) {
 
 **الحدود الآمنة مهمة لأن:**
 ```javascript
-// مدخلات المستخدم قد تكون غير صحيحة:
 findPaginated(-5, 1000)
+// مدخلات المستخدم قد تكون غير صحيحة:
 // ↓ تتحول إلى:
 // safePage = 1, safeLimit = 50
 // ← يمنع تحميل قاعدة البيانات بطلبات ضخمة
@@ -153,7 +153,7 @@ findPaginated(-5, 1000)
 ```javascript
 async updateMany(filter, data) {
   const result = await this.model.updateMany(filter, data).exec();
-  return result.modifiedCount;  // ← يُرجع العدد فقط، وليس الوثائق
+  return result.modifiedCount;  // ← يُرجع العدد فقط, وليس الوثائق
 }
 ```
 
@@ -251,8 +251,8 @@ async updateProfilePicture(id, pictureUrl) {
 
 **لماذا نُرجع `previousPicture`؟**
 ```javascript
-// في Controller:
 const { previousPicture, user } = await userRepo.updateProfilePicture(id, newUrl);
+// في Controller:
 if (previousPicture) {
   await storage.deleteFile(previousPicture);  // ← حذف القديمة من التخزين
 }
@@ -417,7 +417,7 @@ app.get('/health', async (req, res) => {
 
 ## 🔄 كيف تتفاعل الطبقات
 
-```
+```text
 Controller (يستقبل الطلب)
     ↓
 Repository (ينفذ الاستعلام)
@@ -430,8 +430,8 @@ MongoDB (قاعدة البيانات)
 ### مثال كامل — تسجيل مستخدم جديد:
 
 ```javascript
-// في user.controller.js:
 import { getUserRepository } from '../repositories/user.repository.js';
+// في user.controller.js:
 
 const register = async (req, res) => {
   const userRepo = getUserRepository();

@@ -146,15 +146,15 @@ const PORT = process.env.PORT || 3000;
 💡 **ملاحظة**: في `index.js`، نمرر `server` (HTTP server) وليس `app` (Express) — لأن Socket.IO يحتاج لخادم HTTP:
 
 ```javascript
-// في index.js:
 connectServer(server); // ← نمرر server وليس app
+// في index.js:
 ```
 
 ---
 
 ## 🔄 كيف يعمل الاتصال في محادثتي؟
 
-```
+```text
 1. index.js يستدعي connectDB()
    ↓
 2. Mongoose يتصل بـ MongoDB
@@ -184,7 +184,7 @@ JWT_SECRET=my_dev_secret
 npm run dev
 ```
 **الناتج المتوقع:**
-```
+```text
 MongoDB connected
 Server running on PORT 5000.
 ```

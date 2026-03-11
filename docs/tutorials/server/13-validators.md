@@ -1,4 +1,4 @@
-# الدرس الثالث عشر: المدققات (Validators) ✅
+﻿# الدرس الثالث عشر: المدققات (Validators) ✅
 
 > **هدف الدرس:** تفهم كيف يتحقق خادم محادثتي من صحة البيانات الواردة باستخدام نمط **تجميع الأخطاء** — وكيف يختلف هذا النهج عن مكتبات التحقق الجاهزة.
 
@@ -8,7 +8,7 @@
 
 محادثتي تستخدم **دوال تحقق مخصصة** (بدون مكتبة خارجية) تعمل بنمط **تجميع الأخطاء**:
 
-```
+```text
 الخطوة 1: تُنشئ مصفوفة فارغة  → const errors = []
 الخطوة 2: تُدقِّق كل حقل       → if (مشكلة) errors.push('رسالة')
 الخطوة 3: هل يوجد أخطاء؟       → if (errors.length > 0)
@@ -17,9 +17,9 @@
 
 لماذا تجميع بدلاً من الرمي الفوري؟
 
-```
-// رمي فوري (أسوأ للمستخدم):
+```text
 if (!firstName) throw new Error('الاسم الأول مطلوب')
+// رمي فوري (أسوأ للمستخدم):
 // المستخدم يُصلح الاسم → يُرسِل مجدداً → "البريد الإلكتروني مطلوب"
 // جولة جولة
 
@@ -28,7 +28,7 @@ const errors = []
 if (!firstName) errors.push(...)
 if (!email) errors.push(...)
 if (!password) errors.push(...)
-throw Error('الاسم الأول مطلوب، البريد الإلكتروني مطلوب، كلمة المرور مطلوبة')
+throw Error('الاسم الأول مطلوب, البريد الإلكتروني مطلوب, كلمة المرور مطلوبة')
 // المستخدم يرى كل المشاكل دفعة واحدة
 ```
 
@@ -71,13 +71,13 @@ export function validateMessageInput(input) {
 
 ```javascript
   if (errors.length > 0) {
-    const error = new Error(errors.join('، '));
+    const error = new Error(errors.join(', '));
     error.statusCode = 400;
     throw error;
   }
 }
 ```
-- `errors.join('، ')` ← يُدمج الأخطاء بفاصلة عربية: `"معرّف المستقبل مطلوب، محتوى الرسالة مطلوب"`
+- `errors.join(', ')` ← يُدمج الأخطاء بفاصلة عربية: `"معرّف المستقبل مطلوب, محتوى الرسالة مطلوب"`
 - `error.statusCode = 400` ← نُضيف خاصية مخصصة للكائن!
 
 **لماذا `statusCode = 400` على الخطأ؟**
@@ -153,7 +153,7 @@ export function validateRegisterInput(input) {
 
 ```javascript
   if (errors.length > 0) {
-    const error = new Error(errors.join('، '));
+    const error = new Error(errors.join(', '));
     error.statusCode = 400;
     throw error;
   }
@@ -175,7 +175,7 @@ export function validateLoginInput(input) {
   }
 
   if (errors.length > 0) {
-    const error = new Error(errors.join('، '));
+    const error = new Error(errors.join(', '));
     error.statusCode = 400;
     throw error;
   }
@@ -199,15 +199,15 @@ export function validateUpdateUserInput(input) {
 ```
 `if (input.firstName !== undefined)` ← **الفرق المهم** بين التسجيل والتحديث:
 
-```
+```text
+  if (!input.firstName)  // يفشل إذا لم يُرسَل → مطلوب
 التسجيل:
-  if (!input.firstName)  ← يفشل إذا لم يُرسَل → مطلوب
 
 التحديث:
-  if (input.firstName !== undefined)  ← يتحقق فقط إذا أُرسِل
-    → لم يُرسَل؟ لا شيء
-    → أُرسِل فارغاً "  "؟ خطأ!
-    → أُرسِل صحيحاً؟ مقبول
+  if (input.firstName !== undefined)  // يتحقق فقط إذا أُرسِل
+  // لم يُرسَل؟ لا شيء
+  // أُرسِل فارغاً "  "؟ خطأ!
+  // أُرسِل صحيحاً؟ مقبول
 ```
 
 ```javascript
@@ -238,7 +238,7 @@ export function validateDeleteAccountInput(input) {
   }
 
   if (errors.length > 0) {
-    const error = new Error(errors.join('، '));
+    const error = new Error(errors.join(', '));
     error.statusCode = 400;
     throw error;
   }
@@ -268,7 +268,7 @@ export const register = async (req, res) => {
 ```javascript
 // index.js
 app.use((err, req, res, _next) => {
-  const statusCode = err.statusCode || 500;    ← يقرأ statusCode الذي وضعناه
+  const statusCode = err.statusCode || 500;  // يقرأ statusCode الذي وضعناه
   res.status(statusCode).json({ message: err.message });
 });
 ```
@@ -282,7 +282,7 @@ app.use((err, req, res, _next) => {
 | الشكل | مصفوفة من validators → middleware | دالة تُستدعى من المتحكم |
 | التعريف | `body('name').notEmpty()` | `if (!name) errors.push(...)` |
 | التنفيذ | `validateRequest` middleware | مباشرة في المتحكم |
-| الأخطاء | `validationResult(req).array()` | `errors.join('، ')` |
+| الأخطاء | `validationResult(req).array()` | `errors.join(', ')` |
 | المكتبة | `express-validator` | لا مكتبة — JavaScript خالص |
 
 كلا النهجين صحيح — الاختيار بين الاثنين مسألة أسلوب وتفضيل.
@@ -299,10 +299,10 @@ throw error;
 
 كائنات JavaScript يمكن إضافة خصائص جديدة لها في أي وقت — بما فيها `Error`.
 
-```
-error.message = 'رسالة الخطأ'    ← خاصية مدمجة في Error
-error.statusCode = 400           ← خاصية مخصصة أضفناها نحن
-error.stack = '...'              ← خاصية مدمجة (سطر الخطأ)
+```text
+error.message = 'رسالة الخطأ'  // خاصية مدمجة في Error
+error.statusCode = 400  // خاصية مخصصة أضفناها نحن
+error.stack = '...'  // خاصية مدمجة (سطر الخطأ)
 ```
 
 معالج الأخطاء في `index.js` يقرأ `statusCode` إذا وُجد، وإلا يستخدم 500.

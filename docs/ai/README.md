@@ -121,3 +121,5 @@ cd web && npm run format:check
 - CI/CD runs on push to main — validate workflow changes locally before pushing (see `docs/testing.md`)
 - Workflow `if:` conditions exclude PRs — deploy jobs run only on push + workflow_dispatch
 - Deploy commits use `[skip ci]` suffix to prevent infinite loops
+- **No Arabic characters inside code fences in documentation** — the Arabic comma (U+060C) and other Arabic punctuation trigger the Unicode Bidi algorithm, causing code blocks to render right-to-left. Use only Latin punctuation inside ` ``` ` blocks. See `docs/ai-patterns-reference.md §10`
+- **First line of every code block must start with a Latin character** — The Unicode Bidi Algorithm sets a code block's render direction from its **first strong-directional character**. If the first non-empty line starts with Arabic text (even inside a `// comment`), the **entire block** renders right-to-left. **Rule:** always put a real code line (`import`, `const`, class declaration…) on line 1 and move Arabic label comments to line 2+. Emoji (`✅`, `❌`) and `//` are Bidi-neutral and do **not** protect against this. See `docs/ai-tutorials-guide.md §2.6`.

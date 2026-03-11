@@ -59,9 +59,9 @@ export const isSocketAuthenticated = (socket, next) => {
 
 ### كيف يعمل؟
 
-```
-العميل يرسل الطلب مع header:
+```text
   Authorization: Bearer eyJhbGci...
+العميل يرسل الطلب مع header:
 
       ↓
 
@@ -86,9 +86,9 @@ const token =
 ```
 
 #### لماذا ندعم الحالتين؟
-```
-✅ "Bearer eyJhbGci..."  → يستخرج "eyJhbGci..."
-✅ "eyJhbGci..."          → يستخدمه مباشرة
+```text
+✅ "Bearer eyJhbGci..."  // يستخرج "eyJhbGci..."
+✅ "eyJhbGci..."  // يستخدمه مباشرة
 ❌ (فارغ)                 → 401 غير مصادق
 ```
 
@@ -99,8 +99,8 @@ const token =
 ### أين يُستخدم في المسارات؟
 
 ```javascript
-// في routes/user.js — بعض المسارات فقط محمية:
 userRouter.post('/register', register);              // ❌ لا يحتاج توثيق
+// في routes/user.js — بعض المسارات فقط محمية:
 userRouter.post('/login', login);                    // ❌ لا يحتاج توثيق
 userRouter.get('/profile', isAuthenticated, getProfile);  // ✅ يحتاج توثيق
 userRouter.put('/profile', isAuthenticated, updateUser);  // ✅ يحتاج توثيق
@@ -115,9 +115,9 @@ app.use('/api/message', isAuthenticated, messageRouter);  // ✅ كلها محم
 
 ### كيف يعمل؟
 
-```
-العميل يتصل بـ Socket.IO مع التوكن:
+```text
   io(SERVER_URL, { query: { token: accessToken } })
+العميل يتصل بـ Socket.IO مع التوكن:
 
       ↓
 
@@ -126,7 +126,7 @@ isSocketAuthenticated يقرأ التوكن من handshake.query
 يتحقق عبر verifyToken()
       ↓
   نجح؟ → socket.userId = data.userId → next()
-  فشل؟ → next(error) → الاتصال يُرفض
+  فشل؟ → next(error)  // الاتصال يُرفض
 ```
 
 ### الفرق عن HTTP:
@@ -156,8 +156,8 @@ io.on('connection', (socket) => {
 في محادثتي نخزن **المعرف فقط** في الطلب، وليس كائن المستخدم كاملاً:
 
 ```javascript
-// ✅ ما نفعله (أفضل أداءً):
 req.userId = payload.userId;
+// ✅ ما نفعله (أفضل أداءً):
 
 // ❌ بديل أبطأ (طلب إضافي لقاعدة البيانات في كل Middleware):
 const user = await User.findById(payload.userId);

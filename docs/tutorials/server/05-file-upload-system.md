@@ -72,7 +72,7 @@ storage: multer.memoryStorage(),
 
 في محادثتي نستخدم **نمط Strategy** للتخزين — الملف قد يُرسل لـ Local أو Cloudinary أو S3. لذلك نحتاج Buffer في الذاكرة أولاً:
 
-```
+```text
 Multer (memoryStorage) → req.file.buffer → StorageService → Local/Cloud/S3
 ```
 
@@ -120,10 +120,10 @@ path.extname("photo.jpg") → ".jpg"
 ```
 
 #### 2. **لماذا نفحص الاثنين؟**
-```
-❌ ملف باسم "virus.exe" بـ mimetype "image/jpeg" → مرفوض (الامتداد لا يطابق)
-❌ ملف باسم "photo.jpg" بـ mimetype "text/html" → مرفوض (MIME لا يطابق)
-✅ ملف باسم "photo.jpg" بـ mimetype "image/jpeg" → مقبول (كلاهما يطابق)
+```text
+❌ ملف باسم "virus.exe" بـ mimetype "image/jpeg"  // مرفوض (الامتداد لا يطابق)
+❌ ملف باسم "photo.jpg" بـ mimetype "text/html"  // مرفوض (MIME لا يطابق)
+✅ ملف باسم "photo.jpg" بـ mimetype "image/jpeg"  // مقبول (كلاهما يطابق)
 ```
 
 #### 3. **Callback Pattern**:
@@ -137,8 +137,8 @@ cb(error, false); // رفض الملف — error = رسالة الخطأ
 ## 📱 كيف يُستخدم في المسارات؟
 
 ```javascript
-// في routes/user.js:
 import upload from '../middlewares/multer.js';
+// في routes/user.js:
 
 userRouter.put(
   "/profile/picture",
@@ -180,9 +180,9 @@ upload.none()                 // لا ملفات (فقط form fields)
 
 ## 🔄 التدفق الكامل لرفع صورة البروفايل
 
-```
-1. العميل يرسل صورة عبر:
+```text
    PUT /api/user/profile/picture (multipart/form-data)
+1. العميل يرسل صورة عبر:
    ↓
 2. isAuthenticated — يتحقق من JWT
    ↓
@@ -192,9 +192,9 @@ upload.none()                 // لا ملفات (فقط form fields)
    - يخزنها في req.file.buffer
    ↓
 4. updateProfilePicture — Controller:
-   - storage.uploadFile(req.file) → يرفع الصورة
-   - repos.user.updateProfilePicture(userId, url) → يحدث URL
-   - storage.deleteFile(previousPicture) → يحذف القديمة
+   - storage.uploadFile(req.file)  // يرفع الصورة
+   - repos.user.updateProfilePicture(userId, url)  // يحدث URL
+   - storage.deleteFile(previousPicture)  // يحذف القديمة
    ↓
 5. ✅ الاستجابة: بيانات المستخدم المحدثة
 ```

@@ -100,8 +100,8 @@ const router = createBrowserRouter([
 💡 **`:receiverId`** هو **معامل ديناميكي** (Dynamic Parameter). أي مسار مثل `/abc123` سيتم التقاطه كـ `receiverId`:
 
 ```jsx
-// في مكون Chat
 import { useParams } from "react-router-dom";
+// في مكون Chat
 
 const { receiverId } = useParams();
 // إذا كان المسار "/abc123" → receiverId = "abc123"
@@ -157,8 +157,8 @@ export default function ProtectedRoute({ children }) {
 ⚠️ **لماذا نتحقق من `"null"` و `"undefined"` كنصوص؟**
 
 ```javascript
-// مشكلة شائعة:
 localStorage.setItem("accessToken", null);      // يُخزن كنص "null" وليس null
+// مشكلة شائعة:
 localStorage.setItem("accessToken", undefined);  // يُخزن كنص "undefined"
 
 // بدون الفحص الإضافي:
@@ -198,7 +198,7 @@ return (
 ```
 
 ### الشرح:
-```
+```text
 ┌──────────────────────────────────────┐
 │  ┌─────────┐  ┌──────────────────┐  │
 │  │         │  │                  │  │
@@ -245,8 +245,8 @@ useEffect(() => {
 ### مستمعات الأحداث (Event Listeners):
 
 ```jsx
-  // استقبال رسالة جديدة
   socket.on("receive_message", (message) => {
+  // استقبال رسالة جديدة
     addMessage(message);
   });
 
@@ -336,7 +336,7 @@ useEffect(() => {
 
 ## 🎯 ملخص
 
-```
+```text
 main.tsx
   └── App.jsx
         └── Router (routes.jsx)

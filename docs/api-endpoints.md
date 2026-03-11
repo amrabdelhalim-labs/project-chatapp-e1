@@ -1,4 +1,4 @@
-# واجهة API للخادم
+﻿# واجهة API للخادم
 
 ## نظرة عامة
 
@@ -12,7 +12,7 @@
 
 ### فحص الحالة
 
-```
+```http
 GET /api/health
 ```
 
@@ -34,7 +34,7 @@ GET /api/health
 
 ### تسجيل مستخدم جديد
 
-```
+```http
 POST /api/user/register
 ```
 
@@ -67,7 +67,7 @@ POST /api/user/register
 
 ### تسجيل الدخول
 
-```
+```http
 POST /api/user/login
 ```
 
@@ -97,21 +97,21 @@ POST /api/user/login
 
 ### الملف الشخصي (يتطلب توثيق)
 
-```
+```http
 GET /api/user/profile
 Authorization: Bearer <token>
 ```
 
 ### قائمة المستخدمين (يتطلب توثيق)
 
-```
+```http
 GET /api/user/friends
 Authorization: Bearer <token>
 ```
 
 ### تحديث الملف الشخصي (يتطلب توثيق)
 
-```
+```http
 PUT /api/user/profile
 Authorization: Bearer <token>
 ```
@@ -128,7 +128,7 @@ Authorization: Bearer <token>
 
 ### تحديث صورة الملف الشخصي (يتطلب توثيق)
 
-```
+```http
 PUT /api/user/profile/picture
 Authorization: Bearer <token>
 Content-Type: multipart/form-data
@@ -137,7 +137,7 @@ Content-Type: multipart/form-data
 **الحقول:** `file` (صورة JPEG/PNG، حد أقصى 1MB)
 ### حذف الحساب (يتطلب توثيق)
 
-```
+```http
 DELETE /api/user/account
 Authorization: Bearer <token>
 ```
@@ -174,7 +174,7 @@ Authorization: Bearer <token>
 
 ### إنشاء رسالة
 
-```
+```http
 POST /api/message
 Authorization: Bearer <token>
 ```
@@ -190,27 +190,27 @@ Authorization: Bearer <token>
 
 ### جلب جميع الرسائل
 
-```
+```http
 GET /api/message
 Authorization: Bearer <token>
 ```
 
 **دعم الصفحات (اختياري):**
 
-```
+```http
 GET /api/message?page=1&limit=20
 ```
 
 ### جلب محادثة مع مستخدم محدد
 
-```
+```http
 GET /api/message/conversation/:contactId
 Authorization: Bearer <token>
 ```
 
 ### تعليم الرسائل كمقروءة
 
-```
+```http
 PATCH /api/message/seen/:senderId
 Authorization: Bearer <token>
 ```
@@ -262,6 +262,6 @@ const socket = io('http://localhost:5000', {
 
 ```json
 {
-  "message": "الاسم الأول مطلوب، البريد الإلكتروني مطلوب"
+  "message": "الاسم الأول مطلوب, البريد الإلكتروني مطلوب"
 }
 ```

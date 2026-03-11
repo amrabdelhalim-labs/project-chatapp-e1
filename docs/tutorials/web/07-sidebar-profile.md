@@ -209,8 +209,8 @@ export default function Loading() {
 
 **أين يُعرض؟**
 ```jsx
-// في App.jsx عند تحميل البيانات الأولية
 {isLoading ? <Loading /> : <Routes>...</Routes>}
+// في App.jsx عند تحميل البيانات الأولية
 ```
 
 ---

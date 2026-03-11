@@ -75,22 +75,22 @@ logout: async () => {
 - بعكس `localStorage` في الويب الذي يعمل بشكل متزامن
 
 #### تدفق تسجيل الدخول:
-```
+```text
 Login Screen
   → API: login({ email, password })
-  → setAccessToken(token)     ← حفظ في AsyncStorage + المتجر
-  → setUser(user)             ← حفظ في AsyncStorage + المتجر
+  → setAccessToken(token)  // حفظ في AsyncStorage + المتجر
+  → setUser(user)  // حفظ في AsyncStorage + المتجر
   → navigation.navigate("Home")
 ```
 
 #### تدفق تسجيل الخروج:
-```
+```text
 logout()
   → AsyncStorage.removeItem("user")
   → AsyncStorage.removeItem("accessToken")
   → AsyncStorage.removeItem("currentReceiver")
   → set({ user: null, accessToken: null, ... })
-  → navigation.navigate("Login")  ← عبر initialRouteName
+  → navigation.navigate("Login")  // عبر initialRouteName
 ```
 
 💡 **المقارنة**:
@@ -129,8 +129,8 @@ updateFriend: (user) =>
 
 #### لماذا "غير متغيّر" (Immutable)؟
 ```javascript
-// ❌ تعديل المصفوفة الأصلية (Mutable) — Zustand لن يلاحظ التغيير!
 friends[index] = user;
+// ❌ تعديل المصفوفة الأصلية (Mutable) — Zustand لن يلاحظ التغيير!
 set({ friends });
 
 // ✅ إنشاء مصفوفة جديدة (Immutable) — Zustand يعرف أن شيئاً تغيّر
@@ -184,21 +184,21 @@ addMessage: (message) =>
 
 #### لماذا ثلاث حالات؟
 
-```
-تدفق إرسال الرسالة:
+```text
+   → addMessage({ clientId: "abc", content: "مرحباً" })
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 1. المستخدم يكتب ويرسل
-   → addMessage({ clientId: "abc", content: "مرحباً" })
-   → تظهر فوراً في الشاشة (Optimistic Update)
+تدفق إرسال الرسالة:
+  // تظهر فوراً في الشاشة (Optimistic Update)
 
 2. الخادم ينشئ الرسالة + يبث receive_message
    → addMessage({ _id: "server-123", clientId: "abc", content: "مرحباً" })
-   → يبحث عن clientId: "abc" → يجدها → يُحدّثها (لا يكررها)
+  // يبحث عن clientId: "abc"  // يجدها  // يُحدّثها (لا يكررها)
 
 3. إعادة الاتصال (reconnect) — الخادم يبث نفس الرسالة مرة أخرى
    → addMessage({ _id: "server-123", ... })
-   → يبحث عن _id: "server-123" → يجدها → يُحدّثها (لا يكررها)
+  // يبحث عن _id: "server-123"  // يجدها  // يُحدّثها (لا يكررها)
 ```
 
 ---
@@ -206,8 +206,8 @@ addMessage: (message) =>
 ## 📚 القسم الخامس: تعليم الرسائل كمقروءة (Bidirectional Seen)
 
 ```javascript
-// أنا أقرأ رسائل شخص معين
 markMessagesSeenFromSender: (senderId, currentUserId) =>
+// أنا أقرأ رسائل شخص معين
     set(({ messages }) => ({
         messages: messages.map((m) =>
             m.sender === senderId && m.recipient === currentUserId
@@ -231,31 +231,31 @@ markMyMessagesSeen: (myUserId, recipientId) =>
 
 #### لماذا دالتان مختلفتان؟
 
-```
-الحدث: seen({ readerId, senderId })
+```text
+  → markMessagesSeenFromSender(senderId, myId)
 
 حالة 1: أنا القارئ (readerId === myId)
-  → markMessagesSeenFromSender(senderId, myId)
-  → الرسائل من senderId إليّ ← مقروءة ✓
+الحدث: seen({ readerId, senderId })
+  // الرسائل من senderId إليّ  // مقروءة ✓
 
 حالة 2: أنا المرسل (senderId === myId)
   → markMyMessagesSeen(myId, readerId)
-  → رسائلي إلى readerId ← مقروءة ✓
+  // رسائلي إلى readerId  // مقروءة ✓
 ```
 
-```
-أحمد ──────── سارة
-  │              │
-  │  "مرحباً"    │  ← أحمد أرسل (sender: أحمد, recipient: سارة)
-  │              │
-  │              │  سارة فتحت المحادثة
+```text
   │  seen ←──────│  ← seen({readerId: سارة, senderId: أحمد})
   │              │
+  │  "مرحباً"    │  // أحمد أرسل (sender: أحمد, recipient: سارة)
+  │              │
+  │              │  سارة فتحت المحادثة
+أحمد ──────── سارة
+  │              │
   │ markMyMessagesSeen(أحمد, سارة)
-  │              │  ← عند أحمد: رسالته ← seen: true ✓
+  │              │  // عند أحمد: رسالته ← seen: true ✓
   │              │
   │ markMessagesSeenFromSender(أحمد, سارة)
-  │              │  ← عند سارة: رسائل أحمد ← seen: true ✓
+  │              │  // عند سارة: رسائل أحمد ← seen: true ✓
 ```
 
 ---
@@ -276,8 +276,8 @@ clearTyping: (senderId) =>
 #### لماذا "محدد النطاق" (Scoped)؟
 
 ```javascript
-// ❌ الطريقة البسيطة — تمسح أي كتابة
 clearTyping: () => set({ typing: null });
+// ❌ الطريقة البسيطة — تمسح أي كتابة
 
 // ✅ الطريقة الآمنة — تمسح فقط إذا كان نفس الشخص
 clearTyping: (senderId) =>
@@ -288,10 +288,10 @@ clearTyping: (senderId) =>
 
 **السبب**: قد يصل `stop_typing` من شخص بينما شخص آخر بدأ الكتابة:
 
-```
-الزمن    الحدث                           الحالة
-─────────────────────────────────────────────────
+```text
 T1       سارة تكتب → setTyping(سارة)     typing: "سارة"
+─────────────────────────────────────────────────
+الزمن    الحدث                           الحالة
 T2       علي يكتب → setTyping(علي)       typing: "علي"
 T3       سارة توقف → clearTyping(سارة)   typing: "علي" ✅ (لم يُمسح!)
          بدون scoping → clearTyping()    typing: null ❌ (مسح علي!)
@@ -334,8 +334,8 @@ export const hydrateStore = async () => {
 
 #### 2. حماية القيم الفاسدة
 ```javascript
-// قد تكون القيمة المحفوظة "null" أو "undefined" كنص!
 userItem !== "null" && userItem !== "undefined"
+// قد تكون القيمة المحفوظة "null" أو "undefined" كنص!
 ```
 - إذا حُفظت `null` كنص في AsyncStorage، `JSON.parse("null")` يُرجع `null` لكن `"null" !== null`
 - الحماية تتعامل مع هذه الحالة

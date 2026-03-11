@@ -1,4 +1,4 @@
-# محادثتي — تطبيق الدردشة الفوري
+﻿# محادثتي — تطبيق الدردشة الفوري
 
 تطبيق دردشة فوري متعدد المنصات يدعم المحادثات الفردية، مؤشرات الكتابة، إيصالات القراءة، وإدارة الملف الشخصي. مبني بخادم Express مشترك، وعميل ويب React، وعميل جوال Expo/React Native.
 
@@ -65,12 +65,12 @@
 
 ## هيكل المشروع
 
-```
+```text
 project-chatapp-e1/
 ├── .github/workflows/          # GitHub Actions CI/CD (build-and-deploy.yml)
 ├── .gitattributes              # فرض نهايات سطر LF
 ├── .gitignore                  # node_modules, .expo, .env, coverage
-├── CONTRIBUTING.md             # أسماء الفروع، الإيداعات، التاجات، التنسيق
+├── CONTRIBUTING.md             # أسماء الفروع, الإيداعات, التاجات, التنسيق
 ├── format.mjs                  # تشغيل Prettier عبر المنصات
 ├── validate-workflow.mjs       # التحقق من صحة سير عمل GitHub Actions
 ├── README.md                   # هذا الملف
@@ -104,7 +104,7 @@ project-chatapp-e1/
 │   └── tests/                  # 83 اختباراً (4 مجموعات)
 │
 └── docs/                       # التوثيق
-    ├── ai/                     # توجيهات AI (المعمارية، دليل الميزات)
+    ├── ai/                     # توجيهات AI (المعمارية, دليل الميزات)
     ├── features/               # مواصفات الميزات (delete-account.md)
     ├── tutorials/              # الدروس العربية (19 درساً)
     ├── api-endpoints.md        # مرجع REST + WebSocket
@@ -132,7 +132,7 @@ project-chatapp-e1/
 cd server
 npm install
 cp .env.example .env
-# عدّل .env: MONGODB_URL، JWT_SECRET، STORAGE_TYPE
+# عدّل .env: MONGODB_URL, JWT_SECRET, STORAGE_TYPE
 npm run dev
 ```
 
@@ -280,8 +280,8 @@ npm run test:ci          # تشغيل واحد (CI)
 ## تنسيق الكود
 
 ```bash
-# تنسيق جميع الملفات (من جذر المشروع)
 node format.mjs
+# تنسيق جميع الملفات (من جذر المشروع)
 
 # التحقق فقط بدون كتابة (CI — يخرج 1 إذا كان غير منسّق)
 node format.mjs --check

@@ -1,13 +1,13 @@
-# الدرس الرابع عشر: اختبار الخادم 🧪
+﻿# الدرس الرابع عشر: اختبار الخادم 🧪
 
 ## 📋 نظرة عامة
 
 نظام الاختبارات في المشروع **مخصص وبسيط** — لا يستخدم مكتبات مثل Jest أو Mocha. بدلاً من ذلك، يعتمد على إطار صغير في `test.helpers.js` يوفر الأساسيات: تأكيدات، ألوان، وملخص النتائج.
 
 ### هيكل الملفات:
-```
+```text
 tests/
-├── test.helpers.js          ← إطار الاختبار المشترك
+├── test.helpers.js  // إطار الاختبار المشترك
 ├── comprehensive.test.js    ← 84 اختبار — سير عمل كامل
 ├── repositories.test.js     ← 44 اختبار — عمليات CRUD المستودعات
 ├── integration.test.js      ← 46 اختبار — تكامل كامل مع التخزين
@@ -24,8 +24,8 @@ tests/
 ### المكونات:
 
 ```javascript
-// ألوان الطرفية
 export const colors = {
+// ألوان الطرفية
   reset:   '\x1b[0m',
   green:   '\x1b[32m',   // نجاح ✓
   red:     '\x1b[31m',   // فشل ✗
@@ -73,8 +73,8 @@ export function assert(condition, message) {
 ### أدوات التنظيم:
 
 ```javascript
-// عنوان قسم كبير
 export function logSection(title) {
+// عنوان قسم كبير
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   console.log(title);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
@@ -106,22 +106,22 @@ export function printSummary() {
 
 ### المراحل الثمانية:
 
-```
-المرحلة 1: Validators          ← التحقق من المدخلات
-المرحلة 2: JWT Utilities       ← إنشاء والتحقق من التوكنات
+```text
+المرحلة 1: Validators  // التحقق من المدخلات
+المرحلة 2: JWT Utilities  // إنشاء والتحقق من التوكنات
 المرحلة 3: Socket Utility      ← setIO / getIO
-المرحلة 4: User Repository     ← إنشاء وتحديث المستخدمين
-المرحلة 5: Message Repository  ← إرسال وقراءة الرسائل
+المرحلة 4: User Repository  // إنشاء وتحديث المستخدمين
+المرحلة 5: Message Repository  // إرسال وقراءة الرسائل
 المرحلة 6: Base Repository     ← exists, count, findPaginated
-المرحلة 7: Storage Service     ← رفع وحذف ملفات
-المرحلة 8: Cleanup             ← حذف بيانات الاختبار
+المرحلة 7: Storage Service  // رفع وحذف ملفات
+المرحلة 8: Cleanup  // حذف بيانات الاختبار
 ```
 
 ### مثال من المرحلة 1 — اختبار Validator:
 
 ```javascript
-// اختبار التسجيل بمدخلات صحيحة
 try {
+// اختبار التسجيل بمدخلات صحيحة
   validateRegisterInput({
     firstName: 'أحمد',
     lastName: 'محمد',
@@ -153,8 +153,8 @@ try {
 ### كيف يعمل الـ Cleanup:
 
 ```javascript
-// المرحلة 8: حذف كل بيانات الاختبار
 logSection('PHASE 8: CLEANUP');
+// المرحلة 8: حذف كل بيانات الاختبار
 
 for (const user of testData.users) {
   await repos.user.delete(user._id);
@@ -175,7 +175,7 @@ assert(true, 'All test messages deleted');
 
 ### ما يغطيه:
 
-```
+```text
 User Repository:
 ├── create (createUser)
 ├── findByEmail
@@ -249,7 +249,7 @@ async function createTestImage(filename) {
 
 ### أقسام الاختبار:
 
-```
+```text
 1. Validators (مدخلات)
 2. JWT (توكنات)
 3. Socket utility
@@ -260,13 +260,13 @@ async function createTestImage(filename) {
     ├── رفع ملف (من مسار)
     ├── التحقق من وجود الملف
     ├── حذف ملف عادي ← true
-    ├── حذف default-picture.jpg ← محمي
+    ├── حذف default-picture.jpg  // محمي
     └── getFileUrl
 5. User Repository (CRUD كامل)
 6. Message Repository (CRUD كامل)
 7. Cleanup (حذف بيانات + مجلد مؤقت)
 8. Phase 9 - ENV Guards:
-    └── اختبار JWT_SECRET مفقود عند module load ← يرمي Error
+    └── اختبار JWT_SECRET مفقود عند module load  // يرمي Error
 ```
 
 ---
@@ -284,8 +284,8 @@ async function createTestImage(filename) {
 ### Mock Socket.IO:
 
 ```javascript
-// قبل استيراد التطبيق، نضع IO وهمي
 const mockIO = {
+// قبل استيراد التطبيق, نضع IO وهمي
   to: () => ({ emit: () => {} }),
   emit: () => {},
 };
@@ -330,7 +330,7 @@ function makeRequest(method, path, body = null, token = null) {
 
 ### أقسام الاختبار:
 
-```
+```text
 1. Registration:
     ├── POST /api/user/register ← 201
     ├── Duplicate email ← 400
@@ -385,8 +385,8 @@ function makeRequest(method, path, body = null, token = null) {
 ### الأوامر المتاحة:
 
 ```bash
-# اختبار شامل واحد (الافتراضي)
 npm test
+# اختبار شامل واحد (الافتراضي)
 
 # اختبارات المستودعات فقط
 npm run test:repos
@@ -403,7 +403,7 @@ npm run test:all
 
 ### المتطلبات:
 
-```
+```text
 1. MongoDB شغّال (محلي أو Atlas)
 2. ملف .env يحتوي MONGODB_URL و JWT_SECRET
 3. المنفذ 5001 متاح (لاختبارات api.test.js)
@@ -411,7 +411,7 @@ npm run test:all
 
 ### المخرجات المتوقعة:
 
-```
+```text
 ┌──────────────────────────────────────────────────┐
 │  🧪 COMPREHENSIVE INTEGRATION TEST              │
 │  Full Workflow: Create → Update → Delete         │

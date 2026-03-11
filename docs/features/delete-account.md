@@ -1,4 +1,4 @@
-# حذف الحساب (Delete Account Feature)
+﻿# حذف الحساب (Delete Account Feature)
 
 ## 📋 نظرة عامة
 
@@ -14,7 +14,7 @@
 
 ## 🏗️ البنية المعمارية
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │         Client (Web/Mobile)             │
 ├─────────────────────────────────────────┤
@@ -192,8 +192,8 @@ export const deleteAccount = async (password) => {
 ### 2. Zustand Store (`web/src/libs/globalState.js` - تحديث)
 
 ```javascript
-// في الـ action logout، أضف:
 const logout = () => {
+// في الـ action logout, أضف:
   socket?.disconnect();
   localStorage.removeItem('user');
   localStorage.removeItem('accessToken');
@@ -502,7 +502,7 @@ describe('Delete Account Feature', () => {
 ```javascript
 // Expected: DELETE completes successfully
 await deleteAccount({ password: 'correct-password' });
-// يجب: إغلاق Modal، استدعاء onDeleteSuccess()، مسح البيانات
+// يجب: إغلاق Modal, استدعاء onDeleteSuccess(), مسح البيانات
 ```
 
 #### 2. ❌ كلمة مرور خاطئة

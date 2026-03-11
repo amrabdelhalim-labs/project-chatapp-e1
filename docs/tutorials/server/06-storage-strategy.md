@@ -72,8 +72,8 @@ async uploadFile(file) {
 
 #### 1. **اسم فريد**:
 ```javascript
-// مثال: 1708876800000-483726159.jpg
 const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+// مثال: 1708876800000-483726159.jpg
 ```
 هذا يمنع تعارض الأسماء — كل ملف يحصل على اسم فريد.
 
@@ -181,7 +181,7 @@ async healthCheck() {
 
 ## 🔄 التدفق الكامل
 
-```
+```text
 1. Multer يحلل الملف → req.file.buffer
    ↓
 2. Controller يستدعي storage.uploadFile(req.file)

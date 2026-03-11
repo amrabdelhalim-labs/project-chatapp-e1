@@ -1,4 +1,4 @@
-# شرح إعداد الخادم الرئيسي (index.js)
+﻿# شرح إعداد الخادم الرئيسي (index.js)
 
 ## 📋 نظرة عامة
 
@@ -49,8 +49,8 @@ const server = http.createServer(app);
 Socket.IO يحتاج لخادم HTTP لإنشاء اتصال WebSocket. بدونه، لن نتمكن من استخدام WebSocket:
 
 ```javascript
-// ❌ بدون Socket.IO — يكفي:
 app.listen(PORT);
+// ❌ بدون Socket.IO — يكفي:
 
 // ✅ مع Socket.IO — نحتاج:
 const server = http.createServer(app);
@@ -65,7 +65,7 @@ server.listen(PORT); // ← ليس app.listen
 ```javascript
 // Middleware
 app.use(express.json());       // تحليل JSON في body الطلبات
-app.use(express.static('public')); // خدمة الملفات الثابتة (صور، إلخ)
+app.use(express.static('public')); // خدمة الملفات الثابتة (صور, إلخ)
 app.use(cors());               // السماح بالطلبات من نطاقات مختلفة
 
 // Routes
@@ -188,8 +188,8 @@ function setupWebSocket(httpServer) {
 ### الأحداث (Events):
 
 ```javascript
-// إرسال رسالة
 socket.on('send_message', async ({ receiverId, content, clientId }) => {
+// إرسال رسالة
   const message = await repos.message.create({
     sender: socket.userId,
     recipient: receiverId,
@@ -239,14 +239,14 @@ export { app, server, setupWebSocket };
 - عند استيراده في الاختبارات (`import { app } from '../index.js'`) → **لا** يتصل ولا يبدأ ❌
 
 #### **بدون هذا الشرط**:
-```
+```text
 ❌ الاختبارات تبدأ الخادم الحقيقي
 ❌ تتصل بقاعدة البيانات الفعلية
 ❌ خطأ في المنفذ المستخدم
 ```
 
 #### **مع هذا الشرط**:
-```
+```text
 ✅ الاختبارات تستورد app فارغ
 ✅ تتحكم في الاتصال والإعدادات
 ✅ كل اختبار معزول
@@ -256,7 +256,7 @@ export { app, server, setupWebSocket };
 
 ## 📊 ملخص تدفق التنفيذ
 
-```
+```text
 1. استيراد المكتبات والإعدادات
    ↓
 2. إنشاء Express + HTTP Server
@@ -268,7 +268,7 @@ export { app, server, setupWebSocket };
 5. إضافة معالج الأخطاء العام
    ↓
 6. (إذا تشغيل مباشر):
-   الاتصال بـ MongoDB → إعداد Socket.IO → تشغيل الخادم
+   الاتصال بـ MongoDB  // إعداد Socket.IO  // تشغيل الخادم
    ↓
 7. ✅ الخادم جاهز!
 ```

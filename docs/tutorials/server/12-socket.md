@@ -6,9 +6,9 @@
 
 ## 1. HTTP مقابل WebSocket
 
-```
+```text
 HTTP (طلب-استجابة — كل مراسلة الرسائل القديمة):
-    العميل ──طلب──→ الخادم ──استجابة──→ العميل
+    العميل ──طلب──  // الخادم ──استجابة──  // العميل
 
     المستخدم يسأل: "هل وصلت رسائل جديدة؟"
     الخادم يُجيب: "لا."
@@ -20,7 +20,7 @@ WebSocket (اتصال دائم — محادثتي):
            (قناة مفتوحة دائماً)
 
     عندما تصل رسالة جديدة:
-    الخادم ──يدفع مباشرة──→ العميل
+    الخادم ──يدفع مباشرة──  // العميل
     (فوري! بدون أن يسأل العميل)
 ```
 
@@ -41,21 +41,21 @@ import { io } from '../index.js';   ← ❌ مشكلة!
 
 **لماذا مشكلة؟**
 
-```
+```text
 index.js يستورد message.js
    ↓
 message.js يستورد index.js
    ↓
 index.js يستورد message.js
    ↓
-... (حلقة لا تنتهي → خطأ عند التشغيل)
+... (حلقة لا تنتهي  // خطأ عند التشغيل)
 ```
 
 Node.js لا يستطيع تحميل ملفين يعتمد كل منهما على الآخر مباشرة.
 
 ### الحل: `utils/socket.js` كوسيط
 
-```
+```text
 index.js ──setIO(io)──→ socket.js (يحفظ io)
                               ↑
 message.js ──getIO()──────────┘ (يأخذ io)
@@ -98,8 +98,8 @@ export function setIO(instance) {
 
 تُستدعى **مرة واحدة** في `index.js` بعد إنشاء خادم Socket.IO:
 ```javascript
-// في index.js:
 const io = new Server(httpServer, { cors: { origin: '*' } });
+// في index.js:
 setIO(io);  // ← هنا نحفظه للاستخدام لاحقاً
 ```
 
@@ -158,13 +158,13 @@ function setupWebSocket(httpServer) {
 ```
 **الغرف (Rooms)** — مفهوم أساسي في Socket.IO:
 
-```
-socket.join('64e1a3f4')  ← ينضم لـ "غرفة" باسم ID المستخدم
+```text
+socket.join('64e1a3f4')  // ينضم لـ "غرفة" باسم ID المستخدم
 
 لاحقاً:
 io.to('64e1a3f4').emit('receive_message', data)
-  ← يُرسِل لكل socket في تلك الغرفة
-  ← المستخدم قد يكون مفتوحاً على جهازين — كلاهما يستلمان
+  // يُرسِل لكل socket في تلك الغرفة
+  // المستخدم قد يكون مفتوحاً على جهازين — كلاهما يستلمان
 ```
 
 ```javascript
@@ -188,13 +188,13 @@ io.to('64e1a3f4').emit('receive_message', data)
     });
 ```
 
-```
-المستخدم A يكتب:
+```text
+    socket.to('ID_B').emit('typing', 'ID_A')
     العميل A → emit('typing', 'ID_B')
          ↓
-    socket.to('ID_B').emit('typing', 'ID_A')
+المستخدم A يكتب:
          ↓
-    العميل B يستلم: 'typing' من 'ID_A' → يُظهر "جار الكتابة..."
+    العميل B يستلم: 'typing' من 'ID_A'  // يُظهر "جار الكتابة..."
 ```
 
 - `socket.to(room).emit()` ← يُرسِل للغرفة المحددة **ماعدا** المُرسِل نفسه
@@ -263,9 +263,9 @@ io.to('64e1a3f4').emit('receive_message', data)
 
 ## 9. خريطة أحداث Socket.IO
 
-```
-← من العميل:     → للعميل:
+```text
 send_message   → receive_message
+  // من العميل:     → للعميل:
 typing         → typing
 stop_typing    → stop_typing
 seen           → seen
@@ -285,8 +285,8 @@ seen           → seen
 ## 10. لماذا `socket.to()` مقابل `getIO().to()`؟
 
 ```javascript
-// يُرسِل لغرفة معينة ماعدا المُرسِل:
 socket.to(receiverId).emit('typing', myId)
+// يُرسِل لغرفة معينة ماعدا المُرسِل:
 
 // يُرسِل لغرف معينة بما فيها المُرسِل:
 getIO().to([id1, id2]).emit('receive_message', msg)

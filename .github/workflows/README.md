@@ -105,7 +105,7 @@ npm start
 
 عند حدوث خطأ، ابحث عن البطاقات التالية في CI logs:
 
-```
+```text
 📦 Web deploy folder has X files          # يجب أن يكون > 10 ملفات
 📤 Copied X files to web branch           # يجب أن يساوي رقم الأول تقريباً
 ✅ Web build successful                   # دلالة النجاح

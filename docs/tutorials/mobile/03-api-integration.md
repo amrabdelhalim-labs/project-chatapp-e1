@@ -30,8 +30,8 @@ const api = axios.create({
 💡 **لماذا `axios.create` وليس `axios.defaults.baseURL`؟**
 
 ```javascript
-// ❌ يؤثر على كل الطلبات (حتى مكتبات أخرى تستخدم Axios)
 axios.defaults.baseURL = API_URL;
+// ❌ يؤثر على كل الطلبات (حتى مكتبات أخرى تستخدم Axios)
 
 // ✅ نسخة مستقلة — لا تؤثر على أي شيء آخر
 const api = axios.create({ baseURL: API_URL });
@@ -56,7 +56,7 @@ api.interceptors.request.use((config) => {
 - يقرأ التوكن من **Zustand Store** (لا من AsyncStorage مباشرة)
 - يضيف `Authorization: Bearer <token>` للـ headers تلقائياً
 
-```
+```text
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
  الكود يستدعي          Interceptor يضيف         الخادم يستقبل
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -95,16 +95,16 @@ api.interceptors.response.use(
 - عند خطأ 401 (توكن منتهي) → يستدعي `logout()` لمسح الجلسة
 - **يرفض الخطأ دائماً** (`Promise.reject`) — لا يبتلعه
 
-```
-الخادم يرد بـ 401
-  ↓
+```text
 Response Interceptor
   ↓
-logout()                    ← مسح AsyncStorage + المتجر
+الخادم يرد بـ 401
   ↓
-Promise.reject(error)       ← الكود المستدعي يمكنه التعامل مع الخطأ
+logout()  // مسح AsyncStorage + المتجر
   ↓
-navigation → Login          ← عبر initialRouteName (user === null)
+Promise.reject(error)  // الكود المستدعي يمكنه التعامل مع الخطأ
+  ↓
+navigation → Login  // عبر initialRouteName (user === null)
 ```
 
 💡 **الفرق عن الويب**: الويب يستخدم `window.location.href = "/login"` للتوجيه، بينما الموبايل يعتمد على `initialRouteName` — عندما يصبح `user === null`، التطبيق يعيد التوجيه تلقائياً.
@@ -149,8 +149,8 @@ export const register = async ({
 
 #### نمط تطبيع الأخطاء (Error Normalization)
 ```javascript
-// الخادم قد يرد بأشكال مختلفة:
 { response: { data: { message: "كلمة المرور غير صحيحة" } } }  // 400
+// الخادم قد يرد بأشكال مختلفة:
 { message: "Network Error" }                                    // انقطاع الشبكة
 {}                                                              // خطأ غير متوقع
 
@@ -239,8 +239,8 @@ export const updateProfilePicture = async (imageUri) => {
 #### الفرق بين الويب والموبايل في FormData:
 
 ```javascript
-// الويب — يستخدم File/Blob
 const formData = new FormData();
+// الويب — يستخدم File/Blob
 formData.append("file", fileBlob, "photo.jpg");
 
 // الموبايل — يستخدم كائن { uri, name, type }
@@ -274,15 +274,15 @@ export function getReceiverMessages(messages, receiverId, currentUserId) {
 - تُرجع الرسائل بين مستخدمين فقط (في كلا الاتجاهين)
 - تُستخدم لعرض رسائل المحادثة الحالية
 
-```
-كل الرسائل:
-  أحمد → سارة: "مرحباً"     ← تظهر في محادثة سارة
-  سارة → أحمد: "أهلاً"      ← تظهر في محادثة سارة
-  علي → أحمد: "سلام"        ← لا تظهر في محادثة سارة
-  أحمد → علي: "مرحباً"      ← لا تظهر في محادثة سارة
-
+```text
 getReceiverMessages(messages, "سارة", "أحمد")
-  → [أحمد→سارة, سارة→أحمد]   ← فقط رسائل المحادثة
+  أحمد  // سارة: "مرحباً"  // تظهر في محادثة سارة
+  سارة  // أحمد: "أهلاً"  // تظهر في محادثة سارة
+  علي  // أحمد: "سلام"  // لا تظهر في محادثة سارة
+  أحمد  // علي: "مرحباً"  // لا تظهر في محادثة سارة
+
+كل الرسائل:
+  → [أحمد  // سارة, سارة  // أحمد]  // فقط رسائل المحادثة
 ```
 
 ---

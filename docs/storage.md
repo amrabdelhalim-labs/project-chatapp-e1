@@ -4,7 +4,7 @@
 
 يستخدم المشروع **نمط الاستراتيجية (Strategy Pattern)** لإدارة تخزين الملفات. يمكن التبديل بين مزودي التخزين بتغيير متغير بيئة واحد دون تعديل الكود.
 
-```
+```text
 Controllers → StorageService (Factory) → Strategy (Local/Cloudinary/S3)
 ```
 
@@ -12,7 +12,7 @@ Controllers → StorageService (Factory) → Strategy (Local/Cloudinary/S3)
 
 ## هيكل الملفات
 
-```
+```text
 server/services/storage/
 ├── storage.interface.js       # تعريف الواجهة (JSDoc)
 ├── storage.service.js         # مصنع Singleton
@@ -141,7 +141,7 @@ npm run check-default-picture
 
 **الإخراج النموذجي (Cloudinary):**
 
-```
+```text
 🔍 Checking default profile picture setup...
 
 ☁️  Storage Type: CLOUDINARY

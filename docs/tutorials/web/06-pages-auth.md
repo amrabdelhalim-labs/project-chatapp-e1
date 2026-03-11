@@ -167,10 +167,10 @@ export const getDefaultAvatarUrl = () => {
 
 ## 4. تدفق تسجيل الدخول الكامل
 
-```
-المستخدم يملأ النموذج ويضغط Submit
-         ↓
+```text
 formik.handleSubmit() يُشغَّل
+         ↓
+المستخدم يملأ النموذج ويضغط Submit
          ↓
 Yup يتحقق من البيانات
          ↓ (نجح)
@@ -178,7 +178,7 @@ onSubmit(values) → login(values) → API
          ↓ (الخادم يرد)
 setUser(response.user) → Zustand يحفظ بيانات المستخدم
 setAccessToken(response.accessToken) → Zustand يحفظ التوكن
-navigate('/') → الانتقال للصفحة الرئيسية
+navigate('/')  // الانتقال للصفحة الرئيسية
 ```
 
 ---

@@ -71,10 +71,10 @@ export default function Chat() {
 ### الشرح:
 
 #### التمرير التلقائي:
-```
-رسالة جديدة تصل
-  ↓
+```text
 filteredMessages يتغير
+  ↓
+رسالة جديدة تصل
   ↓
 useEffect يُنفذ
   ↓
@@ -84,10 +84,10 @@ scrollIntoView({ behavior: "smooth" })
 ```
 
 #### إرسال "مقروءة" (seen):
-```
-المستخدم يفتح محادثة مع شخص
-  ↓
+```text
 receiverId يتغير
+  ↓
+المستخدم يفتح محادثة مع شخص
   ↓
 useEffect يُنفذ
   ↓
@@ -123,18 +123,18 @@ socket.emit("seen", receiverId)
 
 ### الشرح:
 
-```
+```text
 ┌───────────────────────────┐
-│     ChatHeader            │ ← اسم المستقبل + حالة الكتابة
+│     ChatHeader            │  // اسم المستقبل + حالة الكتابة
 ├───────────────────────────┤
 │                           │
 │   ChatMessage (مرسلة) →   │
 │   ← ChatMessage (مستقبلة) │
 │   ChatMessage (مرسلة) →   │
 │                           │
-│   <div ref={messagesEndRef}/>│ ← نقطة التمرير
+│   <div ref={messagesEndRef}/>│  // نقطة التمرير
 ├───────────────────────────┤
-│     ChatFooter            │ ← حقل الإدخال + زر الإرسال
+│     ChatFooter            │  // حقل الإدخال + زر الإرسال
 └───────────────────────────┘
 ```
 
@@ -192,8 +192,8 @@ export default function ChatHeader({ receiver }) {
 **الملف:** `web/src/utils/avatar.js`
 
 ```jsx
-// الصورة الافتراضية المدمجة (SVG Data URI)
 const DEFAULT_AVATAR_SVG = `data:image/svg+xml;utf8,...`;
+// الصورة الافتراضية المدمجة (SVG Data URI)
 
 // تحويل URL الصورة إلى رابط كامل (مع معالجة API base URL)
 export const getAvatarSrc = (profilePicture) => {
@@ -217,15 +217,15 @@ export const handleAvatarError = (event) => {
 
 #### 🎯 المشكلة التي تحل:
 
-```
-❌ قديماً:
+```text
+   ✓ SVG fallback مدمج (data URI)
    ✗ صور 404 غير موجودة
    ✗ رسائل "undefined" في الـ logs
    ✗ أيقونات صور معطوبة في الواجهة
    ✗ معالجة URL مختلفة في كل مكون
 
 ✅ الحل:
-   ✓ SVG fallback مدمج (data URI)
+❌ قديماً:
    ✓ معالجة موحدة في مكان واحد
    ✓ منع "undefined" في الـ URLs
    ✓ حماية من 404 الخارجية
@@ -235,29 +235,29 @@ export const handleAvatarError = (event) => {
 
 #### 📊 كيف يعمل:
 
-```
+```text
 1️⃣ getAvatarSrc(profilePicture)
    ├─ profilePicture = "https://res.cloudinary.com/.../avatar.jpg?_a=..."
-   ├─ normalizeProfilePicture() → يتحقق من الـ URL
+   ├─ normalizeProfilePicture()  // يتحقق من الـ URL
    └─ يرجع: "https://res.cloudinary.com/.../avatar.jpg?_a=..."
 
    أو
 
    ├─ profilePicture = "/uploads/default-picture.jpg"
-   ├─ normalizeProfilePicture() → يضيف baseUrl
+   ├─ normalizeProfilePicture()  // يضيف baseUrl
    └─ يرجع: "http://localhost:5000/uploads/default-picture.jpg"
 
    أو
 
    ├─ profilePicture = "undefined" (خطأ من الخادم)
-   ├─ normalizeProfilePicture() → يكتشف الخطأ
+   ├─ normalizeProfilePicture()  // يكتشف الخطأ
    └─ يرجع: getDefaultAvatarUrl() → SVG أو رابط افتراضي
 
 2️⃣ <img src={getAvatarSrc(pic)} onError={handleAvatarError} />
-   ├─ الصورة تحمل بنجاح → عرض الصورة ✅
+   ├─ الصورة تحمل بنجاح  // عرض الصورة ✅
    └─ فشل التحميل (404) → handleAvatarError():
        ├─ منع استدعاء متكرر (dataset.fallbackApplied)
-       └─ img.src = DEFAULT_AVATAR_SVG → عرض SVG افتراضي ✅
+       └─ img.src = DEFAULT_AVATAR_SVG  // عرض SVG افتراضي ✅
 ```
 
 ---
@@ -302,30 +302,30 @@ friend.friends.map((friend) => (
 
 #### 🎨 الصورة الافتراضية (SVG):
 
-```
+```text
 ┌──────────────┐
 │              │
-│      ⭕       │ ← رأس دائري
+│      ⭕       │  // رأس دائري
 │      /\       │
-│     /  \      │ ← جسم (fallback avatar)
+│     /  \      │  // جسم (fallback avatar)
 │    /    \     │
 │   /      \    │
 │  /        \   │
 └──────────────┘
 
-ألوان متدرجة (Gradient): رمادي مظلم → رمادي فاتح
+ألوان متدرجة (Gradient): رمادي مظلم  // رمادي فاتح
 ```
-```
+```text
 
 ### الشرح:
 
 #### مؤشر الكتابة المحدد النطاق (Scoped Typing):
 
-```jsx
+```
 {typing === currentReceiver?._id && (
   <p className="text-[#00BFA6] text-xs">typing...</p>
 )}
-```
+```text
 
 💡 **لماذا `typing === currentReceiver?._id`؟**
 
@@ -344,13 +344,13 @@ friend.friends.map((friend) => (
    → typing = "ahmed_id"
    → currentReceiver._id = "sara_id"
    → ahmed_id !== sara_id → لا أعرض "typing..." ✅
-```
+```text
 
 ---
 
 ## 📚 القسم الثالث: فقاعة الرسالة (ChatMessage.jsx)
 
-```jsx
+```
 import cn from "classnames";
 import moment from "moment";
 
@@ -376,13 +376,13 @@ export default function ChatMessage({ content, createdAt, isSender }) {
     </div>
   );
 }
-```
+```text
 
 ### الشرح:
 
 #### الحماية من XSS:
 
-```jsx
+```
 // ✅ آمن — React يهرب HTML تلقائياً
 <p className="text-white whitespace-pre-wrap break-words">
   {content}
@@ -391,13 +391,13 @@ export default function ChatMessage({ content, createdAt, isSender }) {
 // إذا content = "<script>alert('hacked')</script>"
 // React يعرضها كنص عادي: <script>alert('hacked')</script>
 // لا يُنفذ الكود! ✅
-```
+```text
 
 ⚠️ **ما يجب تجنبه**:
-```jsx
+```
 // ❌ خطير! يسمح بتنفيذ كود HTML/JS
 <p dangerouslySetInnerHTML={{ __html: content }} />
-```
+```text
 
 #### `whitespace-pre-wrap`:
 ```
@@ -408,7 +408,7 @@ export default function ChatMessage({ content, createdAt, isSender }) {
   "سطر أول\nسطر ثاني" →
   "سطر أول
    سطر ثاني" (سطرين) ✅
-```
+```text
 
 #### تمييز الألوان:
 
@@ -424,20 +424,20 @@ export default function ChatMessage({ content, createdAt, isSender }) {
 │                 │ كيف حالك؟│    │ ← أخضر (أنا أرسلت)
 │                 └──────────┘    │
 └─────────────────────────────────┘
-```
+```text
 
 ---
 
 ## 📚 القسم الرابع: حقل الإدخال والإرسال (ChatFooter.jsx)
 
-```jsx
+```
 import { useRef } from "react";
 import { TbSend } from "react-icons/tb";
 import { useStore } from "../../libs/globalState";
 
 export default function ChatFooter({ receiverId }) {
   const { socket, input, setInput, user, addMessage } = useStore();
-```
+```text
 
 ### الشرح:
 - يستقبل `receiverId` كـ prop من `Chat/index.jsx`
@@ -447,7 +447,7 @@ export default function ChatFooter({ receiverId }) {
 
 ### إرسال رسالة (Optimistic Update):
 
-```jsx
+```
   const sendMessage = () => {
     if (!input?.trim() || !socket) return;
 
@@ -472,7 +472,7 @@ export default function ChatFooter({ receiverId }) {
 
     setInput("");
   };
-```
+```text
 
 ### الشرح:
 
@@ -490,7 +490,7 @@ export default function ChatFooter({ receiverId }) {
 
 الخطوة 4: مسح حقل الإدخال
    setInput("")
-```
+```text
 
 💡 **`crypto.randomUUID()`**: ينشئ معرف فريد عالمياً (UUID v4). مثال: `"550e8400-e29b-41d4-a716-446655440000"`
 
@@ -498,7 +498,7 @@ export default function ChatFooter({ receiverId }) {
 
 ### مؤشر الكتابة:
 
-```jsx
+```
   useEffect(() => {
     if (!socket) return;
 
@@ -508,7 +508,7 @@ export default function ChatFooter({ receiverId }) {
       socket.emit("stop_typing", receiverId);
     }
   }, [input, socket, receiverId]);
-```
+```text
 
 ### الشرح:
 ```
@@ -519,31 +519,31 @@ input يتغير
 │
 └── input فارغ → socket.emit("stop_typing", receiverId)
     → الطرف الآخر لا يرى "typing..."
-```
+```text
 
 ---
 
 ### الإرسال بـ Enter:
 
-```jsx
+```
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       sendMessage();
     }
   };
-```
+```text
 
+- **Enter**  // إرسال الرسالة
 ### الشرح:
-- **Enter** → إرسال الرسالة
-- **Shift+Enter** → سطر جديد (لا إرسال)
-- **`e.preventDefault()`** → يمنع إضافة سطر جديد عند الإرسال
+- **Shift+Enter**  // سطر جديد (لا إرسال)
+- **`e.preventDefault()`**  // يمنع إضافة سطر جديد عند الإرسال
 
 ---
 
 ### العرض:
 
-```jsx
+```
   return (
     <>
       <label htmlFor="chat" className="sr-only">Your message</label>
@@ -574,13 +574,13 @@ input يتغير
       </div>
     </>
   );
-```
+```text
 
-### الشرح:
+| `socket` متصل + نص موجود | ✅ زر إرسال مفعل |
 
 | الحالة | العرض |
 |--------|-------|
-| `socket` متصل + نص موجود | ✅ زر إرسال مفعل |
+### الشرح:
 | `socket` متصل + نص فارغ | ⚠️ زر إرسال معطّل (`disabled`) |
 | `socket` غير متصل | ❌ رسالة "لا يوجد اتصال" + حقل إدخال معطّل |
 
@@ -588,7 +588,7 @@ input يتغير
 
 ## 📚 القسم الخامس: شاشة الترحيب (NoUserSelected.jsx)
 
-```jsx
+```
 import logo from "../../assets/icon.png";
 import { useNavigate } from "react-router-dom";
 import { IoLogOutOutline } from "react-icons/io5";
@@ -620,7 +620,7 @@ export default function NoUserSelected() {
     </div>
   );
 }
-```
+```text
 
 ### الشرح:
 - تظهر عند المسار `/` (بدون `receiverId`)
@@ -642,13 +642,13 @@ pages/index.jsx (Home)
         ├── ChatHeader (اسم + typing)
         ├── ChatMessage × N (فقاعات الرسائل)
         └── ChatFooter (إدخال + إرسال)
-```
+```text
 
-### النقاط الرئيسية:
+| `Chat/index.jsx` | `useParams` + تصفية + تمرير تلقائي + إرسال seen |
 
 | المكون | الميزة الرئيسية |
 |--------|----------------|
-| `Chat/index.jsx` | `useParams` + تصفية + تمرير تلقائي + إرسال seen |
+### النقاط الرئيسية:
 | `ChatHeader` | Scoped Typing — يعرض "typing..." فقط للمحادثة الحالية |
 | `ChatMessage` | حماية XSS (بدون `dangerouslySetInnerHTML`) + `whitespace-pre-wrap` |
 | `ChatFooter` | Optimistic Update + `crypto.randomUUID()` + Enter/Shift+Enter |
@@ -666,7 +666,7 @@ pages/index.jsx (Home)
 5. addMessage() → عرض فوري (Optimistic)
 6. الخادم يرد → addMessage يدمج بـ clientId
 7. الطرف الآخر: receive_message → عرض
-```
+```text
 
 ---
 

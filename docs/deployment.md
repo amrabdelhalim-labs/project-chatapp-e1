@@ -1,4 +1,4 @@
-# دليل النشر الإنتاجي
+﻿# دليل النشر الإنتاجي
 
 ## 📋 قائمة التحقق قبل النشر
 
@@ -22,7 +22,7 @@
 ## 🔐 استكشاف خطأ JWT_SECRET
 
 ### المشكلة:
-```
+```text
 Error: secretOrPrivateKey must have a value
 ```
 
@@ -33,8 +33,8 @@ Error: secretOrPrivateKey must have a value
 
 **1. التحقق محلياً:**
 ```bash
-# تحقق من وجوده في .env
 cd server
+# تحقق من وجوده في .env
 cat .env | grep JWT_SECRET
 
 # يجب أن يُظهر شيئاً مثل:
@@ -43,10 +43,10 @@ cat .env | grep JWT_SECRET
 
 **2. على Heroku:**
 ```bash
-# تحقق من Config Vars
 heroku config:get JWT_SECRET
+# تحقق من Config Vars
 
-# إذا كان فارغاً، أضفه:
+# إذا كان فارغاً, أضفه:
 heroku config:set JWT_SECRET="$(node -e 'console.log(require(\"crypto\").randomBytes(32).toString(\"base64\"))')"
 
 # أو يدوياً من Dashboard:
@@ -81,7 +81,7 @@ heroku logs --tail
 ## 🚨 استكشاف خطأ 405 (Method Not Allowed)
 
 ### المشكلة:
-```
+```http
 POST https://preview.amrabdelhalim.me/api/user/register 405 (Method Not Allowed)
 ```
 
@@ -137,13 +137,13 @@ cd web && npm run test:ci
 ## 📡 التحقق السريع من API
 
 ```bash
-# اختبر من المتصفح أو curl
 curl -X POST https://your-api.com/api/user/register \
+# اختبر من المتصفح أو curl
   -H "Content-Type: application/json" \
   -d '{"email":"test@test.com","password":"123456"}'
 
-# إذا أرجع 405، هناك مشكلة routing على الخادم أو URL خاطئة
-# إذا أرجع 400، الـ endpoint موجود ✓
+# إذا أرجع 405, هناك مشكلة routing على الخادم أو URL خاطئة
+# إذا أرجع 400, الـ endpoint موجود ✓
 ```
 
 ---
@@ -157,8 +157,8 @@ curl -X POST https://your-api.com/api/user/register \
 المتغيرات المطلوبة للإنتاج:
 
 ```bash
-# أساسي
 PORT=5000
+# أساسي
 MONGODB_URL=mongodb+srv://user:pass@cluster.mongodb.net/mychat
 JWT_SECRET=your_secure_random_secret_here
 
@@ -193,16 +193,16 @@ node -e "console.log(require('crypto').randomBytes(32).toString('base64'))"
 الخادم يستخدم `cors()` بدون تحديد أصول (يقبل الكل في الوضع الحالي). للإنتاج، يُفضل تقييدها:
 
 ```javascript
-// في index.js
 app.use(cors({
+// في index.js
   origin: process.env.CORS_ORIGINS?.split(',') || '*',
   credentials: true,
 }));
 ```
 
 ```bash
-# متغير البيئة
 CORS_ORIGINS=https://yourdomain.com,https://app.yourdomain.com
+# متغير البيئة
 ```
 
 ### 4. تحديد معدل الطلبات (موصى به)
@@ -217,7 +217,7 @@ import rateLimit from 'express-rate-limit';
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 دقيقة
   max: 100,
-  message: { message: 'عدد كبير جداً من الطلبات، يرجى المحاولة لاحقاً' },
+  message: { message: 'عدد كبير جداً من الطلبات, يرجى المحاولة لاحقاً' },
 });
 
 app.use('/api/user/login', limiter);
@@ -256,8 +256,8 @@ app.use('/api/user/register', limiter);
 ### إعداد البيئة
 
 ```bash
-# المتغيرات الأساسية
 heroku config:set MONGODB_URL="mongodb+srv://user:pass@cluster.mongodb.net/mychat"
+# المتغيرات الأساسية
 heroku config:set JWT_SECRET="$(openssl rand -base64 32)"
 heroku config:set NODE_ENV=production
 
@@ -340,15 +340,15 @@ DEFAULT_PROFILE_PICTURE_URL=https://res.cloudinary.com/...
 
 ملف `Procfile` موجود في `server/`:
 
-```
+```text
 web: node index.js
 ```
 
 ### النشر
 
 ```bash
-# نشر مجلد server فقط (subtree)
 git subtree push --prefix server heroku main
+# نشر مجلد server فقط (subtree)
 
 # أو إذا كان المشروع كله في مستودع واحد:
 git push heroku main
@@ -357,8 +357,8 @@ git push heroku main
 ### التحقق
 
 ```bash
-# فتح التطبيق
 heroku open
+# فتح التطبيق
 
 # فحص الحالة
 curl https://mychat-server.herokuapp.com/api/health
@@ -417,15 +417,15 @@ messageSchema.index({ createdAt: -1 });
 ### تطبيق الويب (`web/`)
 
 ```bash
-# ملف .env أو متغير بيئة
 REACT_APP_SERVER_URL=https://mychat-server.herokuapp.com
+# ملف .env أو متغير بيئة
 ```
 
 ### تطبيق الموبايل (`app/`)
 
 ```bash
-# ملف .env أو متغير بيئة
 EXPO_PUBLIC_SERVER_URL=https://mychat-server.herokuapp.com
+# ملف .env أو متغير بيئة
 ```
 
 ---
@@ -435,8 +435,8 @@ EXPO_PUBLIC_SERVER_URL=https://mychat-server.herokuapp.com
 ### سجلات Heroku
 
 ```bash
-# عرض آخر 100 سطر
 heroku logs -n 100
+# عرض آخر 100 سطر
 
 # متابعة مباشرة
 heroku logs --tail
@@ -448,8 +448,8 @@ heroku logs --tail --source app
 ### فحص الحالة
 
 ```bash
-# فحص صحة الخادم
 curl -s https://your-app.herokuapp.com/api/health | jq
+# فحص صحة الخادم
 
 # الاستجابة المتوقعة:
 {
@@ -521,9 +521,9 @@ const io = new Server(server, {
 
 ### كيف يعمل بروتوكول GitHub Pages
 
-```
+```text
+2. GitHub Pages: لا يوجد ملف باسم "chat"  // يخدم 404.html
 1. المستخدم يفتح /project-chatapp-e1/chat/room-123
-2. GitHub Pages: لا يوجد ملف باسم "chat" → يخدم 404.html
 3. 404.html: يحوّل المسار إلى query string:
    /project-chatapp-e1/?/chat/room-123
 4. index.html يستقبل: يرمم history API إلى المسار الحقيقي
@@ -544,7 +544,7 @@ node validate-workflow.mjs
 
 ### محيطة مخصصة `_redirects` لـ Netlify/Render
 
-```
+```text
 /* /index.html 200
 ```
 

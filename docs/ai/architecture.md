@@ -2,7 +2,7 @@
 
 ## System Overview
 
-```
+```text
 ┌─────────────┐     ┌─────────────┐     ┌────────────────┐
 │  Mobile App │     │   Web App   │     │    Server      │
 │  (Expo/RN)  │────▶│  (React)    │────▶│  (Express)     │
@@ -13,7 +13,7 @@
 
 ## Project Root
 
-```
+```text
 project-chatapp-e1/
 ├── .github/workflows/          # GitHub Actions CI/CD (build-and-deploy.yml + README.md)
 ├── .gitattributes              # LF line-ending enforcement (* text=auto eol=lf)
@@ -29,7 +29,7 @@ project-chatapp-e1/
 
 ## Server Architecture
 
-```
+```text
 server/
 ├── index.js                    # Entry point: Express + Socket.IO setup
 ├── config.js                   # MongoDB connection + server startup
@@ -79,7 +79,7 @@ server/
 
 ## Web Client Architecture
 
-```
+```text
 web/
 ├── package.json                # React 19, CRA, Zustand, Socket.IO, Axios, Formik, Yup, Tailwind
 ├── .env.example                # REACT_APP_API_URL=http://localhost:5000
@@ -134,7 +134,7 @@ web/
 
 ## Mobile App Architecture
 
-```
+```text
 app/
 ├── package.json                # Expo ~54, React Native 0.81.5, React 19, Zustand, Axios, Socket.IO
 ├── App.js                      # Entry: hydrateStore → NativeBaseProvider + BackHandler
@@ -185,12 +185,12 @@ app/
 ## Data Flow
 
 ### Authentication
-```
+```text
 Client → POST /api/user/login → validateLoginInput → findByEmail → bcrypt.compare → createToken (7d) → response
 ```
 
 ### Sending a Message (Socket.IO)
-```
+```text
 Client → socket.emit('send_message', { receiverId, content, clientId })
   → Server: repos.message.create({ sender, recipient, content })
   → Server: io.to([receiverId, senderId]).emit('receive_message', message)
@@ -198,7 +198,7 @@ Client → socket.emit('send_message', { receiverId, content, clientId })
 ```
 
 ### Profile Picture Upload
-```
+```text
 Client → PUT /api/user/profile/picture (multipart)
   → multer (memoryStorage) → controller
   → storage.uploadFile(req.file) → { url, filename }

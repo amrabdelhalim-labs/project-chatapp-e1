@@ -6,9 +6,9 @@
 
 ## 1. الصورة الكاملة — أين يتناسب هذا الدرس؟
 
-```
-درس 07 — storage.service.js  ← الموزع (من يختار الاستراتيجية؟)
-درس 06 — local.strategy.js  ← التخزين المحلي (مشروح سابقاً)
+```text
+درس 07 — storage.service.js  // الموزع (من يختار الاستراتيجية؟)
+درس 06 — local.strategy.js  // التخزين المحلي (مشروح سابقاً)
 هذا الدرس ←──────────────── cloudinary.strategy.js + s3.strategy.js + storage.interface.js
 ```
 
@@ -34,8 +34,8 @@
 
 **لماذا هذا مهم؟**
 ```javascript
-// في user.controller.js — نفس الكود مهما كانت الاستراتيجية:
 const storage = getStorageService();
+// في user.controller.js — نفس الكود مهما كانت الاستراتيجية:
 const result = await storage.uploadFile(req.file);
 // ^^^ لا يهم إن كان local أو cloudinary أو s3!
 ```
@@ -141,7 +141,7 @@ _extractPublicId(urlOrId) {
 ```
 
 مثال على استخراج publicId من URL:
-```
+```text
 https://res.cloudinary.com/demo/image/upload/v1234/mychat-profiles/photo.jpg
                                                     ↑uploadIndex
 → parts.slice(uploadIndex + 2) = ['mychat-profiles', 'photo.jpg']
@@ -255,14 +255,14 @@ _extractKey(urlOrKey) {
 - الصورة الافتراضية يجب أن تكون **على نفس سيرفر التخزين** (Cloudinary أو S3)
 - هذا السكريبت يتحقق من وجودها وينشرها إذا لم تكن موجودة
 
-```
+```bash
 node scripts/check-default-picture.js
 
-→ يقرأ STORAGE_TYPE من .env
-→ يُهيئ StorageService (Singleton — نفس المثيل الذي يستخدمه الخادم)
-→ يتحقق من وجود default-picture.jpg
-→ إذا غائبة: يرفعها من public/uploads/default-picture.jpg
-→ يطبع DEFAULT_PROFILE_PICTURE_URL لإضافتها إلى .env
+  // يقرأ STORAGE_TYPE من .env
+  // يُهيئ StorageService (Singleton — نفس المثيل الذي يستخدمه الخادم)
+  // يتحقق من وجود default-picture.jpg
+  // إذا غائبة: يرفعها من public/uploads/default-picture.jpg
+  // يطبع DEFAULT_PROFILE_PICTURE_URL لإضافتها إلى .env
 ```
 
 ### 5.2 هيكل `main()`
@@ -303,8 +303,8 @@ await storage.s3Client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }))
 ## 6. كيف يختار الخادم الاستراتيجية؟
 
 ```javascript
-// في storage.service.js (الدرس السابع):
 function createStorageStrategy() {
+// في storage.service.js (الدرس السابع):
   switch (process.env.STORAGE_TYPE) {
     case 'cloudinary': return new CloudinaryStorageStrategy();
     case 's3':         return new S3StorageStrategy();

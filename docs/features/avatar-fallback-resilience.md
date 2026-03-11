@@ -1,4 +1,4 @@
-# نظام Avatar Fallback Resilience
+﻿# نظام Avatar Fallback Resilience
 
 ## 📋 نظرة عامة
 
@@ -24,7 +24,7 @@
 
 ## 🏗️ البنية المعمارية
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │  React Component (ChatHeader, Sidebar)  │
 ├─────────────────────────────────────────┤
@@ -200,7 +200,7 @@ const getDefaultAvatarUrl = () => {
 
 **التدفق:**
 
-```
+```text
 getAvatarSrc("https://cloudinary.com/.../avatar.jpg")
   ↓ normalizeProfilePicture()
   ↓ "https://cloudinary.com/.../avatar.jpg"
@@ -241,12 +241,12 @@ export const handleAvatarError = (event) => {
 **لماذا `dataset.fallbackApplied`؟**
 
 ```javascript
-// ❌ بدون فحص — infinite loop!
 <img onError={handleAvatarError} src="invalid.jpg" />
+// ❌ بدون فحص — infinite loop!
 
 // onError يُطلق
 // img.src = SVG (صورة صحيحة)
-// ??? لا يوجد خطأ، المعالج لا يُطلق مجدداً (لا infinite loop)
+// ??? لا يوجد خطأ, المعالج لا يُطلق مجدداً (لا infinite loop)
 
 // لكن إذا كان SVG نفسه معطوب:
 <img onError={handleAvatarError} src="invalid.jpg" />
@@ -346,10 +346,10 @@ describe('Avatar Fallback System', () => {
 
 ## 📊 مخطط سير العمل الكامل
 
-```
-المستخدم يفتح تطبيق الدردشة
-  ↓
+```text
 Sidebar يحمل الأصدقاء من المخزن
+  ↓
+المستخدم يفتح تطبيق الدردشة
   ↓
 friend.profilePicture = "undefined" (من API)
   ↓
@@ -362,7 +362,7 @@ getAvatarSrc("undefined")
   ↓
 <img src={`data:image/svg+xml;utf8,...`} />
   ↓
-تحميل SVG من data URI (محلي، بدون طلب)
+تحميل SVG من data URI (محلي, بدون طلب)
   ↓
 عرض صورة avatar افتراضية على الشاشة ✅
 

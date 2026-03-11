@@ -1,4 +1,4 @@
-# دليل المساهمة — محادثتي (project-chatapp-e1)
+﻿# دليل المساهمة — محادثتي (project-chatapp-e1)
 
 > **اقرأ هذا الملف قبل إجراء أي تغيير.**
 > هذه القواعد غير قابلة للتفاوض وتُطبَّق عند مراجعة الكود. أي انحراف يتطلب مبرراً صريحاً.
@@ -28,13 +28,13 @@
 
 ## 2. أسماء الفروع
 
-```
-main             ← كود جاهز للإنتاج فقط؛ لا تُودِع مباشرة
-feat/<topic>     ← ميزة جديدة (مثال: feat/group-chat)
-fix/<topic>      ← إصلاح خطأ (مثال: fix/typing-indicator-scope)
-docs/<topic>     ← توثيق فقط (مثال: docs/update-ai-guide)
-chore/<topic>    ← أدوات، اعتماديات، إعداد (مثال: chore/add-prettier)
-refactor/<topic> ← إعادة هيكلة بدون تغيير في السلوك
+```text
+main  // كود جاهز للإنتاج فقط؛ لا تُودِع مباشرة
+feat/<topic>  // ميزة جديدة (مثال: feat/group-chat)
+fix/<topic>  // إصلاح خطأ (مثال: fix/typing-indicator-scope)
+docs/<topic>  // توثيق فقط (مثال: docs/update-ai-guide)
+chore/<topic>  // أدوات, اعتماديات, إعداد (مثال: chore/add-prettier)
+refactor/<topic>  // إعادة هيكلة بدون تغيير في السلوك
 ```
 
 ---
@@ -43,7 +43,7 @@ refactor/<topic> ← إعادة هيكلة بدون تغيير في السلوك
 
 **الصيغة:** [Conventional Commits](https://www.conventionalcommits.org/) — **بالإنجليزية فقط**.
 
-```
+```text
 <type>(<scope>): <short description>
 
 <body — list of changes, one per line starting with ->
@@ -86,8 +86,8 @@ refactor/<topic> ← إعادة هيكلة بدون تغيير في السلوك
 ### أمثلة
 
 ```bash
-# ✅ صحيح
 git commit -m "feat(server): add group chat with repository + validators
+# ✅ صحيح
 
 - Add Group Mongoose model with members array
 - Register in models and add GroupRepository extending BaseRepository
@@ -140,8 +140,8 @@ git commit -m "feat(server): added group endpoint"
 ### صيغة التاج — annotated tags حصراً
 
 ```bash
-# تاج موصوف (استخدم دائماً -a — لا lightweight tags)
 git tag -a v1.2.0 -m "v1.2.0 - Add Group Chat System
+# تاج موصوف (استخدم دائماً -a — لا lightweight tags)
 
 - Group model + GroupRepository (Mongoose/MongoDB)
 - REST routes: POST /groups, GET /groups, DELETE /groups/:id
@@ -173,8 +173,8 @@ git push origin v1.2.0
 **جميع الكود منسّق بـ Prettier** قبل كل إيداع. لا قرارات مسافات يدوية.
 
 ```bash
-# تنسيق جميع الملفات (من جذر المشروع — يعمل على جميع الأنظمة)
 node format.mjs
+# تنسيق جميع الملفات (من جذر المشروع — يعمل على جميع الأنظمة)
 
 # التحقق بدون كتابة (CI — يخرج 1 إذا كان غير منسّق)
 node format.mjs --check
@@ -213,8 +213,8 @@ cd web && npm run format
 شغّل هذا قبل كل `git commit`:
 
 ```bash
-# 1. جميع اختبارات الخادم (339 اختباراً)
 cd server && npm run test:all
+# 1. جميع اختبارات الخادم (339 اختباراً)
 
 # 2. جميع اختبارات الويب (99 اختباراً)
 cd web && npm run test:ci

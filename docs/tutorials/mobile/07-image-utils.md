@@ -8,7 +8,7 @@
 
 عند التطوير على جهاز حقيقي (هاتف) يكون الخادم يعمل على `http://localhost:3000`. لكن **الهاتف لا يعرف `localhost`** — localhost بالنسبة للهاتف هو الهاتف نفسه لا الكمبيوتر!
 
-```
+```text
 كمبيوتر: http://localhost:3000/uploads/photo.jpg ✅
 هاتف:    http://localhost:3000/uploads/photo.jpg ❌  (الهاتف يبحث عن نفسه)
 هاتف:    http://192.168.1.10:3000/uploads/photo.jpg ✅ (IP الكمبيوتر)
@@ -138,8 +138,8 @@ export function createAvatarSource(profilePicture) {
 React Native يتوقع `{ uri: '...' }` وليس نصاً مجرداً:
 
 ```jsx
-// ✅ صحيح:
 <Image source={createAvatarSource(user.profilePicture)} />
+// ✅ صحيح:
 
 // ❌ خطأ:
 <Image source={getAvatarUrl(user.profilePicture)} />

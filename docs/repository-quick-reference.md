@@ -12,8 +12,8 @@ const repos = getRepositoryManager();
 ## المستخدمون
 
 ```javascript
-// إنشاء
 const user = await repos.user.createUser({ firstName, lastName, email, password, profilePicture });
+// إنشاء
 
 // بحث
 const user = await repos.user.findByEmail('ahmed@example.com');
@@ -31,8 +31,8 @@ const { previousPicture, user } = await repos.user.updateProfilePicture(userId, 
 ## الرسائل
 
 ```javascript
-// إنشاء
 const msg = await repos.message.create({ sender, recipient, content });
+// إنشاء
 
 // بحث
 const messages = await repos.message.findAllForUser(userId);

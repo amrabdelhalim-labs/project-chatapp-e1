@@ -1,10 +1,10 @@
-# تجريد قاعدة البيانات — نمط المستودعات
+﻿# تجريد قاعدة البيانات — نمط المستودعات
 
 ## نظرة عامة
 
 يستخدم المشروع **نمط المستودعات (Repository Pattern)** لفصل منطق الوصول للبيانات عن وحدات التحكم.
 
-```
+```text
 Controllers → Repositories → Mongoose Models → MongoDB
 ```
 
@@ -12,7 +12,7 @@ Controllers → Repositories → Mongoose Models → MongoDB
 
 ## هيكل الملفات
 
-```
+```text
 server/
 ├── repositories/
 │   ├── repository.interface.js    # تعريفات JSDoc للواجهات
@@ -105,7 +105,7 @@ const result = await repos.message.findAllForUserPaginated(userId, 1, 20);
 import { validateRegisterInput } from '../validators/user.validator.js';
 
 // ترمي خطأ مع statusCode: 400
-// والرسالة: "الاسم الأول مطلوب، البريد الإلكتروني مطلوب"
+// والرسالة: "الاسم الأول مطلوب, البريد الإلكتروني مطلوب"
 validateRegisterInput({ firstName: '', email: '' });
 ```
 

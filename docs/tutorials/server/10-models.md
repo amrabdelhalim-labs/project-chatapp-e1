@@ -8,7 +8,7 @@
 
 محادثتي تستخدم **MongoDB** (قاعدة بيانات وثائقية) مع مكتبة **Mongoose** للتعامل معها.
 
-```
+```text
 MongoDB بدون Mongoose:
     db.collection('users').insertOne({ name: 'أي شيء!', x: 999 })
          ↓ (لا رقابة — أي بيانات تُقبل!)
@@ -29,8 +29,8 @@ Mongoose = **حارس بوابة** قاعدة البيانات.
 **Schema** = وصف شكل البيانات المسموح بها.
 
 ```javascript
-// مثال بسيط
 const userSchema = new Schema({
+// مثال بسيط
   name: { type: String, required: true },
   age: { type: Number, min: 0 }
 });
@@ -202,9 +202,9 @@ messageSchema.index({ createdAt: -1 });
 
 **الفهرس** = فهرس كتاب — بدله MongoDB تقرأ كل الوثائق للعثور على واحدة (بطيء).
 
-```
-بدون فهرس: "اعثر على رسائل John لـ Sara"
+```text
     MongoDB يقرأ: رسالة 1... لا | رسالة 2... لا | ... رسالة 10000... نعم!
+بدون فهرس: "اعثر على رسائل John لـ Sara"
     (O(n) — يتناسب مع حجم البيانات)
 
 مع فهرس { sender, recipient }:
@@ -228,7 +228,7 @@ export default Message;
 
 ## 5. ObjectId — المعرّف الفريد في MongoDB
 
-```
+```text
 ObjectId: 64f3b2c1a8e4d7f9c2b10e3a
           └─ 24 حرف هيكساديسيمال
           └─ يتضمن: الوقت + رقم الجهاز + عشوائية
@@ -237,9 +237,9 @@ ObjectId: 64f3b2c1a8e4d7f9c2b10e3a
 
 في الرسائل نستخدمه مرجعاً للمستخدم:
 ```javascript
-// الرسالة المحفوظة في MongoDB:
-{
   _id: ObjectId("64f3b2c1..."),   ← ID الرسالة نفسها
+{
+// الرسالة المحفوظة في MongoDB:
   sender: ObjectId("64e1a3f4..."), ← ID المُرسِل
   recipient: ObjectId("64e1b5c2..."), ← ID المستلم
   content: "مرحباً!",
@@ -265,17 +265,17 @@ ObjectId: 64f3b2c1a8e4d7f9c2b10e3a
 
 ## 7. رحلة الرسالة من النموذج للقاعدة
 
-```
-1. المستخدم يرسل: POST /messages { receiverId: "64e1b5c2", content: "مرحباً" }
-         ↓
+```text
 2. message.validator.js يتحقق من البيانات
+         ↓
+1. المستخدم يرسل: POST /messages { receiverId: "64e1b5c2", content: "مرحباً" }
          ↓
 3. messageController.sendMessage يستدعي الـ Repository
          ↓
 4. messageRepository.create ينشئ:
    new Message({
-     sender: "64e1a3f4",   ← من JWT
-     recipient: "64e1b5c2", ← من req.body
+     sender: "64e1a3f4",  // من JWT
+     recipient: "64e1b5c2",  // من req.body
      content: "مرحباً"
    })
          ↓
@@ -284,7 +284,7 @@ ObjectId: 64f3b2c1a8e4d7f9c2b10e3a
    - recipient موجود؟ ✓
    - content موجود وطوله ≤ 500؟ ✓
          ↓
-6. message.save() → يُحفظ في MongoDB
+6. message.save()  // يُحفظ في MongoDB
          ↓
 7. Socket.IO يُرسِل الرسالة للمستلم فورياً
 ```

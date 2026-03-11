@@ -37,10 +37,10 @@ const LoginSchema = Yup.object().shape({
 - نفس المكتبات المستخدمة في تطبيق الويب
 
 #### تدفق تسجيل الدخول:
-```
-المستخدم يملأ الحقول
-  ↓
+```text
 Formik + Yup يتحققان من الصحة
+  ↓
+المستخدم يملأ الحقول
   ↓
 login({ email, password })        ← requests.js
   ↓
@@ -89,7 +89,7 @@ export default function Chat() {
 - عند الضغط على صديق → يُحفظ كـ `currentReceiver` ويُنتقل لشاشة الرسائل
 - `getLastMessage` تستخدم `filterMessages` لإيجاد آخر رسالة في المحادثة
 
-```
+```text
 ┌─────────────────────────────┐
 │  🟢 سارة أحمد               │
 │  آخر رسالة: "مرحباً!"       │
@@ -157,8 +157,8 @@ const sendMessage = () => {
 
 #### إرسال إشعار قراءة:
 ```javascript
-// عند فتح المحادثة → إبلاغ الخادم بقراءة الرسائل
 useEffect(() => {
+// عند فتح المحادثة → إبلاغ الخادم بقراءة الرسائل
     if (currentReceiver && socket) {
         socket.emit("seen", currentReceiver._id);
     }

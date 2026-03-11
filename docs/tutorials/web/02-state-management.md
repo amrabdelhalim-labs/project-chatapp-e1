@@ -1,4 +1,4 @@
-# شرح إدارة الحالة بـ Zustand (State Management)
+﻿# شرح إدارة الحالة بـ Zustand (State Management)
 
 ## 📋 نظرة عامة
 
@@ -13,8 +13,8 @@
 ### المشكلة بدون مخزن مركزي:
 
 ```jsx
-// ❌ تمرير البيانات عبر Props لكل مكون
 <App user={user} messages={messages} socket={socket}>
+// ❌ تمرير البيانات عبر Props لكل مكون
   <Sidebar user={user} friends={friends}>
     <FriendItem friend={friend} messages={messages} />
   </Sidebar>
@@ -28,8 +28,8 @@
 ### الحل مع Zustand:
 
 ```jsx
-// ✅ أي مكون يأخذ ما يحتاجه مباشرة
 function ChatHeader() {
+// ✅ أي مكون يأخذ ما يحتاجه مباشرة
   const { typing, currentReceiver } = useStore();
   // لا حاجة لـ Props!
 }
@@ -200,21 +200,21 @@ updateFriend: (user) =>
 
 ### الشرح:
 
-```
-[مستخدم1, مستخدم2, مستخدم3]   ← المصفوفة الأصلية (لا تتغير!)
+```text
          ↓ findIndex
+[مستخدم1, مستخدم2, مستخدم3]  // المصفوفة الأصلية (لا تتغير!)
       index = 1
 
-[مستخدم1, مستخدم2, مستخدم3]   ← نسخة جديدة [...friends]
+[مستخدم1, مستخدم2, مستخدم3]  // نسخة جديدة [...friends]
                 ↓
-[مستخدم1, مستخدم2_محدث, مستخدم3]   ← التحديث في النسخة
+[مستخدم1, مستخدم2_محدث, مستخدم3]  // التحديث في النسخة
 ```
 
 💡 **لماذا Immutable Update؟**
 
 ```javascript
-// ❌ تعديل مباشر — React لن يكتشف التغيير!
 friends[index] = user;
+// ❌ تعديل مباشر — React لن يكتشف التغيير!
 set({ friends }); // نفس المرجع → لا إعادة رسم
 
 // ✅ نسخة جديدة — React يكتشف التغيير
@@ -265,30 +265,30 @@ addMessage: (message) => {
 هذه الدالة تتعامل مع 3 حالات:
 
 #### الحالة 1: صدى الخادم (Server Echo)
-```
-المستخدم يرسل → الخادم يحفظ → الخادم يرسل نفس الرسالة مع _id
-→ نبحث عن _id → إذا موجود → نحدث (نضيف _id, createdAt الحقيقي)
+```text
+المستخدم يرسل  // الخادم يحفظ  // الخادم يرسل نفس الرسالة مع _id
+  // نبحث عن _id  // إذا موجود  // نحدث (نضيف _id, createdAt الحقيقي)
 ```
 
 #### الحالة 2: تحديث الرسالة المتفائلة (Optimistic Update)
-```
+```text
 ChatFooter يضيف رسالة مؤقتة بـ clientId
-→ الخادم يرد بنفس clientId + _id جديد
-→ نبحث عن clientId → نحدث الرسالة المؤقتة بالبيانات الحقيقية
+  // الخادم يرد بنفس clientId + _id جديد
+  // نبحث عن clientId  // نحدث الرسالة المؤقتة بالبيانات الحقيقية
 ```
 
 #### الحالة 3: رسالة جديدة
-```
-رسالة واردة من مستخدم آخر → لا _id مطابق ولا clientId → أضفها
+```text
+رسالة واردة من مستخدم آخر  // لا _id مطابق ولا clientId  // أضفها
 ```
 
 💡 **ما هو Optimistic Update؟**
-```
+```text
 ❌ بدون (بطيء):
-   إرسال → انتظار الرد → عرض الرسالة
+   إرسال  // انتظار الرد  // عرض الرسالة
 
 ✅ مع (فوري):
-   إرسال → عرض فوراً (مؤقت) → الرد يصل → تحديث بالبيانات الحقيقية
+   إرسال  // عرض فوراً (مؤقت)  // الرد يصل  // تحديث بالبيانات الحقيقية
 ```
 
 ---
@@ -296,8 +296,8 @@ ChatFooter يضيف رسالة مؤقتة بـ clientId
 ### تعليم الرسائل كمقروءة:
 
 ```javascript
-// عندما أفتح محادثة → أعلم رسائل الشخص الآخر كمقروءة
 markMessagesSeenFromSender: (senderId, currentUserId) =>
+// عندما أفتح محادثة → أعلم رسائل الشخص الآخر كمقروءة
   set(({ messages }) => ({
     messages: messages.map((m) =>
       m.sender === senderId && m.recipient === currentUserId
@@ -319,7 +319,7 @@ markMyMessagesSeen: (myUserId, recipientId) =>
 
 ### الشرح:
 
-```
+```text
 markMessagesSeenFromSender (أنا قرأت رسائله):
   sender === هو  &&  recipient === أنا  →  seen: true
 
@@ -359,8 +359,8 @@ clearTyping: (senderId) =>
 #### لماذا `clearTyping` لا يمسح مباشرة؟
 
 ```javascript
-// ❌ خطأ: يمسح typing بغض النظر عمن أرسل stop_typing
 clearTyping: () => set({ typing: null })
+// ❌ خطأ: يمسح typing بغض النظر عمن أرسل stop_typing
 
 // ✅ صحيح: يمسح فقط إذا كان نفس الشخص
 clearTyping: (senderId) =>
@@ -370,11 +370,11 @@ clearTyping: (senderId) =>
 ```
 
 #### السيناريو:
-```
+```text
 1. أحمد يكتب → setTyping("ahmed_id") → typing = "ahmed_id"
 2. سارة تكتب → setTyping("sara_id")  → typing = "sara_id"
 3. أحمد يتوقف → clearTyping("ahmed_id") → typing لا يزال "sara_id" ✅
-   (لو مسحنا مباشرة، لاختفى مؤشر سارة بالخطأ!)
+   (لو مسحنا مباشرة, لاختفى مؤشر سارة بالخطأ!)
 ```
 
 ---
@@ -438,7 +438,7 @@ setInput: (input) => set({ input }),
 
 ### خريطة المخزن:
 
-```
+```text
 useStore
 ├── 🔌 socket / setSocket
 ├── 👤 user / setUser (+ localStorage)

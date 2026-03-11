@@ -1,4 +1,4 @@
-# الدرس التاسع: المتحكمات — قلب منطق الخادم 🎮
+﻿# الدرس التاسع: المتحكمات — قلب منطق الخادم 🎮
 
 > **هدف الدرس:** تفهم ما هي المتحكمات (Controllers)، وكيف تستقبل طلبات المستخدم وتعالجها وترد عليها، وذلك بشرح تفصيلي سطر بسطر لكل دالة في مشروع محادثتي — متحكم المستخدمين ومتحكم الرسائل.
 
@@ -8,7 +8,7 @@
 
 ### التشبيه البسيط:
 
-```
+```text
 المستخدم يرسل رسالة (HTTP Request)
          ↓
        المسار (Route) يستقبل الطلب ويوجهه
@@ -25,19 +25,19 @@
 
 في محادثتي، المتحكمات تتكامل مع **Socket.IO** — بعض العمليات تُرسل تحديثاً فورياً لكل المستخدمين المتصلين عبر WebSocket. هذا ما يجعل التطبيق "حياً" في الوقت الحقيقي.
 
-```
-register() → يحفظ المستخدم في DB → يُرسل HTTP Response
-                                  → يُرسل 'user_created' لكل المتصلين عبر Socket!
+```text
+register()  // يحفظ المستخدم في DB  // يُرسل HTTP Response
+  // يُرسل 'user_created' لكل المتصلين عبر Socket!
 ```
 
 ---
 
 ## 2. هيكل ملفات المتحكمات
 
-```
+```text
 server/controllers/
-├── user.js     ← إدارة المستخدمين (تسجيل، دخول، ملف شخصي، حذف)
-└── message.js  ← إدارة الرسائل (إرسال، جلب، محادثة، تمييز مقروء)
+├── user.js  // إدارة المستخدمين (تسجيل, دخول, ملف شخصي, حذف)
+└── message.js  // إدارة الرسائل (إرسال, جلب, محادثة, تمييز مقروء)
 ```
 
 ---
@@ -81,8 +81,8 @@ const repos = getRepositoryManager();
 **لماذا هنا وليس داخل كل دالة؟**
 
 ```javascript
-// ❌ طريقة مكررة — تنشئ مدير جديد في كل طلب
 const login = async (req, res) => {
+// ❌ طريقة مكررة — تنشئ مدير جديد في كل طلب
   const repos = getRepositoryManager(); // ← ينشئ كل مرة!
 };
 
@@ -566,10 +566,10 @@ export const markAsSeen = async (req, res) => {
 | **وسيط عام** | `getProfile`, `getUsers`, `updateUser`, `updateProfilePicture`, `createMessage`, `getMessages`, `getConversation`, `markAsSeen` |
 
 ```javascript
-// دالة بدون try/catch تعتمد على الوسيط العام
 export const getProfile = async (req, res) => {
+// دالة بدون try/catch تعتمد على الوسيط العام
   const user = await repos.user.findByIdSafe(req.userId);
-  // إذا رمى repos.user.findByIdSafe خطأً، سيصل لوسيط الأخطاء في index.js
+  // إذا رمى repos.user.findByIdSafe خطأً, سيصل لوسيط الأخطاء في index.js
   if (!user) {
     return res.status(StatusCodes.NOT_FOUND).json({ message: 'المستخدم غير موجود' });
   }
@@ -606,10 +606,10 @@ export const getProfile = async (req, res) => {
 
 ## 7. تدفق البيانات الكامل — مثال إرسال رسالة
 
-```
-المستخدم يضغط "إرسال" في التطبيق
-         ↓
+```text
 POST /messages  { receiverId: "...", content: "مرحبا!" }
+         ↓
+المستخدم يضغط "إرسال" في التطبيق
          ↓
 وسيط المصادقة (isAuthenticated.js)
    - يتحقق من JWT Token في الـ Header
@@ -617,8 +617,8 @@ POST /messages  { receiverId: "...", content: "مرحبا!" }
          ↓
 createMessage(req, res)
    - يستخرج: senderId = req.userId, receiverId, content
-   - validateMessageInput(...)  ← التحقق من الصيغة
-   - repos.message.create({...})  ← الحفظ في MongoDB
+   - validateMessageInput(...)  // التحقق من الصيغة
+   - repos.message.create({...})  // الحفظ في MongoDB
          ↓
 HTTP Response 201  { _id: "...", sender: "...", recipient: "...", content: "مرحبا!" }
          ↓

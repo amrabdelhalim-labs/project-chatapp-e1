@@ -1,4 +1,4 @@
-# شرح خدمة التخزين (storage.service.js)
+﻿# شرح خدمة التخزين (storage.service.js)
 
 ## 📋 نظرة عامة
 
@@ -84,8 +84,8 @@ static getInstance() {
 - نسخة واحدة تكفي لكل التطبيق
 
 ```javascript
-// في أي مكان في الكود:
 const storage1 = getStorageService();
+// في أي مكان في الكود:
 const storage2 = getStorageService();
 // storage1 === storage2 ← نفس الكائن! ✅
 ```
@@ -115,7 +115,7 @@ static createStrategy() {
 
 ### 3. Strategy Pattern — نفس الواجهة، تنفيذ مختلف
 
-```
+```text
 StorageStrategy (الواجهة المشتركة):
 ├── uploadFile(file)    → { url, filename }
 ├── uploadFiles(files)  → [{ url, filename }, ...]
@@ -124,9 +124,9 @@ StorageStrategy (الواجهة المشتركة):
 ├── getFileUrl(name)    → string
 └── healthCheck()       → boolean
 
-LocalStorageStrategy    ← يحفظ في نظام الملفات
-CloudinaryStorageStrategy ← يرفع لـ Cloudinary CDN
-S3StorageStrategy       ← يرفع لـ AWS S3
+LocalStorageStrategy  // يحفظ في نظام الملفات
+CloudinaryStorageStrategy  // يرفع لـ Cloudinary CDN
+S3StorageStrategy  // يرفع لـ AWS S3
 ```
 
 **لماذا؟**
@@ -156,8 +156,8 @@ const defaultUrl = storage.getFileUrl('default-picture.jpg');
 
 ### من الخارج — كل شيء نفسه:
 ```javascript
-// لا فرق في الكود، أياً كان المزود:
 const storage = getStorageService();
+// لا فرق في الكود, أياً كان المزود:
 await storage.uploadFile(file);  // يعمل مع Local, Cloudinary, و S3
 ```
 
@@ -203,8 +203,8 @@ static reset() {
 يسمح للاختبارات بإعادة تهيئة الخدمة مع إعدادات مختلفة:
 
 ```javascript
-// في الاختبارات:
 StorageService.reset();
+// في الاختبارات:
 process.env.STORAGE_TYPE = 'local';
 const storage = getStorageService(); // ينشئ نسخة جديدة
 ```

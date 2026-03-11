@@ -35,7 +35,7 @@ export function verifyToken(token) {
 - JWT يحل هذه المشكلة: العميل يرسل التوكن مع كل طلب ← الخادم يعرف هوية المستخدم
 
 ### بنية JWT:
-```
+```text
 eyJhbGciOiJIUzI1NiJ9.eyJ1c2VySWQiOiI2NWFiY2QifQ.Xk9f2kL...
            ↑                    ↑                    ↑
         Header              Payload              Signature
@@ -67,10 +67,10 @@ export function createToken(userId) {
 
 #### 2. **متى تُستدعى؟**:
 ```javascript
-// في controllers/user.js:
+const token = createToken(newUser._id);
 
 // عند التسجيل
-const token = createToken(newUser._id);
+// في controllers/user.js:
 res.json({ accessToken: token });
 
 // عند تسجيل الدخول
@@ -108,10 +108,10 @@ export function verifyToken(token) {
 
 #### 2. **متى تُستدعى؟**:
 ```javascript
-// في middlewares/isAuthenticated.js:
+const payload = verifyToken(token);
 
 // لطلبات HTTP
-const payload = verifyToken(token);
+// في middlewares/isAuthenticated.js:
 req.userId = payload.userId; // ← نستخرج معرف المستخدم
 
 // لاتصالات Socket.IO
@@ -134,8 +134,8 @@ socket.userId = data.userId;
 
 ### ❌ لا تفعل:
 ```javascript
-// لا تخزن كلمة المرور في التوكن!
 jwt.sign({ userId, password }, secret); // ❌❌❌
+// لا تخزن كلمة المرور في التوكن!
 
 // لا تستخدم مفتاح ضعيف!
 jwt.sign({ userId }, 'secret123'); // ❌
@@ -146,8 +146,8 @@ const SECRET = 'my-super-secret'; // ❌
 
 ### ✅ افعل:
 ```javascript
-// خزن الحد الأدنى من البيانات
 jwt.sign({ userId }, process.env.JWT_SECRET); // ✅
+// خزن الحد الأدنى من البيانات
 
 // استخدم مفتاح قوي وعشوائي
 // JWT_SECRET=kX9f2mPqR7vL3nW8yT5bA... (32+ حرف عشوائي)
@@ -160,8 +160,8 @@ jwt.sign({ userId }, process.env.JWT_SECRET); // ✅
 
 ## 🔄 تدفق المصادقة الكامل
 
-```
-1. المستخدم يرسل email + password
+```text
+   Authorization: Bearer eyJhb...
    ↓
 2. الخادم يتحقق من البيانات
    ↓
@@ -170,7 +170,7 @@ jwt.sign({ userId }, process.env.JWT_SECRET); // ✅
 4. العميل يستقبل ويخزن التوكن
    ↓
 5. العميل يرسل التوكن مع كل طلب:
-   Authorization: Bearer eyJhb...
+1. المستخدم يرسل email + password
    ↓
 6. Middleware يتحقق: verifyToken(token) → { userId }
    ↓

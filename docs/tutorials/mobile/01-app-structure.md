@@ -1,4 +1,4 @@
-# شرح هيكل تطبيق الموبايل (App Structure)
+﻿# شرح هيكل تطبيق الموبايل (App Structure)
 
 ## 📋 نظرة عامة
 
@@ -61,10 +61,10 @@ export default function App() {
 - خلال التحميل، يظهر مؤشر تحميل (spinner) بدلاً من الشاشات
 
 #### 2. مقدمو الخدمات (Providers)
-```
-NativeBaseProvider          ← مكتبة UI (أزرار, نماذج, ...)
-  └── NavigationContainer   ← حاوية التنقل (React Navigation)
-        └── Navigation      ← شجرة الشاشات
+```text
+NativeBaseProvider  // مكتبة UI (أزرار, نماذج, ...)
+  └── NavigationContainer  // حاوية التنقل (React Navigation)
+        └── Navigation  // شجرة الشاشات
 ```
 
 💡 **الفرق عن الويب**: تطبيق الويب يستخدم `createBrowserRouter` (React Router)، لكن الموبايل يستخدم `NavigationContainer` (React Navigation). الفكرة نفسها — حاوية تدير التنقل.
@@ -131,13 +131,13 @@ export default function Navigation() {
 - تنقل مثل كومة الأوراق — كل شاشة جديدة تُوضع فوق السابقة
 - زر الرجوع يزيل الشاشة العلوية ويعود للسابقة
 
-```
+```text
 ┌─────────────────┐
-│   Messages      │  ← الشاشة الحالية (أعلى الكومة)
+│   Messages      │  // الشاشة الحالية (أعلى الكومة)
 ├─────────────────┤
-│   Home          │  ← الشاشة الرئيسية
+│   Home          │  // الشاشة الرئيسية
 ├─────────────────┤
-│   Login         │  ← شاشة تسجيل الدخول
+│   Login         │  // شاشة تسجيل الدخول
 └─────────────────┘
 ```
 
@@ -180,7 +180,7 @@ export default function Home() {
     } = useStore();
 
     useEffect(() => {
-        // لو Socket موجود ومتصل، لا تنشئ واحد جديد
+        // لو Socket موجود ومتصل, لا تنشئ واحد جديد
         if (socketRef.current?.connected) return;
 
         const socket = io(API_URL, {
@@ -203,8 +203,8 @@ export default function Home() {
 #### 2. مستمعات الأحداث (Event Listeners):
 
 ```javascript
-// استقبال رسالة جديدة
 socket.on("receive_message", (message) => {
+// استقبال رسالة جديدة
     addMessage(message);
 });
 
@@ -234,8 +234,8 @@ socket.on("seen", ({ readerId, senderId }) => {
 #### 3. تحديثات المستخدمين:
 
 ```javascript
-// تحديث بيانات مستخدم
 socket.on("user_updated", (updatedUser) => {
+// تحديث بيانات مستخدم
     if (user._id === updatedUser._id) {
         setUser(updatedUser);          // أنا — تحديث بياناتي
     } else {
@@ -276,7 +276,7 @@ return (
 );
 ```
 
-```
+```text
 ┌─────────────────────────────────┐
 │           Header                │
 ├────────────────┬────────────────┤

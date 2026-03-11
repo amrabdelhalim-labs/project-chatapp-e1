@@ -1,4 +1,4 @@
-# دليل سريع للمفاهيم الأساسية
+﻿# دليل سريع للمفاهيم الأساسية
 
 ## 📚 المفاهيم المستخدمة في محادثتي
 
@@ -37,8 +37,8 @@ PATCH  /api/message/seen/:senderId   // تعليم الرسائل كمقروءة
 
 **مثال من محادثتي**:
 ```javascript
-// العميل يرسل رسالة
 socket.emit('send_message', { receiverId, content });
+// العميل يرسل رسالة
 
 // العميل يستقبل رسالة
 socket.on('receive_message', (message) => {
@@ -63,8 +63,8 @@ socket.on('typing', (senderId) => {
 
 **مثال من محادثتي**:
 ```javascript
-// المسار يمر عبر وسيطين قبل الوصول للـ Controller
 router.put("/profile/picture", [isAuthenticated, upload.single("file")], updateProfilePicture);
+// المسار يمر عبر وسيطين قبل الوصول للـ Controller
 //                               ↑ تحقق من JWT   ↑ رفع الصورة         ↑ Controller
 ```
 
@@ -77,8 +77,8 @@ router.put("/profile/picture", [isAuthenticated, upload.single("file")], updateP
 
 **مثال من محادثتي**:
 ```javascript
-// تسجيل الدخول
 const token = createToken(user._id); // صالح لمدة 7 أيام
+// تسجيل الدخول
 res.json({ accessToken: token });
 
 // في الطلبات اللاحقة (HTTP)
@@ -98,8 +98,8 @@ const socket = io(SERVER_URL, { query: { token: accessToken } });
 
 **مثال**:
 ```javascript
-// بدون Mongoose (استعلام مباشر)
 const user = await db.collection('users').findOne({ email: 'test@test.com' });
+// بدون Mongoose (استعلام مباشر)
 
 // مع Mongoose
 const user = await User.findOne({ email: 'test@test.com' });
@@ -150,8 +150,8 @@ static createStrategy() {
 
 #### ج. **Strategy Pattern** (استراتيجية)
 ```javascript
-// كل مزود تخزين ينفذ نفس الواجهة
 // StorageStrategy interface:
+// كل مزود تخزين ينفذ نفس الواجهة
 //   uploadFile(file)   → Promise<{ url, filename }>
 //   deleteFile(url)    → Promise<boolean>
 //   getFileUrl(name)   → string
@@ -181,8 +181,8 @@ const user = await repos.user.findByEmail(email);
 
 **الأساسية**:
 ```javascript
-// حالة
 const [count, setCount] = useState(0);
+// حالة
 
 // تأثير جانبي (يُنفذ عند التحميل)
 useEffect(() => {
@@ -269,8 +269,8 @@ socket.emit('send_message', { receiverId, content });
 - **v7** يستخدم `createBrowserRouter` (Data Router)
 
 ```javascript
-// الطريقة الحديثة (React Router v7):
 const router = createBrowserRouter([
+// الطريقة الحديثة (React Router v7):
   {
     path: "/",
     element: <ProtectedRoute><Home /></ProtectedRoute>,
@@ -337,10 +337,10 @@ api.interceptors.response.use(
 - يعطي تجربة مستخدم فورية
 
 ```javascript
-// ❌ بدون (بطيء): إرسال → انتظار → عرض
+const clientId = crypto.randomUUID(); // معرف مؤقت
 // ✅ مع (فوري):   إرسال → عرض فوراً → تأكيد لاحقاً
 
-const clientId = crypto.randomUUID(); // معرف مؤقت
+// ❌ بدون (بطيء): إرسال → انتظار → عرض
 socket.emit("send_message", { content, clientId });
 addMessage({ clientId, content, sender: user._id }); // عرض فوري!
 // عندما يرد الخادم → addMessage يدمج بـ clientId (لا تكرار)
@@ -352,8 +352,8 @@ addMessage({ clientId, content, sender: user._id }); // عرض فوري!
 
 ### 1. **Async/Await**
 ```javascript
-// القديم (Promises)
 fetch('/api/messages')
+// القديم (Promises)
   .then(res => res.json())
   .then(data => console.log(data))
   .catch(err => console.error(err));
@@ -372,8 +372,8 @@ try {
 
 ### 2. **ES Modules (import/export)**
 ```javascript
-// تصدير مسمى (Named Export)
 export function createToken(userId) { ... }
+// تصدير مسمى (Named Export)
 export function verifyToken(token) { ... }
 
 // استيراد مسمى
@@ -390,8 +390,8 @@ import User from '../models/User.js';
 
 ### 3. **Destructuring (التفكيك)**
 ```javascript
-// الكائنات
 const { firstName, lastName, email } = req.body;
+// الكائنات
 
 // في المعاملات
 function register({ firstName, lastName, email, password }) {
@@ -403,8 +403,8 @@ function register({ firstName, lastName, email, password }) {
 
 ### 4. **Optional Chaining**
 ```javascript
-// بدلاً من
 if (user && user.profile && user.profile.image) {
+// بدلاً من
   console.log(user.profile.image);
 }
 
@@ -418,8 +418,8 @@ console.log(user?.profile?.image);
 
 ### 1. **Hash Password (تشفير كلمة المرور)**
 ```javascript
-// ❌ لا تخزن كلمات المرور مباشرة
 user.password = '123456';
+// ❌ لا تخزن كلمات المرور مباشرة
 
 // ✅ استخدم bcrypt
 const hashedPassword = await bcrypt.hash(password, 10);
@@ -432,8 +432,8 @@ const isCorrect = await bcrypt.compare(inputPassword, user.password);
 
 ### 2. **Environment Variables (متغيرات البيئة)**
 ```javascript
-// ❌ لا تكتب المعلومات الحساسة في الكود
 const secret = 'my-secret-key-123';
+// ❌ لا تكتب المعلومات الحساسة في الكود
 
 // ✅ استخدم .env
 const secret = process.env.JWT_SECRET;
@@ -443,8 +443,8 @@ const secret = process.env.JWT_SECRET;
 
 ### 3. **Input Validation (التحقق من المدخلات)**
 ```javascript
-// ✅ نمط تجميع الأخطاء — يجمع كل الأخطاء ثم يرميها مرة واحدة
 const errors = [];
+// ✅ نمط تجميع الأخطاء — يجمع كل الأخطاء ثم يرميها مرة واحدة
 
 if (!firstName?.trim()) {
   errors.push('الاسم الأول مطلوب');
@@ -457,7 +457,7 @@ if (!email?.trim()) {
 }
 
 if (errors.length > 0) {
-  const error = new Error(errors.join('، '));
+  const error = new Error(errors.join(', '));
   error.statusCode = 400;
   throw error;
 }
@@ -482,8 +482,8 @@ if (errors.length > 0) {
 
 ### 1. **DRY (Don't Repeat Yourself)**
 ```javascript
-// ❌ تكرار
 const user = await User.findOne({ email: 'a@test.com' });
+// ❌ تكرار
 const user2 = await User.findOne({ email: 'b@test.com' });
 
 // ✅ استخدم Repository
@@ -520,8 +520,8 @@ export const login = async (req, res) => {
 - الإعدادات في `.prettierrc.json` — نفس الإعدادات في كل حزمة
 
 ```bash
-# تنسيق جميع الملفات (من جذر المشروع)
 node format.mjs
+# تنسيق جميع الملفات (من جذر المشروع)
 
 # فحص فقط (يستخدم في CI)
 node format.mjs --check
@@ -564,8 +564,8 @@ cd web && npm run format
 
 **مثال من محادثتي**:
 ```bash
-# ✅ صحيح — نطاق واحد، صيغة أمرية، وصف واضح
 git commit -m "feat(server): add group chat with repository + validators
+# ✅ صحيح — نطاق واحد, صيغة أمرية, وصف واضح
 
 - Add Group Mongoose model with members array
 - Register in RepositoryManager as getGroupRepository()
@@ -607,8 +607,8 @@ git commit -m "feat: add groups server and web and app"
 
 **مثال من محادثتي**:
 ```bash
-# دائماً استخدم -a (annotated) — لا تستخدم lightweight tags
 git tag -a v1.4.0 -m "v1.4.0 - Add code quality toolchain
+# دائماً استخدم -a (annotated) — لا تستخدم lightweight tags
 
 - Prettier formatting across all 3 packages
 - .gitattributes for LF line endings
@@ -629,13 +629,13 @@ git tag -a v1.4.0 -m "v1.4.0 - Add code quality toolchain
 - في محادثتي نستخدم **GitHub Actions** — ملف الإعدادات: `.github/workflows/build-and-deploy.yml`
 
 **كيف يعمل؟**
-```
-دفع كود لـ main ← GitHub يشغّل الورك فلو تلقائياً
+```text
+  (Server Job)                (Web Job)
                     ↓
     ┌──────────────┴──────────────┐
     ↓                             ↓
   وظيفة الخادم                 وظيفة الويب
-  (Server Job)                (Web Job)
+دفع كود لـ main ← GitHub يشغّل الورك فلو تلقائياً
     ↓                             ↓
   تثبيت التبعيات               تثبيت التبعيات
     ↓                             ↓

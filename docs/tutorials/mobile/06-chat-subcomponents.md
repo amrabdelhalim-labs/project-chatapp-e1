@@ -265,13 +265,13 @@ const handleConfirmDelete = async (password) => {
 
 ## 6. العلاقة بين المكوّنات
 
-```
+```text
 ChatItem (قائمة المحادثات)
-    ↓ ضغط
+  // ضغط
 MessageFooter (شريط الإدخال)
-    ↓ كتابة
+  // كتابة
 TypingIndicator (يظهر عند الطرف الآخر)
-    ↓ إرسال
+  // إرسال
 MessageItem (فقاعة الرسالة تُضاف فوراً)
 ```
 

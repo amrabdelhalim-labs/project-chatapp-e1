@@ -1,4 +1,4 @@
-# Feature Implementation Guide — My Chat (محادثتي)
+﻿# Feature Implementation Guide — My Chat (محادثتي)
 
 ## Socket.IO Events Reference
 
@@ -100,7 +100,7 @@ const imageUrl = user.profilePicture
 
 ### Git Ignore for Local Uploads
 
-```
+```text
 # .gitignore
 server/public/uploads/*      # Ignore user-uploaded files
 !server/public/uploads/.gitkeep  # Preserve directory structure
@@ -115,7 +115,7 @@ server/public/uploads/*      # Ignore user-uploaded files
 4. Client stores token → localStorage (web) / AsyncStorage (mobile)
 5. Subsequent requests → Authorization: Bearer <token>
 6. Socket connection → io({ query: { token } })
-```
+```text
 
 ## Adding a New Feature Checklist
 
@@ -197,7 +197,7 @@ This feature demonstrates a **destructive operation** with password verification
 
 Both web and mobile use Zustand with persistence:
 
-```javascript
+```
 // Web: localStorage (with safeParse/safeGet wrappers)
 // Mobile: AsyncStorage
 
@@ -224,26 +224,26 @@ Both web and mobile use Zustand with persistence:
   markMyMessagesSeen(myUserId, recipientId),            // Outgoing messages
   logout(),                         // Clear all state + localStorage
 }
-```
+```text
 
 ### Axios Interceptors (web only)
 
-```javascript
+```
 // requests.js creates axios instance with:
 // 1. Request interceptor: auto-inject Bearer token from localStorage
 // 2. Response interceptor: redirect to /login on 401
 // All API functions use this instance — no manual Authorization headers needed
-```
+```text
 
 ### Axios Interceptors (mobile)
 
-```javascript
+```
 // requests.js creates axios instance with axios.create({ baseURL: API_URL }):
 // 1. Request interceptor: auto-inject Bearer token from useStore.getState().accessToken
 // 2. Response interceptor: 401 → logout() (clears AsyncStorage + Zustand store)
 // Token comes from Zustand (not storage) — no manual Authorization headers needed
 // login()/register() wrapped in try/catch with error normalization: { error: "message" }
-```
+```text
 
 ### Key Differences: Web vs Mobile State
 
@@ -267,7 +267,7 @@ Both web and mobile use Zustand with persistence:
 
 ### Server Tests (339 tests — custom runner, requires MongoDB)
 
-```bash
+```
 cd server
 npm run test:all    # Run all 339 tests (6 files sequentially)
 npm test            # comprehensive.test.js (84)
@@ -276,7 +276,7 @@ npm run test:integration  # integration.test.js (46)
 npm run test:e2e    # api.test.js (69) — starts server on port 5001
 npm run test:image  # image.test.js (38) — profile picture upload/replace/delete
 npm run test:storage # storage.test.js (54 unit / 58 with live Cloudinary)
-```
+```text
 
 - Tests validators, JWT, socket utility, both repositories, storage service, API endpoints
 - E2E tests start real Express server and make HTTP requests
@@ -285,11 +285,11 @@ npm run test:storage # storage.test.js (54 unit / 58 with live Cloudinary)
 
 ### Web Tests (99 tests — Jest + @testing-library/react, no backend needed)
 
-```bash
+```
 cd web
 npm test             # watch mode (development)
 npm run test:ci      # single run (CI/servers)
-```
+```text
 
 | File | Tests | What It Tests |
 |------|-------|---------------|
@@ -308,12 +308,12 @@ npm run test:ci      # single run (CI/servers)
 
 ### Mobile Tests (83 tests — Jest 29 + jest-expo 54, no backend needed)
 
-```bash
+```
 cd app
 npm test             # watch mode (development)
 npm run test:ci      # single run (CI/servers)
 npx jest --watchAll=false --verbose  # verbose output
-```
+```text
 
 | File | Tests | What It Tests |
 |------|-------|---------------|
@@ -351,7 +351,7 @@ npx jest --watchAll=false --verbose  # verbose output
 
 Before every commit, verify:
 
-```bash
+```
 # 1. Server tests (339)
 cd server && npm run test:all
 
@@ -366,7 +366,7 @@ node format.mjs --check
 
 # 5. Workflow validation (لازم عند تعديل .github/workflows أو package.json)
 node validate-workflow.mjs
-```
+```text
 
 All 5 steps must pass. See `CONTRIBUTING.md` for full standards.
 
@@ -374,7 +374,7 @@ All 5 steps must pass. See `CONTRIBUTING.md` for full standards.
 
 Separate commits by scope — never mix server + web + app + docs in one commit.
 
-```bash
+```
 # Server changes first:
 git add server/ && git commit -m "feat(server): add group chat with repository + validators
 
@@ -401,7 +401,7 @@ git add app/ && git commit -m "feat(app): add group chat screens
 
 # Documentation (always last, always separate):
 git add docs/ && git commit -m "docs(ai): update architecture with group chat layer"
-```
+```text
 
 ### Tagging (when applicable)
 
@@ -409,7 +409,7 @@ Create an annotated tag only if this commit represents a **significant milestone
 complete with tests, or a notable improvement. Patch-level fixes (docs, renames) use `vX.Y.Z`;
 new features use `vX.(Y+1).0`.
 
-```bash
+```
 git tag -a v1.5.0 -m "v1.5.0 - Add Group Chat System
 
 - Group model + GroupRepository (Mongoose/MongoDB)
@@ -421,7 +421,7 @@ git tag -a v1.5.0 -m "v1.5.0 - Add Group Chat System
 - Server tests: 339 → <new total> passing
 - Web tests: 99 → <new total> passing
 - Mobile tests: 83 → <new total> passing"
-```
+```text
 
 See `CONTRIBUTING.md` §3 (Commit Messages) and §4 (Tagging Strategy) for full rules.  
 See workspace tagging rules: [`docs/ai-improvement-guide.md`](../../../../docs/ai-improvement-guide.md) § Tagging Strategy.
@@ -447,19 +447,19 @@ The web app is platform-agnostic. Deploy to:
 If you modify the workflow file (`.github/workflows/build-and-deploy.yml`), validate locally first
 using the automated script — mirrors the same pattern as `format.mjs`:
 
-```bash
+```
 # Single command covers: YAML structure, rsync excludes, package.json strip simulation
 node validate-workflow.mjs
 # Expected: Passed: 15   Failed: 0  |  [OK] Workflow is valid and ready to push.
-```
+```text
 
 The script automatically extracts the delete list from the workflow YAML itself and simulates it
 against the real `server/package.json` — no manual maintenance required.
 
 **✅ التحقق الدوري:**
 
-بعد كل إيداع على `main`، تحقق من:
+بعد كل إيداع على `main`, تحقق من:
 1. **GitHub Actions UI** — تأكد من نجاح Job التوازي
 2. **GitHub Pages** — زيارة `https://YOUR_USERNAME.github.io/project-chatapp-e1/`
 3. **فرع `web`** — تحقق من وجود `index.html` + assets
-4. **فرع `server`** — تحقق من عدم وجود `node_modules`، `dist`، أو ملفات الاختبار
+4. **فرع `server`** — تحقق من عدم وجود `node_modules`, `dist`, أو ملفات الاختبار
