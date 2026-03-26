@@ -11,4 +11,4 @@ build
 
 tests
 
-# Keep only source; nginx runner uses the `build` output copied from the build stage.
+# Host `build/` is not copied; CRA output is produced at container start (see docker-entrypoint.sh).

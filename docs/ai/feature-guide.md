@@ -1,4 +1,4 @@
-﻿# Feature Implementation Guide — My Chat (محادثتي)
+# Feature Implementation Guide — My Chat (محادثتي)
 
 ## Socket.IO Events Reference
 
@@ -265,39 +265,39 @@ Both web and mobile use Zustand with persistence:
 
 ## Testing
 
-### Server Tests (339 tests — custom runner, requires MongoDB)
+### Server Tests (335 tests — custom runner, requires MongoDB)
 
 ```
 cd server
-npm run test:all    # Run all 339 tests (6 files sequentially)
+npm run test:all    # Run all 335 tests (6 files sequentially)
 npm test            # comprehensive.test.js (84)
 npm run test:repos  # repositories.test.js (44)
 npm run test:integration  # integration.test.js (46)
 npm run test:e2e    # api.test.js (69) — starts server on port 5001
 npm run test:image  # image.test.js (38) — profile picture upload/replace/delete
 npm run test:storage # storage.test.js (54 unit / 58 with live Cloudinary)
-```text
+```
 
 - Tests validators, JWT, socket utility, both repositories, storage service, API endpoints
 - E2E tests start real Express server and make HTTP requests
 - Integration tests create temp workspace for file operations
 - All tests create and clean up test data automatically
 
-### Web Tests (99 tests — Jest + @testing-library/react, no backend needed)
+### Web Tests (119 tests — Jest + @testing-library/react, no backend needed)
 
 ```
 cd web
 npm test             # watch mode (development)
 npm run test:ci      # single run (CI/servers)
-```text
+```
 
 | File | Tests | What It Tests |
 |------|-------|---------------|
 | `filterMessages.test.js` | 7 | Message filtering between two users |
-| `globalState.test.js` | 25 | Zustand store operations + localStorage sync |
-| `requests.test.js` | 24 | Axios interceptors + all API function shapes |
-| `integration.test.js` | 23 | Socket.IO event flows (message, seen, typing) |
-| `components.test.jsx` | 20 | Component rendering, XSS prevention, routing |
+| `globalState.test.js` | 23 | Zustand store operations + localStorage sync |
+| `requests.test.js` | 47 | Axios interceptors + all API function shapes |
+| `integration.test.js` | 20 | Socket.IO event flows (message, seen, typing) |
+| `components.test.jsx` | 22 | Component rendering, XSS prevention, routing |
 
 **Web test patterns:**
 - Mock Axios with `jest.mock('axios')` factory
@@ -306,21 +306,21 @@ npm run test:ci      # single run (CI/servers)
 - Use `createMemoryRouter` + `RouterProvider` for routing tests
 - `setupTests.js` polyfills `TextEncoder` for react-router v7 + jsdom
 
-### Mobile Tests (83 tests — Jest 29 + jest-expo 54, no backend needed)
+### Mobile Tests (90 tests — Jest 29 + jest-expo 54, no backend needed)
 
 ```
 cd app
 npm test             # watch mode (development)
 npm run test:ci      # single run (CI/servers)
 npx jest --watchAll=false --verbose  # verbose output
-```text
+```
 
 | File | Tests | What It Tests |
 |------|-------|---------------|
-| `globalState.test.js` | 25 | Zustand store + AsyncStorage sync (auth, friends, messages, typing) |
+| `globalState.test.js` | 23 | Zustand store + AsyncStorage sync (auth, friends, messages, typing) |
 | `filterMessages.test.js` | 7 | Message filtering (same logic as web) |
-| `requests.test.js` | 27 | Axios instance + interceptors + API functions + integration scenarios |
-| `integration.test.js` | 28 | Socket.IO event flows + conversation isolation + multi-event + guards |
+| `requests.test.js` | 33 | Axios instance + interceptors + API functions + integration scenarios |
+| `integration.test.js` | 27 | Socket.IO event flows + conversation isolation + multi-event + guards |
 
 **Mobile test patterns:**
 - Must use Jest 29 (not 30) — jest-expo 54 incompatible with Jest 30
@@ -352,13 +352,13 @@ npx jest --watchAll=false --verbose  # verbose output
 Before every commit, verify:
 
 ```
-# 1. Server tests (339)
+# 1. Server tests (335)
 cd server && npm run test:all
 
-# 2. Web tests (99)
+# 2. Web tests (119)
 cd web && npm run test:ci
 
-# 3. Mobile tests (83)
+# 3. Mobile tests (90)
 cd app && npm run test:ci
 
 # 4. Formatting — must pass with zero issues
@@ -366,7 +366,7 @@ node format.mjs --check
 
 # 5. Workflow validation (لازم عند تعديل .github/workflows أو package.json)
 node validate-workflow.mjs
-```text
+```
 
 All 5 steps must pass. See `CONTRIBUTING.md` for full standards.
 
@@ -418,10 +418,10 @@ git tag -a v1.5.0 -m "v1.5.0 - Add Group Chat System
 - Socket.IO: group_message, group_typing events
 - Web: GroupList + GroupChat components
 - Mobile: GroupListScreen + GroupChatScreen
-- Server tests: 339 → <new total> passing
-- Web tests: 99 → <new total> passing
-- Mobile tests: 83 → <new total> passing"
-```text
+- Server tests: 335 → <new total> passing
+- Web tests: 119 → <new total> passing
+- Mobile tests: 90 → <new total> passing"
+```
 
 See `CONTRIBUTING.md` §3 (Commit Messages) and §4 (Tagging Strategy) for full rules.  
 See workspace tagging rules: [`docs/ai-improvement-guide.md`](../../../../docs/ai-improvement-guide.md) § Tagging Strategy.

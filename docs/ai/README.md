@@ -23,13 +23,13 @@ This directory contains machine-facing documentation for AI assistants working o
 - **Real-time:** Socket.IO for messaging, typing indicators (scoped), bidirectional read receipts
 - **Storage:** Strategy Pattern (local/Cloudinary/S3) via `STORAGE_TYPE` env var
 - **Web Client:** React 19 + Zustand + Axios interceptors + Formik/Yup + Tailwind CSS
-- **Server Testing:** Custom runner, 339 server tests (6 test suites)
-- **Web Testing:** Jest + Testing Library, 99 web tests (5 test suites)
-- **Mobile Testing:** Jest 29 + jest-expo 54, 83 mobile tests (4 test suites)
-- **Total Tests:** 521 (339 server + 99 web + 83 mobile)
+- **Server Testing:** Custom runner, 335 server tests (6 test suites)
+- **Web Testing:** Jest + Testing Library, 119 web tests (5 test suites)
+- **Mobile Testing:** Jest 29 + jest-expo 54, 90 mobile tests (4 test suites)
+- **Total Tests:** 544 (335 server + 119 web + 90 mobile)
 - **Deployment:** Heroku-ready with Procfile
 - **CI/CD:** GitHub Actions — server tests (MongoDB service) + web tests/build → deploy to orphan branches
-- **Docker Delivery:** Unified manual Docker workflow + `docker-delivery.mjs` for server/web/mobile build, Trivy scan, and optional GHCR publish
+- **Docker Delivery:** Unified manual Docker workflow + `scripts/docker/docker-delivery.mjs` for server/web/mobile build, Trivy scan, and optional GHCR publish
 - **Formatting:** Prettier with LF normalization (`.prettierrc.json` in each package, `format.mjs` at root)
 - **Contributing:** `CONTRIBUTING.md` at project root — commit format, tagging, pre-commit checklist
 - **Tutorials:** 15 server tutorials + 7 web tutorials + 7 mobile tutorials (Arabic) in `docs/tutorials/`
@@ -39,7 +39,7 @@ This directory contains machine-facing documentation for AI assistants working o
 ### Server (custom test runner — requires MongoDB)
 ```bash
 cd server
-npm run test:all         # all 339 tests (6 files sequentially)
+npm run test:all         # all 335 tests (6 files sequentially)
 npm test                 # comprehensive.test.js (84 tests)
 npm run test:repos       # repositories.test.js (44 tests)
 npm run test:integration # integration.test.js (46 tests)
@@ -54,7 +54,7 @@ npm run check-default-picture  # verify/upload default profile picture (setup to
 cd web
 npm test                 # watch mode (development)
 npm run test:ci          # single run (CI/servers)
-# 99 tests across 5 suites — all pass
+# 119 tests across 5 suites — all pass
 ```
 
 ### Mobile (Jest 29 + jest-expo 54)
@@ -63,7 +63,7 @@ cd app
 npm test                 # watch mode (development)
 npm run test:ci          # single run (CI/servers)
 npx jest --watchAll=false --verbose  # verbose output
-# 83 tests across 4 suites — all pass
+# 90 tests across 4 suites — all pass
 ```
 
 ### Formatting (Prettier — all packages)

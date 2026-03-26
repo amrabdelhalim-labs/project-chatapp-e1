@@ -35,9 +35,9 @@ services:
   web:
     build:
       context: ./web
-      args:
-        REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:5000}
-        PUBLIC_URL: ${PUBLIC_URL:-/}
+    environment:
+      REACT_APP_API_URL: ${REACT_APP_API_URL:-http://localhost:5000}
+      PUBLIC_URL: ${PUBLIC_URL:-/}
     ports:
       - "3000:8080"
     depends_on:

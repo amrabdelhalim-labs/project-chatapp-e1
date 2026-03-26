@@ -49,7 +49,7 @@
 11. [المسارات](./server/11-routes.md) - شرح جميع مسارات API (خريطة كاملة)
 12. [الاتصال اللحظي — Socket.IO](./server/12-socket.md) - شرح نمط Singleton, الأحداث, الغرف
 13. [المدققات](./server/13-validators.md) - شرح نمط تجميع الأخطاء, error.statusCode
-14. [اختبارات الخادم](./server/14-testing.md) - 339 اختبار (6 ملفات)
+14. [اختبارات الخادم](./server/14-testing.md) - 335 اختبار (6 ملفات)
 15. [استراتيجيات التخزين السحابي](./server/15-cloud-storage.md) - شرح `cloudinary.strategy.js`, `s3.strategy.js`, `storage.interface.js`, `scripts/check-default-picture.js`
 
 ---
@@ -65,7 +65,7 @@
 
 #### **المكونات والاختبارات**
 4. [مكونات المحادثة](./web/04-chat-components.md) - شرح Chat, ChatHeader, ChatFooter, ChatMessage
-5. [اختبارات الويب](./web/05-web-testing.md) - 99 اختبار (5 ملفات)
+5. [اختبارات الويب](./web/05-web-testing.md) - 119 اختبار (5 ملفات)
 6. [صفحات الدخول والتسجيل](./web/06-pages-auth.md) - شرح `login.jsx`, `register.jsx`, `utils/avatar.js` (Formik, Yup, getAvatarSrc)
 7. [الشريط الجانبي والملف الشخصي](./web/07-sidebar-profile.md) - شرح `Sidebar`, `MessageItem`, `Profile`, `EditableInput`, `Loading`, `DeleteAccountButton`
 
@@ -82,7 +82,7 @@
 
 #### **المكونات والاختبارات**
 4. [مكونات المحادثة والشاشات](./mobile/04-chat-components.md) - شرح الشاشات + المكونات
-5. [اختبارات الموبايل](./mobile/05-mobile-testing.md) - 83 اختبار (4 ملفات)
+5. [اختبارات الموبايل](./mobile/05-mobile-testing.md) - 90 اختبار (4 ملفات)
 6. [مكوّنات Chat التفصيلية](./mobile/06-chat-subcomponents.md) - شرح `TypingIndicator` (Animated), `MessageItem`, `MessageFooter` (Optimistic), `ChatItem`, `DeleteAccountButton`
 7. [أدوات الصور](./mobile/07-image-utils.md) - شرح `libs/avatar.js` (SVG fallback, localhost rewrite) و`libs/imageUtils.js` (normalizeImageUrl)
 
@@ -135,28 +135,28 @@
 - ✅ التعامل مع **قاعدة بيانات** MongoDB باستخدام Mongoose
 - ✅ **رفع وإدارة** الملفات والصور
 - ✅ **Design Patterns**: Singleton, Factory, Strategy, Repository
-- ✅ كتابة **339 اختبار** عبر 6 ملفات اختبار
+- ✅ كتابة **335 اختبار** عبر 6 ملفات اختبار
 
 ### Web:
 - ✅ هيكل التطبيق مع **React Router v7** (Data Router)
 - ✅ **إدارة الحالة** بـ Zustand (Optimistic Updates, Scoped Typing)
 - ✅ **Axios Interceptors** للمصادقة التلقائية ومعالجة 401
 - ✅ **مكونات المحادثة** (حماية XSS, إرسال فوري, مؤشر الكتابة)
-- ✅ كتابة **99 اختبار** عبر 5 ملفات اختبار
+- ✅ كتابة **119 اختبار** عبر 5 ملفات اختبار
 
 ### Mobile:
 - ✅ هيكل التطبيق مع **Expo + React Navigation** (Stack + Tab)
 - ✅ **إدارة الحالة** بـ Zustand + **AsyncStorage** (بدلاً من localStorage)
 - ✅ **Axios Interceptors** مع `axios.create()` والتوكن من Zustand
 - ✅ **شاشات ومكونات** المحادثة (FlatList, Modal, ImagePicker)
-- ✅ كتابة **83 اختبار** عبر 4 ملفات اختبار مع jest-expo
+- ✅ كتابة **90 اختبار** عبر 4 ملفات اختبار مع jest-expo
 
 ### المفاهيم العامة:
 - ✅ التواصل الفوري (Real-time) باستخدام Socket.IO
 - ✅ نمط الأحداث (Event-driven) في WebSocket
 - ✅ تصميم RESTful API
 - ✅ أنماط التصميم (Design Patterns)
-- ✅ كتابة **521 اختبار شامل** (339 خادم + 99 ويب + 83 موبايل)
+- ✅ كتابة **544 اختبار شامل** (335 خادم + 119 ويب + 90 موبايل)
 - ✅ التكامل والنشر المستمر (CI/CD) باستخدام GitHub Actions
 
 ---

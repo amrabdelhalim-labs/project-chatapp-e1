@@ -8,8 +8,8 @@
 
 | Job | ما يفعل |
 |-----|---------|
-| **Deploy Server** | تثبيت التبعيات → تشغيل 232 اختبار (MongoDB service) → نشر إلى فرع `server` |
-| **Deploy Web** | تثبيت التبعيات → تشغيل 99 اختبار → بناء React → نشر إلى فرع `web` |
+| **Deploy Server** | تثبيت التبعيات → تشغيل 335 اختبار (MongoDB service) → نشر إلى فرع `server` |
+| **Deploy Web** | تثبيت التبعيات → تشغيل 119 اختبار → بناء React → نشر إلى فرع `web` |
 | **Docker Delivery** | `check-docker-config.mjs` + `docker-delivery.mjs` (build/scan/publish) → (اختياري) نشر على GHCR |
 | **Docker Delivery (manual)** | `check-docker-config.mjs` + `check-docker-mobile-config.mjs` + `docker-delivery.mjs` (server/web/mobile build/scan/publish) |
 
@@ -156,12 +156,14 @@ npm start
 - اضغط **Run workflow**
 - اختر `targets` (مثل: `all` أو `mobile` أو `server,web`)
 - اختر `docker_mode`:
-  - `build-only` للتأكد من البوابة والفحص فقط
-  - `publish` لدفع الصور إلى GHCR
-- (اختياري) خصص:
-  - `web_api_url`
-  - `public_url`
-  - `mobile_api_url`
+  - `build-only`: يبني الصور ويشغّل Trivy كـ report فقط (لا يفشل بسبب الثغرات افتراضياً)
+  - `publish`: يبني + يفحص + يدفع إلى GHCR، والفحص هنا حاجز (يفشل عند وجود ثغرات حسب `severity`)
+- (اختياري) حقول `web_api_url` / `public_url` / `mobile_api_url` تضبط القيم الافتراضية المخبوزة داخل صورة Docker وقت البناء، ويمكن تجاوزها لاحقًا عند التشغيل عبر `docker run -e` أو `environment` في Compose.
+- منطق Docker الموحد موجود في `scripts/docker/`:
+  - `scripts/docker/docker-delivery.mjs`
+  - `scripts/docker/check-docker-config.mjs`
+  - `scripts/docker/check-docker-mobile-config.mjs`
+- في حال أردت جعل `build-only` حاجزاً أيضاً، مرّر `TRIVY_EXIT_CODE=1` أو `--trivy-exit-code 1`.
 
 ---
 
@@ -170,6 +172,6 @@ npm start
 | المشكلة | الحل |
 |---------|------|
 | فشل اختبارات الخادم | تأكد أن MongoDB service يعمل (تحقق من الـ logs) |
-| فشل بناء الويب | تأكد من إضافة `REACT_APP_API_URL` في Variables |
+| فشل بناء الويب في Docker | تأكد من تمرير `REACT_APP_API_URL` عند التشغيل أو في `.env.docker` لخدمة `web` |
 | لم يُنشر شيء | تأكد أن الـ push على فرع `main` وليس فرع آخر |
 | `[skip ci]` في الإيداع | إيداعات النشر تتجاهل تشغيل الـ workflow مرة أخرى |

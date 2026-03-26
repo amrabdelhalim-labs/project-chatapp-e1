@@ -1,4 +1,4 @@
-﻿# دليل المساهمة — محادثتي (project-chatapp-e1)
+# دليل المساهمة — محادثتي (project-chatapp-e1)
 
 > **اقرأ هذا الملف قبل إجراء أي تغيير.**
 > هذه القواعد غير قابلة للتفاوض وتُطبَّق عند مراجعة الكود. أي انحراف يتطلب مبرراً صريحاً.
@@ -148,9 +148,9 @@ git tag -a v1.2.0 -m "v1.2.0 - Add Group Chat System
 - Custom validators: name required, members array min 2
 - Socket.IO: group_message, group_typing events
 - Client: GroupList + GroupChat components
-- Server tests: 232 → 280 passing
-- Web tests: 99 passing
-- Mobile tests: 83 passing"
+- Server tests: 335 passing
+- Web tests: 119 passing
+- Mobile tests: 90 passing"
 
 # تاج على إيداع سابق
 git tag -a v1.0.0 <hash> -m "v1.0.0 - ..."
@@ -214,12 +214,12 @@ cd web && npm run format
 
 ```bash
 cd server && npm run test:all
-# 1. جميع اختبارات الخادم (339 اختباراً)
+# 1. جميع اختبارات الخادم (335 اختباراً)
 
-# 2. جميع اختبارات الويب (99 اختباراً)
+# 2. جميع اختبارات الويب (119 اختباراً)
 cd web && npm run test:ci
 
-# 3. جميع اختبارات الجوال (83 اختباراً)
+# 3. جميع اختبارات الجوال (90 اختباراً)
 cd app && npm run test:ci
 
 # 4. Prettier — تأكد من تطبيق التنسيق
@@ -262,8 +262,8 @@ node validate-workflow.mjs
 | E2E API | `cd server && npm run test:e2e` | 69 | أي إيداع على الخادم |
 | الصور | `cd server && npm run test:image` | 38 | أي إيداع للتخزين |
 | التخزين | `cd server && npm run test:storage` | 54 | أي إيداع للتخزين |
-| اختبارات الويب | `cd web && npm run test:ci` | 99 | أي إيداع على الويب |
-| اختبارات الجوال | `cd app && npm run test:ci` | 83 | أي إيداع على الجوال |
-| **الإجمالي** | — | **521** | أي تاج إصدار |
+| اختبارات الويب | `cd web && npm run test:ci` | 119 | أي إيداع على الويب |
+| اختبارات الجوال | `cd app && npm run test:ci` | 90 | أي إيداع على الجوال |
+| **الإجمالي** | — | **544** | أي تاج إصدار |
 
 راجع [`docs/testing.md`](docs/testing.md) للتوثيق الكامل للاختبارات.

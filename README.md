@@ -17,7 +17,7 @@
 | الملف الشخصي | تحديث الاسم والحالة، رفع/تغيير الصورة الشخصية |
 | متعدد المنصات | ويب (React) + جوال (Expo/React Native) + خادم مشترك |
 | تخزين مرن | بنية قابلة للتوصيل: Local أو Cloudinary أو AWS S3 |
-| اختبارات شاملة | 513 اختباراً: 331 خادم + 99 ويب + 83 جوال |
+| اختبارات شاملة | 544 اختباراً: 335 خادم + 119 ويب + 90 جوال |
 | جودة الكود | Prettier + فرض نهايات LF + معايير المساهمة |
 
 ---
@@ -67,12 +67,18 @@
 
 ```text
 project-chatapp-e1/
-├── .github/workflows/          # GitHub Actions CI/CD (build-and-deploy.yml)
+├── .github/workflows/          # GitHub Actions CI/CD (build-and-deploy.yml, docker-delivery.yml)
 ├── .gitattributes              # فرض نهايات سطر LF
 ├── .gitignore                  # node_modules, .expo, .env, coverage
 ├── CONTRIBUTING.md             # أسماء الفروع, الإيداعات, التاجات, التنسيق
+├── docker-compose.yml          # تشغيل محلي: خادم + ويب + MongoDB
+├── docker-delivery.mjs         # غلاف يستدعي scripts/docker/docker-delivery.mjs
+├── check-docker-config.mjs     # غلاف يستدعي scripts/docker/check-docker-config.mjs
+├── check-docker-mobile-config.mjs
 ├── format.mjs                  # تشغيل Prettier عبر المنصات
 ├── validate-workflow.mjs       # التحقق من صحة سير عمل GitHub Actions
+├── scripts/docker/             # منطق Docker الموحد + فحوصات تكاملية
+├── trivy/                      # trivyignore.yaml للفحص الأمني مع Docker Delivery
 ├── README.md                   # هذا الملف
 │
 ├── server/                     # Express REST API + Socket.IO
@@ -86,22 +92,27 @@ project-chatapp-e1/
 │   ├── models/                 # مخططات Mongoose (User, Message)
 │   ├── utils/                  # JWT helpers + Socket.IO utility
 │   ├── routes/                 # /api/user/* + /api/message/*
-│   ├── tests/                  # 339 اختباراً (6 مجموعات)
+│   ├── tests/                  # 335 اختباراً (6 ملفات)
+│   ├── Dockerfile
 │   └── Procfile                # نشر Heroku
 │
 ├── web/                        # React CRA
+│   ├── Dockerfile
+│   ├── docker-entrypoint.sh    # بناء/تصدير عند التشغيل حسب REACT_APP_*
 │   └── src/
 │       ├── pages/              # Home, Login, Register
 │       ├── components/         # Chat, Sidebar, Profile, DeleteAccountButton
 │       ├── libs/               # Zustand store, Axios interceptors
 │       ├── utils/              # Avatar helpers + fallbacks
-│       └── tests/              # 99 اختباراً (5 مجموعات)
+│       └── tests/              # 119 اختباراً (5 مجموعات)
 │
 ├── app/                        # Expo + React Native
+│   ├── Dockerfile
+│   ├── docker-entrypoint.sh    # تصدير ويب ثابت عند التشغيل (API_URL)
 │   ├── screens/                # Login, Register, Home
 │   ├── components/             # Header, EditUserModal, DeleteAccountButton
 │   ├── libs/                   # Zustand store, Axios interceptors
-│   └── tests/                  # 83 اختباراً (4 مجموعات)
+│   └── tests/                  # 90 اختباراً (4 مجموعات)
 │
 └── docs/                       # التوثيق
     ├── ai/                     # توجيهات AI (المعمارية, دليل الميزات)
@@ -186,7 +197,7 @@ docker compose up --build
 ### المنافذ الأساسية
 - `server`: `http://localhost:5000`
 - `web`: `http://localhost:3000`
-- `mobile` (Expo web داخل Docker): `http://localhost:19006`
+- `mobile` (تصدير ويب ثابت داخل Docker): `http://localhost:8080` عند تشغيل الحاوية بـ `-p 8080:8080`
 
 ### فحص الحالة
 ```bash
@@ -197,21 +208,20 @@ curl -fsS http://localhost:5000/api/health
 
 ### Mobile (Expo) داخل Docker
 
-حاوية تطوير لـ Expo (تشغيل `expo start --web`) مناسبة للـ preview/التجربة.
+تصدير ويب ثابت عند بدء الحاوية (`expo export -p web`) ثم التقديم عبر Nginx؛ عناوين الـAPI تُمرَّر عند التشغيل (`-e API_URL=...`).
 
 1. بناء الصورة:
 ```bash
-node docker-delivery.mjs \
+node scripts/docker/docker-delivery.mjs \
   --targets mobile \
-  --mode build-only \
-  --mobile-api-url http://localhost:5000
+  --mode build-only
 ```
 
 2. تشغيل الحاوية:
 ```bash
 docker run --rm -it \
-  -p 8081:8081 \
-  -p 19006:19006 \
+  -p 8080:8080 \
+  -e API_URL=http://localhost:5000 \
   --name chatapp-mobile \
   chatapp-mobile:latest
 ```
@@ -295,21 +305,22 @@ docker run --rm -it \
 
 ## تشغيل الاختبارات
 
-**الإجمالي: 452 اختباراً** (270 خادم + 99 ويب + 83 جوال) — جميعها ناجحة.
+**الإجمالي: 544 اختباراً** (335 خادم + 119 ويب + 90 جوال) — جميعها ناجحة.
 
-### اختبارات الخادم (270 — يتطلب MongoDB)
+### اختبارات الخادم (335 — يتطلب MongoDB)
 
 ```bash
 cd server
-npm run test:all         # جميع الاختبارات (5 مجموعات تسلسلية)
-npm test                 # comprehensive.test.js — 80 اختباراً
+npm run test:all         # جميع الاختبارات (6 ملفات تسلسلية)
+npm test                 # comprehensive.test.js — 84 اختباراً
 npm run test:repos       # repositories.test.js — 44 اختباراً
-npm run test:integration # integration.test.js — 45 اختباراً
-npm run test:e2e         # api.test.js — 63 اختباراً
+npm run test:integration # integration.test.js — 46 اختباراً
+npm run test:e2e         # api.test.js — 69 اختباراً
 npm run test:image       # image.test.js — 38 اختباراً
+npm run test:storage     # storage.test.js — 54 اختباراً (وحدة؛ اختياري Cloudinary)
 ```
 
-### اختبارات الويب (99 — Jest + @testing-library/react)
+### اختبارات الويب (119 — Jest + @testing-library/react)
 
 ```bash
 cd web
@@ -317,7 +328,7 @@ npm test                 # وضع المراقبة (التطوير)
 npm run test:ci          # تشغيل واحد (CI)
 ```
 
-### اختبارات الجوال (83 — Jest 29 + jest-expo 54)
+### اختبارات الجوال (90 — Jest 29 + jest-expo 54)
 
 ```bash
 cd app
@@ -385,13 +396,13 @@ cd web && npm run format
 |-------|-------|
 | `npm start` | الخادم للإنتاج |
 | `npm run dev` | التطوير مع إعادة التشغيل التلقائي |
-| `npm test` | 80 اختباراً شاملاً |
+| `npm test` | 84 اختباراً شاملاً |
 | `npm run test:repos` | 44 اختباراً للـ repositories |
 | `npm run test:integration` | 46 اختباراً متكاملاً |
-| `npm run test:e2e` | 65 اختباراً E2E |
+| `npm run test:e2e` | 69 اختباراً E2E |
 | `npm run test:image` | 38 اختباراً للصور |
-| `npm run test:storage` | 50 اختباراً لخدمات التخزين |
-| `npm run test:all` | جميع 323 اختباراً تسلسلياً |
+| `npm run test:storage` | 54 اختباراً لخدمات التخزين |
+| `npm run test:all` | جميع 335 اختباراً تسلسلياً |
 | `npm run check-default-picture` | تحقق/رفع الصورة الافتراضية للسحابة |
 | `npm run format` | تنسيق الملفات |
 | `npm run format:check` | التحقق من التنسيق |
@@ -403,7 +414,7 @@ cd web && npm run format
 | `npm start` | خادم التطوير |
 | `npm run build` | بناء الإنتاج |
 | `npm test` | اختبارات وضع المراقبة |
-| `npm run test:ci` | 99 اختباراً (CI) |
+| `npm run test:ci` | 119 اختباراً (CI) |
 | `npm run format` | تنسيق الملفات |
 
 ### الجوال
@@ -414,7 +425,7 @@ cd web && npm run format
 | `npm run android` | تطوير Android |
 | `npm run ios` | تطوير iOS |
 | `npm test` | اختبارات وضع المراقبة |
-| `npm run test:ci` | 83 اختباراً (CI) |
+| `npm run test:ci` | 90 اختباراً (CI) |
 | `npm run format` | تنسيق الملفات |
 
 ---
@@ -425,8 +436,8 @@ cd web && npm run format
 
 | الوظيفة | ما تفعله |
 |---------|---------|
-| **نشر الخادم** | تثبيت → 323 اختباراً (MongoDB service) → دفع إلى فرع `server` → Heroku |
-| **نشر الويب** | تثبيت → 99 اختباراً → بناء React → دفع إلى فرع `web` → GitHub Pages |
+| **نشر الخادم** | تثبيت → 335 اختباراً (MongoDB service) → دفع إلى فرع `server` → Heroku |
+| **نشر الويب** | تثبيت → 119 اختباراً → بناء React → دفع إلى فرع `web` → GitHub Pages |
 
 كلا الوظيفتين تعملان **بالتوازي**. إيداعات النشر تستخدم `[skip ci]` لمنع التشغيل المتكرر.
 
@@ -444,11 +455,11 @@ cd web && npm run format
 |-------|---------|-----------------|
 | `v1.0.0` | المشروع مكتمل الميزات | الخادم + الويب + الجوال مع CRUD كامل وSocket.IO |
 | `v1.1.0` | نمط Repository والتخزين واختبارات الخادم | Repository Pattern، Storage Strategy، الدروس التعليمية |
-| `v1.2.0` | أمان واختبارات عميل الويب | Axios interceptors، Zustand، Formik/Yup، 99 اختباراً |
-| `v1.3.0` | عميل الجوال واختبارات متعددة المنصات | جوال، Zustand/AsyncStorage، 83 اختباراً |
+| `v1.2.0` | أمان واختبارات عميل الويب | Axios interceptors، Zustand، Formik/Yup، توسيع اختبارات الويب |
+| `v1.3.0` | عميل الجوال واختبارات متعددة المنصات | جوال، Zustand/AsyncStorage، اختبارات الجوال |
 | `v1.4.0` | جودة الكود ومعايير المساهمة | Prettier، .gitattributes، CONTRIBUTING.md |
 | `v1.5.0` | خط CI/CD | GitHub Actions: اختبارات الخادم + بناء ونشر الويب |
-| `v1.6.0` | اختبارات الصور | image.test.js — إجمالي 452 اختباراً، تحسينات التوثيق |
+| `v1.6.0` | اختبارات الصور | image.test.js — توسيع تغطية الصور، تحسينات التوثيق |
 | `v1.7.0` | Cloudinary وتحسينات Storage | CLOUDINARY_URL، حل race condition، اختبارات storage |
 | `v1.7.1` | إصلاح Cloudinary init | نقل cloudinary للـ dependencies، إصلاح race condition |
 | `v1.7.2` | إصلاح SPA routing و405 errors | _redirects، 404.html، receiver script، 405 tests |

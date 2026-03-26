@@ -12,7 +12,7 @@
 - [ ] جميع التبعيات موجودة في `package.json`
 - [ ] `.gitignore` يستثني الملفات الحساسة
 - [ ] معالجة الأخطاء شاملة
-- [ ] `npm run test:all` يمر بنجاح (339 اختبار)
+- [ ] `npm run test:all` يمر بنجاح (335 اختبار)
 - [ ] `REACT_APP_API_URL` مضبوط في الويب للإنتاج
 - [ ] `DEFAULT_PROFILE_PICTURE_URL` مضبوط عند استخدام Cloudinary/S3
 - [ ] SPA routing: `web/public/_redirects`, `web/public/404.html`, وسكريبت receiver في `web/public/index.html` موجودة (`node validate-workflow.mjs` يتحقق منها تلقائيًا)
@@ -36,26 +36,29 @@ curl -fsS http://localhost:5000/api/health
 
 ملاحظة: عند `STORAGE_TYPE=local` يتم bind-mount لـ `server/public/uploads` داخل حاوية السيرفر حتى لا تختفي صورة `default-picture.jpg`.
 
-على GitHub Actions، يتم بناء الصور وفحصها بـ `Trivy` عبر Workflow يدوي مخصص `Docker Delivery`، ويمكن تفعيل النشر عند اختيار `publish`. قبل البناء، يتم تشغيل `node check-docker-config.mjs` و`node check-docker-mobile-config.mjs` كـ config-as-test لمنع drift بين الـDocker والـCI.
+على GitHub Actions، يتم بناء الصور وفحصها بـ `Trivy` عبر Workflow يدوي مخصص `Docker Delivery`، ويمكن تفعيل النشر عند اختيار `publish`. قبل البناء، يتم تشغيل `node scripts/docker/check-docker-config.mjs` و`node scripts/docker/check-docker-mobile-config.mjs` كـ config-as-test لمنع drift بين الـDocker والـCI.
 
-### تشغيل منطق الصور يدويًا (docker-delivery.mjs)
+> ملاحظة مهمة: `build-only` يشغّل الفحص كـ report افتراضياً، بينما `publish` يشغّله كـ gate (يفشل قبل الدفع إلى GHCR إذا ظهرت ثغرات ضمن مستوى الشدة المحدد).
 
-السكربت الموحد `docker-delivery.mjs` يفصل منطق بناء/scan/publish عن الـworkflows، ويقبل تخصيص targets و build args و mode.
+### تشغيل منطق الصور يدويًا (scripts/docker/docker-delivery.mjs)
+
+السكربت الموحد `scripts/docker/docker-delivery.mjs` يفصل منطق بناء/scan/publish عن الـworkflows، ويقبل تخصيص targets و mode.
+- يمكن تمرير قيم افتراضية وقت البناء عبر: `--web-api-url` و`--public-url` و`--mobile-api-url`.
+- عند التشغيل، إذا مرّرت متغيرات runtime (`-e REACT_APP_API_URL` / `-e PUBLIC_URL` / `-e API_URL`) فهي **تتجاوز** القيم المخبوزة.
+- إذا لم تمرّر runtime env، تُستخدم القيم المخبوزة داخل الصورة تلقائيًا.
 
 #### Server/Web
 ```bash
-node docker-delivery.mjs \
+node scripts/docker/docker-delivery.mjs \
   --targets server,web \
-  --mode build-only \
-  --web-api-url http://localhost:5000
+  --mode build-only
 ```
 
 #### Publish إلى GHCR (اختياري)
 ```bash
-node docker-delivery.mjs \
+node scripts/docker/docker-delivery.mjs \
   --targets server,web \
   --mode publish \
-  --web-api-url https://your-server.domain \
   --gh-owner your-github-username \
   --gh-actor your-github-actor \
   --ghcr-token "$GITHUB_TOKEN" \
@@ -64,31 +67,30 @@ node docker-delivery.mjs \
 
 #### Mobile (Expo)
 ```bash
-node docker-delivery.mjs \
+node scripts/docker/docker-delivery.mjs \
   --targets mobile \
-  --mode build-only \
-  --mobile-api-url http://localhost:5000
+  --mode build-only
 ```
 
 > لتسريع التجربة محلياً يمكنك إضافة `--skip-trivy` إذا لم تكن تريد scan الآن.
+> ولتشديد `build-only` وجعله حاجزاً، أضف `--trivy-exit-code 1`.
 
 ### 🐳 Mobile Docker (Expo)
 
-لحاوية تطوير لـ Expo (تشغيل `expo start --web`) مناسبة للـ preview/التجربة:
+تصدير ويب ثابت (`expo export -p web`) عند بدء الحاوية، ثم التقديم عبر Nginx (بدون `npm install` عند التشغيل):
 
 1. بناء الصورة:
 ```bash
-node docker-delivery.mjs \
+node scripts/docker/docker-delivery.mjs \
   --targets mobile \
-  --mode build-only \
-  --mobile-api-url http://localhost:5000
+  --mode build-only
 ```
 
-2. تشغيل الحاوية:
+2. تشغيل الحاوية (مثال: توجيه الـAPI):
 ```bash
 docker run --rm -it \
-  -p 8081:8081 \
-  -p 19006:19006 \
+  -p 8080:8080 \
+  -e API_URL=http://localhost:5000 \
   --name chatapp-mobile \
   chatapp-mobile:latest
 ```

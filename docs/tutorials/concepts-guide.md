@@ -1,4 +1,4 @@
-﻿# دليل سريع للمفاهيم الأساسية
+# دليل سريع للمفاهيم الأساسية
 
 ## 📚 المفاهيم المستخدمة في محادثتي
 
@@ -613,7 +613,7 @@ git tag -a v1.4.0 -m "v1.4.0 - Add code quality toolchain
 - Prettier formatting across all 3 packages
 - .gitattributes for LF line endings
 - CONTRIBUTING.md with commit/tag/formatting standards
-- 521 tests passing (339 server + 99 web + 83 mobile)"
+- 544 tests passing (335 server + 119 web + 90 mobile)"
 ```
 
 **قواعد رسالة التوسيم**:
@@ -639,7 +639,7 @@ git tag -a v1.4.0 -m "v1.4.0 - Add code quality toolchain
     ↓                             ↓
   تثبيت التبعيات               تثبيت التبعيات
     ↓                             ↓
-  339 اختبار                   99 اختبار
+  335 اختبار                   119 اختبار
     ↓                             ↓
   نشر لفرع server             بناء React
                                   ↓

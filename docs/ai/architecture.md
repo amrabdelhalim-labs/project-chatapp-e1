@@ -244,37 +244,37 @@ messageSchema.index({ createdAt: -1 });
 
 ## Testing Architecture
 
-### Server Tests (320 tests — custom runner)
+### Server Tests (335 tests — custom runner)
 
 | File | Tests | Level | What It Tests |
 |------|-------|-------|---------------|
-| `comprehensive.test.js` | 80 | Integration | All layers in a single workflow (validators → JWT → repos → storage) |
+| `comprehensive.test.js` | 84 | Integration | All layers in a single workflow (validators → JWT → repos → storage) |
 | `repositories.test.js` | 44 | Unit | CRUD operations per repository in isolation |
-| `integration.test.js` | 45 | Integration | Full-stack with temp workspace (storage + JWT + validators) |
-| `api.test.js` | 63 | E2E | Real HTTP requests against Express server on port 5001 |
+| `integration.test.js` | 46 | Integration | Full-stack with temp workspace (storage + JWT + validators) |
+| `api.test.js` | 69 | E2E | Real HTTP requests against Express server on port 5001 |
 | `image.test.js` | 38 | E2E | Profile picture upload, replace, and delete via real HTTP |
-| `storage.test.js` | 50 | Unit | Storage layer: local disk, CLOUDINARY_URL parsing, factory, singleton; 58 total with live Cloudinary |
+| `storage.test.js` | 54 | Unit | Storage layer: local disk, CLOUDINARY_URL parsing, factory, singleton; 58 total with live Cloudinary |
 
 ```bash
 cd server
-npm run test:all         # all 320 tests (6 files sequentially)
+npm run test:all         # all 335 tests (6 files sequentially)
 npm test                 # comprehensive.test.js (84 tests)
 npm run test:repos       # repositories.test.js (44 tests)
-npm run test:integration # integration.test.js (45 tests)
-npm run test:e2e         # api.test.js (63 tests — port 5001)
+npm run test:integration # integration.test.js (46 tests)
+npm run test:e2e         # api.test.js (69 tests — port 5001)
 npm run test:image       # image.test.js (38 tests — profile picture E2E)
-npm run test:storage     # storage.test.js (50 unit / 58 with live Cloudinary)
+npm run test:storage     # storage.test.js (54 unit / 58 with live Cloudinary)
 ```
 
-### Web Tests (99 tests — Jest + @testing-library/react)
+### Web Tests (119 tests — Jest + @testing-library/react)
 
 | File | Tests | Level | What It Tests |
 |------|-------|-------|---------------|
 | `filterMessages.test.js` | 7 | Unit | `getReceiverMessages()` bidirectional filtering |
-| `globalState.test.js` | 25 | Unit | Zustand store (user, friends, messages, typing, localStorage sync) |
-| `requests.test.js` | 24 | Unit | Axios interceptors (token injection, 401 redirect), all API functions |
-| `integration.test.js` | 23 | Integration | Socket.IO event flows (messages, seen, typing, broadcasts) |
-| `components.test.jsx` | 20 | Component | ChatMessage XSS, ProtectedRoute, ChatHeader, ChatFooter, Router |
+| `globalState.test.js` | 23 | Unit | Zustand store (user, friends, messages, typing, localStorage sync) |
+| `requests.test.js` | 47 | Unit | Axios interceptors (token injection, 401 redirect), all API functions |
+| `integration.test.js` | 20 | Integration | Socket.IO event flows (messages, seen, typing, broadcasts) |
+| `components.test.jsx` | 22 | Component | ChatMessage XSS, ProtectedRoute, ChatHeader, ChatFooter, Router |
 
 ```bash
 cd web
@@ -289,14 +289,14 @@ npm run test:ci          # single run, no watch (CI/servers)
 - **transformIgnorePatterns:** react-router packages are transformed (not ignored) since they use ESM internally
 - **No real server needed:** All web tests mock Axios and Socket.IO — they run without a backend
 
-### Mobile Tests (83 tests — Jest 29 + jest-expo 54)
+### Mobile Tests (90 tests — Jest 29 + jest-expo 54)
 
 | File | Tests | Level | What It Tests |
 |------|-------|-------|---------------|
-| `globalState.test.js` | 25 | Unit | Zustand store + AsyncStorage sync (auth, friends, messages, typing) |
+| `globalState.test.js` | 23 | Unit | Zustand store + AsyncStorage sync (auth, friends, messages, typing) |
 | `filterMessages.test.js` | 7 | Unit | `getReceiverMessages()` bidirectional filtering |
-| `requests.test.js` | 27 | Unit+Integration | Axios instance + interceptors + all API functions + integration scenarios |
-| `integration.test.js` | 28 | Integration | Socket.IO event flows (messages, seen, typing, broadcasts, isolation, multi-event) |
+| `requests.test.js` | 33 | Unit+Integration | Axios instance + interceptors + all API functions + integration scenarios |
+| `integration.test.js` | 27 | Integration | Socket.IO event flows (messages, seen, typing, broadcasts, isolation, multi-event) |
 
 ```bash
 cd app
@@ -374,8 +374,8 @@ Two parallel jobs triggered on `push` to `main`, `pull_request` to `main`, or ma
 
 | Job | Service | Steps | Deploy Target |
 |-----|---------|-------|---------------|
-| **Deploy Server** | MongoDB 7 (service container) | `npm ci` → `npm run test:all` (320 tests) → rsync (exclude `tests/` + `node_modules/`) → strip devDeps → push to `server` branch | Render / Railway / Heroku |
-| **Deploy Web** | — | `npm ci` → `npm run test:ci` (99 tests) → `npm run build` → push to `web` branch | GitHub Pages / Netlify / Vercel |
+| **Deploy Server** | MongoDB 7 (service container) | `npm ci` → `npm run test:all` (335 tests) → rsync (exclude `tests/` + `node_modules/`) → strip devDeps → push to `server` branch | Render / Railway / Heroku |
+| **Deploy Web** | — | `npm ci` → `npm run test:ci` (119 tests) → `npm run build` → push to `web` branch | GitHub Pages / Netlify / Vercel |
 
 ### CI Environment Variables
 
@@ -410,7 +410,7 @@ Before pushing workflow changes, validate locally to catch errors without CI rou
 | YAML structure | `node -e "..."` (read + check tabs/keys) | No YAML syntax issues, all required keys present |
 | Prerequisites | Check `package-lock.json` + script names exist | `npm ci` won't fail, script references are valid |
 | Server tests | `npm run test:all` (with CI env vars) | Same tests that CI runs — needs local MongoDB |
-| Web tests | `npm run test:ci` | 99 tests pass in single-run mode |
+| Web tests | `npm run test:ci` | 119 tests pass in single-run mode |
 | Web build | `npm run build` (with `REACT_APP_API_URL` set) | CRA compiles successfully, `web/build/` created |
 | Deploy script (rsync) | `rsync --exclude=tests --exclude=node_modules ...` | `tests/` folder never appears in the `server` branch |
 | Deploy script (package.json) | `node -e "..."` (strip devDeps + test scripts) | Only `start` script remains, no devDependencies |

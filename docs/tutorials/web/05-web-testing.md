@@ -2,7 +2,7 @@
 
 ## 📋 نظرة عامة
 
-تطبيق الويب يحتوي على **99 اختبار** عبر **5 ملفات اختبار**. تغطي منطق الحالة، طلبات API، تكامل Socket.IO، والمكونات. يستخدم **Jest** (من CRA) مع **React Testing Library**.
+تطبيق الويب يحتوي على **119 اختبار** عبر **5 ملفات اختبار**. تغطي منطق الحالة، طلبات API، تكامل Socket.IO، والمكونات. يستخدم **Jest** (من CRA) مع **React Testing Library**.
 
 **الملفات المشروحة**:
 - `setupTests.js` — إعداد بيئة الاختبار
@@ -394,7 +394,7 @@ PASS src/tests/integration.test.js (23 tests)
 PASS src/tests/components.test.jsx (20 tests)
 
 Test Suites: 5 passed, 5 total
-Tests:       99 passed, 99 total
+Tests:       119 passed, 119 total
 ```
 
 ---
@@ -496,7 +496,7 @@ render(
 | `requests.test.js` | 24 | وحدة | Axios Interceptors + API |
 | `integration.test.js` | 23 | تكامل | Socket.IO → Store → Persistence |
 | `components.test.jsx` | 20 | مكونات | عرض + سلوك + حماية |
-| **المجموع** | **99** | | |
+| **المجموع** | **119** | | |
 
 ### النقاط الرئيسية:
 1. **`setupTests.js`** — TextEncoder polyfill ضروري لـ React Router v7

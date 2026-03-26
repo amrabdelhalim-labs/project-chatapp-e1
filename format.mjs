@@ -37,7 +37,7 @@ function runPrettier(dir, glob) {
 // Server — all .js files
 runPrettier('server', '**/*.js');
 
-// Mobile app — all .js and .jsx files (React Native)
+// Mobile app — all .js and .jsx files (React Native); app/.prettierignore skips dist/, etc.
 runPrettier('app', '**/*.{js,jsx}');
 
 // Web — src/ .js, .jsx, and .css files (CRA)
