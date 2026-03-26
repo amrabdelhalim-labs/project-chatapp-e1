@@ -23,6 +23,7 @@
 ### 📘 المفاهيم العامة
 - [**دليل المفاهيم الأساسية**](./concepts-guide.md) - جميع المفاهيم المستخدمة في المشروع
 - [**المرجع السريع**](./quick-reference.md) - خارطة سريعة لكل الشروحات
+- [**شرح Docker Delivery الموحد**](./docker-delivery-workflow.md) - build/scan/publish عبر `docker-delivery.mjs`
 
 ---
 

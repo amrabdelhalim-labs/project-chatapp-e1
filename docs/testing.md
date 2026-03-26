@@ -1,4 +1,4 @@
-﻿# الاختبارات
+# الاختبارات
 
 ## نظرة عامة
 
@@ -726,6 +726,34 @@ node validate-workflow.mjs
   Passed: 16   Failed: 0
 [OK] Workflow is valid and ready to push.
 ```
+
+### فحص Docker Delivery (config-as-test)
+
+يجب تشغيل سكريبت تحقق Docker قبل أي تغييرات على ملفات الـDocker/CI لتفادي drift:
+
+```bash
+node check-docker-config.mjs
+```
+
+السكربت يتحقق من:
+- وجود Dockerfiles و`docker-compose.yml` و`/.dockerignore`
+- وجود `HEALTHCHECK` مربوط على `GET /api/health` داخل حاوية السيرفر
+- تشغيل الحاويات كـ non-root (`USER`)
+- أن السكريبت `docker-delivery.mjs` يستخدم Trivy مع ملف ignore الخاص به
+
+### فحص Docker Mobile (config-as-test)
+
+إذا كنت تعدّل ملفات Docker الخاصة بالموبايل أو الـworkflow الخاص بها:
+
+```bash
+node check-docker-mobile-config.mjs
+```
+
+السكربت يتحقق من:
+- وجود `app/Dockerfile` و`app/.dockerignore`
+- وجود `HEALTHCHECK` مربوط على Expo web dev server (`19006`)
+- تشغيل الحاوية كـ non-root (`USER app`)
+- أن Workflow `Docker Delivery` يستدعي سكريبت `docker-delivery.mjs` الذي يستخدم Trivy مع ملف ignore الخاص به
 
 ### خطوات التحقق المحلي التفصيلية
 

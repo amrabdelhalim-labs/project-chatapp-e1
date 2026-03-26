@@ -2,7 +2,7 @@
 
 ## كيف يعمل الـ Workflow
 
-يعمل تلقائياً عند كل `push` إلى `main`، أو يدوياً عبر **Actions → Run workflow**.
+يعمل تلقائياً عند كل `push` إلى `main` لخط نشر الفروع (`server`/`web`)، بينما تشغيل Docker يتم يدوياً فقط عبر **Actions → Run workflow**.
 
 ### الوظائف (Jobs)
 
@@ -10,6 +10,8 @@
 |-----|---------|
 | **Deploy Server** | تثبيت التبعيات → تشغيل 232 اختبار (MongoDB service) → نشر إلى فرع `server` |
 | **Deploy Web** | تثبيت التبعيات → تشغيل 99 اختبار → بناء React → نشر إلى فرع `web` |
+| **Docker Delivery** | `check-docker-config.mjs` + `docker-delivery.mjs` (build/scan/publish) → (اختياري) نشر على GHCR |
+| **Docker Delivery (manual)** | `check-docker-config.mjs` + `check-docker-mobile-config.mjs` + `docker-delivery.mjs` (server/web/mobile build/scan/publish) |
 
 الوظيفتان تعملان **بالتوازي** — لا تعتمد إحداهما على الأخرى.
 
@@ -144,6 +146,22 @@ echo "REACT_APP_API_URL=http://localhost:5000" > .env.local
 npm install
 npm start
 ```
+
+---
+
+### تشغيل Docker Delivery يدويًا
+
+لتشغيل Workflow Docker الموحد (server/web/mobile):
+- من GitHub افتح: **Actions → Docker Delivery**
+- اضغط **Run workflow**
+- اختر `targets` (مثل: `all` أو `mobile` أو `server,web`)
+- اختر `docker_mode`:
+  - `build-only` للتأكد من البوابة والفحص فقط
+  - `publish` لدفع الصور إلى GHCR
+- (اختياري) خصص:
+  - `web_api_url`
+  - `public_url`
+  - `mobile_api_url`
 
 ---
 

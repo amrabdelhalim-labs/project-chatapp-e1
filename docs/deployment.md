@@ -1,4 +1,4 @@
-﻿# دليل النشر الإنتاجي
+# دليل النشر الإنتاجي
 
 ## 📋 قائمة التحقق قبل النشر
 
@@ -16,6 +16,84 @@
 - [ ] `REACT_APP_API_URL` مضبوط في الويب للإنتاج
 - [ ] `DEFAULT_PROFILE_PICTURE_URL` مضبوط عند استخدام Cloudinary/S3
 - [ ] SPA routing: `web/public/_redirects`, `web/public/404.html`, وسكريبت receiver في `web/public/index.html` موجودة (`node validate-workflow.mjs` يتحقق منها تلقائيًا)
+
+### 🐳 Docker Delivery (للتجربة المحلية + نشر CI)
+
+لتشغيل التطبيق محلياً باستخدام Docker:
+1. انسخ ملف البيئة:
+```bash
+cp .env.docker.example .env.docker
+```
+2. شغّل الخدمات:
+```bash
+docker compose up --build
+```
+
+فحص الصحة عبر:
+```bash
+curl -fsS http://localhost:5000/api/health
+```
+
+ملاحظة: عند `STORAGE_TYPE=local` يتم bind-mount لـ `server/public/uploads` داخل حاوية السيرفر حتى لا تختفي صورة `default-picture.jpg`.
+
+على GitHub Actions، يتم بناء الصور وفحصها بـ `Trivy` عبر Workflow يدوي مخصص `Docker Delivery`، ويمكن تفعيل النشر عند اختيار `publish`. قبل البناء، يتم تشغيل `node check-docker-config.mjs` و`node check-docker-mobile-config.mjs` كـ config-as-test لمنع drift بين الـDocker والـCI.
+
+### تشغيل منطق الصور يدويًا (docker-delivery.mjs)
+
+السكربت الموحد `docker-delivery.mjs` يفصل منطق بناء/scan/publish عن الـworkflows، ويقبل تخصيص targets و build args و mode.
+
+#### Server/Web
+```bash
+node docker-delivery.mjs \
+  --targets server,web \
+  --mode build-only \
+  --web-api-url http://localhost:5000
+```
+
+#### Publish إلى GHCR (اختياري)
+```bash
+node docker-delivery.mjs \
+  --targets server,web \
+  --mode publish \
+  --web-api-url https://your-server.domain \
+  --gh-owner your-github-username \
+  --gh-actor your-github-actor \
+  --ghcr-token "$GITHUB_TOKEN" \
+  --version v1.0.0
+```
+
+#### Mobile (Expo)
+```bash
+node docker-delivery.mjs \
+  --targets mobile \
+  --mode build-only \
+  --mobile-api-url http://localhost:5000
+```
+
+> لتسريع التجربة محلياً يمكنك إضافة `--skip-trivy` إذا لم تكن تريد scan الآن.
+
+### 🐳 Mobile Docker (Expo)
+
+لحاوية تطوير لـ Expo (تشغيل `expo start --web`) مناسبة للـ preview/التجربة:
+
+1. بناء الصورة:
+```bash
+node docker-delivery.mjs \
+  --targets mobile \
+  --mode build-only \
+  --mobile-api-url http://localhost:5000
+```
+
+2. تشغيل الحاوية:
+```bash
+docker run --rm -it \
+  -p 8081:8081 \
+  -p 19006:19006 \
+  --name chatapp-mobile \
+  chatapp-mobile:latest
+```
+
+على GitHub Actions، نفس Workflow اليدوي `Docker Delivery` يدعم بناء/فحص/نشر صورة الموبايل أيضًا عبر اختيار `targets=mobile`.
 
 ---
 

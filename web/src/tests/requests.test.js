@@ -500,8 +500,7 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
   });
 
   it('يجب عرض زر "حذف الحساب"', () => {
-    const DeleteAccountButton =
-      require('../components/DeleteAccountButton').default;
+    const DeleteAccountButton = require('../components/DeleteAccountButton').default;
     render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
 
     const deleteButton = screen.getByRole('button', { name: /Delete Account/i });
@@ -510,8 +509,7 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
   });
 
   it('يجب فتح Modal عند الضغط على الزر', async () => {
-    const DeleteAccountButton =
-      require('../components/DeleteAccountButton').default;
+    const DeleteAccountButton = require('../components/DeleteAccountButton').default;
     const { container } = render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
 
     const deleteButton = screen.getByRole('button', { name: /Delete Account/i });
@@ -523,8 +521,7 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
   });
 
   it('يجب إغلاق Modal عند الضغط على "إلغاء"', async () => {
-    const DeleteAccountButton =
-      require('../components/DeleteAccountButton').default;
+    const DeleteAccountButton = require('../components/DeleteAccountButton').default;
     render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
 
     const deleteButton = screen.getByRole('button', { name: /Delete Account/i });
@@ -537,8 +534,7 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
   });
 
   it('يجب عرض خطأ عند ترك حقل كلمة المرور فارغاً', async () => {
-    const DeleteAccountButton =
-      require('../components/DeleteAccountButton').default;
+    const DeleteAccountButton = require('../components/DeleteAccountButton').default;
     jest.spyOn(require('../libs/requests'), 'deleteAccount');
 
     render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
@@ -557,14 +553,10 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
   });
 
   it('يجب استدعاء API عند إدخال كلمة مرور صحيحة', async () => {
-    const mockDeleteAccount = jest.spyOn(
-      require('../libs/requests'),
-      'deleteAccount'
-    );
+    const mockDeleteAccount = jest.spyOn(require('../libs/requests'), 'deleteAccount');
     mockDeleteAccount.mockResolvedValueOnce({ message: 'تم الحذف بنجاح' });
 
-    const DeleteAccountButton =
-      require('../components/DeleteAccountButton').default;
+    const DeleteAccountButton = require('../components/DeleteAccountButton').default;
     render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
 
     // Open modal
@@ -587,17 +579,13 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
   });
 
   it('يجب عرض خطأ عند رفع كلمة المرور من قبل السيرفر', async () => {
-    const mockDeleteAccount = jest.spyOn(
-      require('../libs/requests'),
-      'deleteAccount'
-    );
+    const mockDeleteAccount = jest.spyOn(require('../libs/requests'), 'deleteAccount');
     const errorMessage = 'كلمة المرور غير صحيحة';
     mockDeleteAccount.mockRejectedValueOnce({
       response: { status: 401, data: { message: errorMessage } },
     });
 
-    const DeleteAccountButton =
-      require('../components/DeleteAccountButton').default;
+    const DeleteAccountButton = require('../components/DeleteAccountButton').default;
     render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
 
     // Open modal
@@ -621,14 +609,10 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
 
   it('يجب استدعاء onDeleteSuccess بعد الحذف الناجح', async () => {
     const mockDeleteSuccess = jest.fn();
-    const mockDeleteAccount = jest.spyOn(
-      require('../libs/requests'),
-      'deleteAccount'
-    );
+    const mockDeleteAccount = jest.spyOn(require('../libs/requests'), 'deleteAccount');
     mockDeleteAccount.mockResolvedValueOnce({ message: 'تم الحذف بنجاح' });
 
-    const DeleteAccountButton =
-      require('../components/DeleteAccountButton').default;
+    const DeleteAccountButton = require('../components/DeleteAccountButton').default;
     render(<DeleteAccountButton onDeleteSuccess={mockDeleteSuccess} />);
 
     // Open modal
@@ -651,14 +635,10 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
   });
 
   it('يجب إعادة تعيين isDeleting بعد الحذف الناجح', async () => {
-    const mockDeleteAccount = jest.spyOn(
-      require('../libs/requests'),
-      'deleteAccount'
-    );
+    const mockDeleteAccount = jest.spyOn(require('../libs/requests'), 'deleteAccount');
     mockDeleteAccount.mockResolvedValueOnce({ message: 'تم الحذف بنجاح' });
 
-    const DeleteAccountButton =
-      require('../components/DeleteAccountButton').default;
+    const DeleteAccountButton = require('../components/DeleteAccountButton').default;
     render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
 
     // Open modal
@@ -685,16 +665,12 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
   });
 
   it('يجب إعادة تعيين isDeleting عند فشل الحذف', async () => {
-    const mockDeleteAccount = jest.spyOn(
-      require('../libs/requests'),
-      'deleteAccount'
-    );
+    const mockDeleteAccount = jest.spyOn(require('../libs/requests'), 'deleteAccount');
     mockDeleteAccount.mockRejectedValueOnce({
       response: { status: 401, data: { message: 'كلمة المرور غير صحيحة' } },
     });
 
-    const DeleteAccountButton =
-      require('../components/DeleteAccountButton').default;
+    const DeleteAccountButton = require('../components/DeleteAccountButton').default;
     render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
 
     // Open modal
@@ -720,8 +696,7 @@ describe('DeleteAccountButton Component — مكون حذف الحساب', () =>
   });
 
   it('يجب مسح حقل كلمة المرور عند فتح Modal جديد', async () => {
-    const DeleteAccountButton =
-      require('../components/DeleteAccountButton').default;
+    const DeleteAccountButton = require('../components/DeleteAccountButton').default;
     render(<DeleteAccountButton onDeleteSuccess={() => {}} />);
 
     // First open
@@ -759,7 +734,6 @@ describe('DeleteAccountButton Component — Mobile (React Native) Version', () =
     expect(true).toBe(true);
   });
 });
-
 
 describe('سيناريوهات تكاملية — Interceptor + API', () => {
   it('سيناريو: تسجيل دخول → تخزين توكن → طلب محمي بالتوكن', async () => {

@@ -1,4 +1,4 @@
-﻿# محادثتي — تطبيق الدردشة الفوري
+# محادثتي — تطبيق الدردشة الفوري
 
 تطبيق دردشة فوري متعدد المنصات يدعم المحادثات الفردية، مؤشرات الكتابة، إيصالات القراءة، وإدارة الملف الشخصي. مبني بخادم Express مشترك، وعميل ويب React، وعميل جوال Expo/React Native.
 
@@ -165,6 +165,56 @@ npm start
 ```
 
 ---
+
+## Docker (Local)
+
+تشغيل `server` + `web` مع MongoDB باستخدام `docker-compose` (مناسب للتجربة المحلية).
+
+### تشغيل سريع
+1. انسخ ملف البيئة:
+```bash
+cp .env.docker.example .env.docker
+```
+
+2. شغّل الخدمات:
+```bash
+docker compose up --build
+```
+
+> ملاحظة: في وضع `STORAGE_TYPE=local` يتم bind-mount لـ `server/public/uploads` داخل حاوية السيرفر حتى لا تختفي صورة `default-picture.jpg`.
+
+### المنافذ الأساسية
+- `server`: `http://localhost:5000`
+- `web`: `http://localhost:3000`
+- `mobile` (Expo web داخل Docker): `http://localhost:19006`
+
+### فحص الحالة
+```bash
+curl -fsS http://localhost:5000/api/health
+```
+
+---
+
+### Mobile (Expo) داخل Docker
+
+حاوية تطوير لـ Expo (تشغيل `expo start --web`) مناسبة للـ preview/التجربة.
+
+1. بناء الصورة:
+```bash
+node docker-delivery.mjs \
+  --targets mobile \
+  --mode build-only \
+  --mobile-api-url http://localhost:5000
+```
+
+2. تشغيل الحاوية:
+```bash
+docker run --rm -it \
+  -p 8081:8081 \
+  -p 19006:19006 \
+  --name chatapp-mobile \
+  chatapp-mobile:latest
+```
 
 ## متغيرات البيئة
 

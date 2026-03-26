@@ -29,6 +29,7 @@ This directory contains machine-facing documentation for AI assistants working o
 - **Total Tests:** 521 (339 server + 99 web + 83 mobile)
 - **Deployment:** Heroku-ready with Procfile
 - **CI/CD:** GitHub Actions — server tests (MongoDB service) + web tests/build → deploy to orphan branches
+- **Docker Delivery:** Unified manual Docker workflow + `docker-delivery.mjs` for server/web/mobile build, Trivy scan, and optional GHCR publish
 - **Formatting:** Prettier with LF normalization (`.prettierrc.json` in each package, `format.mjs` at root)
 - **Contributing:** `CONTRIBUTING.md` at project root — commit format, tagging, pre-commit checklist
 - **Tutorials:** 15 server tutorials + 7 web tutorials + 7 mobile tutorials (Arabic) in `docs/tutorials/`

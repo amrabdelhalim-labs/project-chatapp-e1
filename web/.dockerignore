@@ -1,0 +1,14 @@
+node_modules
+coverage
+dist
+build
+
+.git
+.gitignore
+.env
+.env.*
+*.log
+
+tests
+
+# Keep only source; nginx runner uses the `build` output copied from the build stage.

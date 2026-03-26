@@ -45,6 +45,12 @@
 
 ---
 
+### 🐳 [شرح Docker Delivery الموحد](./docker-delivery-workflow.md)
+**المحتوى**: شرح عملي لتشغيل build/scan/publish لصور `server/web/mobile` عبر سكريبت واحد `docker-delivery.mjs`
+**الوقت المتوقع**: 15-20 دقيقة
+
+---
+
 ## 🖥️ شروحات الخادم (Server)
 
 ### 1️⃣ [إعداد الخادم الرئيسي](./server/01-app-setup.md)

@@ -1,6 +1,7 @@
 node_modules/
 .expo/
 .env
+.env.docker
 *.log
 coverage/
 dist/

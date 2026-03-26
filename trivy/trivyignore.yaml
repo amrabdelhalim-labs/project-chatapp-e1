@@ -1,0 +1,14 @@
+# Trivy ignore policy file (config-as-test).
+#
+# Why it's here:
+# - Base images (Alpine/Debian) can occasionally produce “unresolved base-image CVEs”
+#   that are handled via compensating controls (healthchecks, non-root, minimal runtime).
+#
+# How to use:
+# - Run the pipeline to generate real Trivy findings for this repo.
+# - Then add concrete ignore rules for ONLY the CVEs you accept temporarily.
+# - Keep ignore scope as small as possible and remove entries once the base image is updated.
+#
+# Empty policy by default: it enforces wiring without masking vulnerabilities.
+vulnerabilities: []
+

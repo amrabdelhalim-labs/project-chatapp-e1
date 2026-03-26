@@ -1,0 +1,16 @@
+node_modules
+coverage
+dist
+build
+
+.git
+.gitignore
+.env
+.env.*
+*.log
+
+tests
+__tests__
+
+# Keep uploads + default-picture inside the runtime image
+# (server/public/uploads must remain for local STORAGE_TYPE=local)

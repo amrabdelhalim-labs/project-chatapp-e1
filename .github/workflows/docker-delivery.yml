@@ -1,0 +1,147 @@
+name: Docker Delivery
+
+on:
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: "Which images to process?"
+        type: choice
+        required: true
+        default: all
+        options:
+          - all
+          - server
+          - web
+          - mobile
+          - server,web
+          - server,mobile
+          - web,mobile
+      docker_mode:
+        description: "Docker mode (build-only vs publish)"
+        type: choice
+        required: false
+        default: build-only
+        options:
+          - build-only
+          - publish
+      web_api_url:
+        description: "Default REACT_APP_API_URL baked in web image; runtime value can still override via docker run -e."
+        type: string
+        required: false
+        default: "http://localhost:5000"
+      public_url:
+        description: "Default PUBLIC_URL baked in web image; runtime value can still override via docker run -e."
+        type: string
+        required: false
+        default: "/"
+      mobile_api_url:
+        description: "Default API_URL baked in mobile image; runtime value can still override via docker run -e."
+        type: string
+        required: false
+        default: "http://localhost:5000"
+
+permissions:
+  contents: write
+  packages: write
+
+concurrency:
+  group: docker-delivery-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  docker-delivery:
+    name: Docker Delivery (manual)
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:7-jammy
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ ping: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.x
+          cache: npm
+          cache-dependency-path: |
+            server/package-lock.json
+            web/package-lock.json
+            app/package-lock.json
+
+      - name: Resolve target set
+        id: target_set
+        run: |
+          set -euo pipefail
+          if [ "${{ inputs.targets }}" = "all" ]; then
+            echo "targets=server,web,mobile" >> "$GITHUB_OUTPUT"
+          else
+            echo "targets=${{ inputs.targets }}" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Format check
+        run: node format.mjs --check
+
+      - name: Install server dependencies
+        if: contains(steps.target_set.outputs.targets, 'server')
+        working-directory: server
+        run: npm ci
+
+      - name: Run server tests
+        if: contains(steps.target_set.outputs.targets, 'server')
+        working-directory: server
+        run: npm run test:all
+        env:
+          NODE_ENV: test
+          JWT_SECRET: test_jwt_secret_key_for_ci_testing_only_32chars
+          MONGODB_URL: mongodb://localhost:27017/test_chatapp_db
+
+      - name: Install web dependencies
+        if: contains(steps.target_set.outputs.targets, 'web')
+        working-directory: web
+        run: npm ci
+
+      - name: Run web tests
+        if: contains(steps.target_set.outputs.targets, 'web')
+        working-directory: web
+        run: npm run test:ci
+
+      - name: Install mobile dependencies
+        if: contains(steps.target_set.outputs.targets, 'mobile')
+        working-directory: app
+        run: npm ci --legacy-peer-deps
+
+      - name: Run mobile tests
+        if: contains(steps.target_set.outputs.targets, 'mobile')
+        working-directory: app
+        run: npm run test:ci
+
+      - name: Infra checks (docker config-as-test)
+        run: |
+          set -euo pipefail
+          node scripts/docker/check-docker-config.mjs
+          node scripts/docker/check-docker-mobile-config.mjs
+
+      - name: Docker build/scan/publish (script)
+        env:
+          GH_OWNER: ${{ github.repository_owner }}
+          GH_ACTOR: ${{ github.actor }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          node scripts/docker/docker-delivery.mjs \
+            --targets "${{ steps.target_set.outputs.targets }}" \
+            --mode "${{ inputs.docker_mode }}" \
+            --sha "${{ github.sha }}" \
+            --web-api-url "${{ inputs.web_api_url }}" \
+            --public-url "${{ inputs.public_url }}" \
+            --mobile-api-url "${{ inputs.mobile_api_url }}" \
+            --skip-validate
+

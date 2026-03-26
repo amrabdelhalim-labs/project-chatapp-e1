@@ -418,11 +418,9 @@ describe('سيناريوهات تكاملية — Interceptor + API', () => {
 
   it('deleteAccount مع كلمة مرور خاطئة — يجب رفع خطأ', async () => {
     const errorResponse = { message: 'كلمة المرور غير صحيحة' };
-    mockApi.delete = jest
-      .fn()
-      .mockRejectedValueOnce({
-        response: { status: 401, data: errorResponse },
-      });
+    mockApi.delete = jest.fn().mockRejectedValueOnce({
+      response: { status: 401, data: errorResponse },
+    });
 
     await expect(deleteAccount({ password: 'wrong-password' })).rejects.toMatchObject({
       response: { status: 401, data: errorResponse },
