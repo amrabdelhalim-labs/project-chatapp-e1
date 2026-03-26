@@ -36,6 +36,8 @@ curl -fsS http://localhost:5000/api/health
 
 ملاحظة: عند `STORAGE_TYPE=local` يتم bind-mount لـ `server/public/uploads` داخل حاوية السيرفر حتى لا تختفي صورة `default-picture.jpg`.
 
+**سياسة إعادة التشغيل:** جميع خدمات Compose (`mongodb`، `server`، `web`) تستخدم `restart: unless-stopped` بحيث تعود الحاويات بعد إعادة تشغيل الـ daemon أو الجهاز، مع الإبقاء على `depends_on` وشرط `service_healthy` على MongoDB كما هو.
+
 على GitHub Actions، يتم بناء الصور وفحصها بـ `Trivy` عبر Workflow يدوي مخصص `Docker Delivery`، ويمكن تفعيل النشر عند اختيار `publish`. قبل البناء، يتم تشغيل `node scripts/docker/check-docker-config.mjs` و`node scripts/docker/check-docker-mobile-config.mjs` كـ config-as-test لمنع drift بين الـDocker والـCI.
 
 > ملاحظة مهمة: `build-only` يشغّل الفحص كـ report افتراضياً، بينما `publish` يشغّله كـ gate (يفشل قبل الدفع إلى GHCR إذا ظهرت ثغرات ضمن مستوى الشدة المحدد).

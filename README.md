@@ -179,7 +179,7 @@ npm start
 
 ## Docker (Local)
 
-تشغيل `server` + `web` مع MongoDB باستخدام `docker-compose` (مناسب للتجربة المحلية).
+تشغيل `server` + `web` مع MongoDB باستخدام `docker-compose` (مناسب للتجربة المحلية). جميع الخدمات الثلاث تستخدم `restart: unless-stopped` لاستقرار أفضل بعد إعادة تشغيل Docker أو الجهاز.
 
 ### تشغيل سريع
 1. انسخ ملف البيئة:
