@@ -223,8 +223,10 @@ docker run --rm -it \
   -p 8080:8080 \
   -e API_URL=http://localhost:5000 \
   --name chatapp-mobile \
-  chatapp-mobile:latest
+  project-chatapp-e1-mobile:latest
 ```
+
+صور GHCR بعد النشر: `ghcr.io/<owner>/project-chatapp-e1-server|web|mobile:<tag>` — تفاصيل السحب والتشغيل في [docs/deployment.md](docs/deployment.md) (قسم Docker Delivery).
 
 ## متغيرات البيئة
 

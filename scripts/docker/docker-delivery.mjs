@@ -119,16 +119,16 @@ function assertFileExists(p, label) {
 }
 
 function localImageRef(target) {
-  if (target === 'server') return `chatapp-server:${sha}`;
-  if (target === 'web') return `chatapp-web:${sha}`;
-  if (target === 'mobile') return `chatapp-mobile:${sha}`;
+  if (target === 'server') return `project-chatapp-e1-server:${sha}`;
+  if (target === 'web') return `project-chatapp-e1-web:${sha}`;
+  if (target === 'mobile') return `project-chatapp-e1-mobile:${sha}`;
   throw new Error(`Unknown target: ${target}`);
 }
 
 function localLatestRef(target) {
-  if (target === 'server') return `chatapp-server:latest`;
-  if (target === 'web') return `chatapp-web:latest`;
-  if (target === 'mobile') return `chatapp-mobile:latest`;
+  if (target === 'server') return `project-chatapp-e1-server:latest`;
+  if (target === 'web') return `project-chatapp-e1-web:latest`;
+  if (target === 'mobile') return `project-chatapp-e1-mobile:latest`;
   throw new Error(`Unknown target: ${target}`);
 }
 

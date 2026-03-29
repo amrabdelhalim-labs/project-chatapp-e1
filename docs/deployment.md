@@ -94,10 +94,56 @@ docker run --rm -it \
   -p 8080:8080 \
   -e API_URL=http://localhost:5000 \
   --name chatapp-mobile \
-  chatapp-mobile:latest
+  project-chatapp-e1-mobile:latest
 ```
 
 على GitHub Actions، نفس Workflow اليدوي `Docker Delivery` يدعم بناء/فحص/نشر صورة الموبايل أيضًا عبر اختيار `targets=mobile`.
+
+### سحب الصور من GHCR وتشغيلها
+
+أسماء الحزم المنشورة تتبع `project-chatapp-e1-<artifact>`:
+
+| الصورة | الوصف |
+|--------|--------|
+| `ghcr.io/<OWNER>/project-chatapp-e1-server:<tag>` | خادم Node (API) |
+| `ghcr.io/<OWNER>/project-chatapp-e1-web:<tag>` | واجهة React (بناء عند التشغيل عبر entrypoint) |
+| `ghcr.io/<OWNER>/project-chatapp-e1-mobile:<tag>` | تصدير ويب Expo |
+
+**تسجيل الدخول (حزم خاصة):** `docker login ghcr.io`
+
+**سحب:**
+```bash
+docker pull ghcr.io/<OWNER>/project-chatapp-e1-server:sha-xxxxxxxxxxxx
+docker pull ghcr.io/<OWNER>/project-chatapp-e1-web:sha-xxxxxxxxxxxx
+```
+
+**تشغيل الخادم (مع MongoDB على شبكة Docker):**
+```bash
+docker network create chatapp-net
+docker run -d --name chatapp-mongo --network chatapp-net mongo:7-jammy
+
+docker run -d --name chatapp-api --network chatapp-net -p 5000:5000 \
+  -e NODE_ENV=production \
+  -e PORT=5000 \
+  -e DATABASE_URL=mongodb://chatapp-mongo:27017/mychat \
+  -e JWT_SECRET=replace_with_strong_secret \
+  -e STORAGE_TYPE=local \
+  ghcr.io/<OWNER>/project-chatapp-e1-server:<tag>
+```
+
+التحقق: `curl -fsS http://localhost:5000/api/health`
+
+**تشغيل الويب (يجب أن يصل المتصفح إلى عنوان الـ API):**
+```bash
+docker run -d -p 3000:8080 \
+  -e REACT_APP_API_URL=http://localhost:5000 \
+  -e PUBLIC_URL=/ \
+  ghcr.io/<OWNER>/project-chatapp-e1-web:<tag>
+```
+
+**PowerShell:** لا تستخدم `\` لاستمرار السطر؛ استخدم سطرًا واحدًا أو backtick `` ` ``.
+
+البناء المحلي عبر `docker-delivery.mjs` يوسم الصور أيضًا بـ `project-chatapp-e1-*:latest` و`:sha-...` قبل الدفع إلى GHCR.
 
 ---
 

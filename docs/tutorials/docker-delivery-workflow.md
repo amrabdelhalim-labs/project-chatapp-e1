@@ -78,7 +78,7 @@ docker run --rm -it \
   -p 3000:8080 \
   -e REACT_APP_API_URL=http://localhost:5000 \
   -e PUBLIC_URL=/ \
-  chatapp-web:latest
+  project-chatapp-e1-web:latest
 ```
 
 ### Mobile (Expo web export + nginx)
@@ -86,7 +86,7 @@ docker run --rm -it \
 docker run --rm -it \
   -p 8080:8080 \
   -e API_URL=http://localhost:5000 \
-  chatapp-mobile:latest
+  project-chatapp-e1-mobile:latest
 ```
 
 ## كيف يعمل الفحص الأمني؟
